@@ -18,3 +18,11 @@ gen/
 
 # Local configuration file (sdk path, etc)
 local.properties
+
+## IntelliJ ignores
+.idea/*
+!.idea/libraries/
+
+## Misc
+tmp/
+
