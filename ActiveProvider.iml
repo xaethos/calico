@@ -36,7 +36,8 @@
       <sourceFolder url="file://$MODULE_DIR$/gen" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/tests/robolectric" isTestSource="true" />
     </content>
-    <orderEntry type="library" name="robolectric-main" level="project" />
+    <orderEntry type="library" scope="TEST" name="robolectric-main" level="project" />
+    <orderEntry type="library" scope="TEST" name="robolectric-test" level="project" />
     <orderEntry type="jdk" jdkName="Android 2.3.3 Platform" jdkType="Android SDK" />
     <orderEntry type="module" module-name="Robolectric" scope="TEST" />
     <orderEntry type="sourceFolder" forTests="false" />
