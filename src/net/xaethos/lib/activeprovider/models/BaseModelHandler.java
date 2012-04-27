@@ -8,9 +8,9 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 
-public abstract class BaseModelProxy implements InvocationHandler {
+public abstract class BaseModelHandler implements InvocationHandler {
 
-    protected static <T> T newModelInstance(Class<T> ifaceCls, BaseModelProxy handler) {
+    protected static <T> T newModelInstance(Class<T> ifaceCls, BaseModelHandler handler) {
         if (!ifaceCls.isAnnotationPresent(Model.class)) {
             throw new IllegalArgumentException("model interface must have the Model annotation");
         }

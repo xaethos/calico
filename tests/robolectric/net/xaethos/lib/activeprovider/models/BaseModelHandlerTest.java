@@ -9,9 +9,9 @@ import org.junit.Test;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 
-public class BaseModelProxyTest {
+public class BaseModelHandlerTest {
 
-    private static class TestModelProxy extends BaseModelProxy {
+    private static class TestModelHandler extends BaseModelHandler {
         @Override
         public Object get(String field) {
             return null;
@@ -33,36 +33,36 @@ public class BaseModelProxyTest {
 
     private static interface BadInterface {}
 
-    private TestModelProxy proxy;
+    private TestModelHandler proxy;
 
     @Before
     public void mockProxy() {
-        proxy = new TestModelProxy();
+        proxy = new TestModelHandler();
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void shouldNotHandleUnannotatedInterfaces() {
-        BaseModelProxy.newModelInstance(BadInterface.class, proxy);
+        BaseModelHandler.newModelInstance(BadInterface.class, proxy);
     }
 
     @Test(expected = UnsupportedOperationException.class)
     public void shouldNotHandleUnsupportedMethods() {
-        TestModel iface = BaseModelProxy.newModelInstance(TestModel.class, proxy);
+        TestModel iface = BaseModelHandler.newModelInstance(TestModel.class, proxy);
         iface.badMethod();
     }
 
     @Test
     public void shouldForwardGetterMethodsToGet() {
-        TestModelProxy mock = spy(proxy);
-        TestModel iface = BaseModelProxy.newModelInstance(TestModel.class, mock);
+        TestModelHandler mock = spy(proxy);
+        TestModel iface = BaseModelHandler.newModelInstance(TestModel.class, mock);
         iface.getInt();
         verify(mock).get(TestModel.COL_INT);
     }
 
     @Test
     public void shouldForwardSetterMethodsToSet() {
-        TestModelProxy mock = spy(proxy);
-        TestModel iface = BaseModelProxy.newModelInstance(TestModel.class, mock);
+        TestModelHandler mock = spy(proxy);
+        TestModel iface = BaseModelHandler.newModelInstance(TestModel.class, mock);
         iface.setInt(42);
         verify(mock).set(TestModel.COL_INT, 42);
     }
