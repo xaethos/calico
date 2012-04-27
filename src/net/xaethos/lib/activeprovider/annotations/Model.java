@@ -7,8 +7,4 @@ import java.lang.annotation.Target;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
-public @interface Model {
-//	String table() default "";
-//	String authority();
-//	String type() default "";
-}
+public @interface Model {}
