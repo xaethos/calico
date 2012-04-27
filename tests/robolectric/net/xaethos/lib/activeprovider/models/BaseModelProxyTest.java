@@ -2,11 +2,10 @@ package net.xaethos.lib.activeprovider.models;
 
 import net.xaethos.lib.activeprovider.annotations.Getter;
 import net.xaethos.lib.activeprovider.annotations.Model;
+import net.xaethos.lib.activeprovider.annotations.Setter;
 import org.junit.Before;
 import org.junit.Test;
 
-import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 
@@ -17,6 +16,10 @@ public class BaseModelProxyTest {
         public Object get(String field) {
             return null;
         }
+
+        @Override
+        public void set(String field, Object value) {
+        }
     }
 
     @Model
@@ -25,6 +28,7 @@ public class BaseModelProxyTest {
 
         public static final String COL_INT = "int";
         @Getter(COL_INT) public Integer getInt();
+        @Setter(COL_INT) public void setInt(Integer i);
     }
 
     private static interface BadInterface {}
@@ -51,9 +55,16 @@ public class BaseModelProxyTest {
     public void shouldForwardGetterMethodsToGet() {
         TestModelProxy mock = spy(proxy);
         TestModel iface = BaseModelProxy.newModelInstance(TestModel.class, mock);
-        assertThat(iface, is(not(nullValue())));
         iface.getInt();
         verify(mock).get(TestModel.COL_INT);
+    }
+
+    @Test
+    public void shouldForwardSetterMethodsToSet() {
+        TestModelProxy mock = spy(proxy);
+        TestModel iface = BaseModelProxy.newModelInstance(TestModel.class, mock);
+        iface.setInt(42);
+        verify(mock).set(TestModel.COL_INT, 42);
     }
 
 }
