@@ -16,7 +16,7 @@ public class HashModelHandler extends BaseModelHandler {
     }
 
     @Override
-    public Object get(String field) {
+    public Object get(String field, Class<?> cls) {
         return mContent.get(field);
     }
 

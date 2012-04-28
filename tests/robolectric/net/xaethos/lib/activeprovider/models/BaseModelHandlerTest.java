@@ -13,7 +13,7 @@ public class BaseModelHandlerTest {
 
     private static class TestModelHandler extends BaseModelHandler {
         @Override
-        public Object get(String field) {
+        public Object get(String field, Class<?> cls) {
             return null;
         }
 
@@ -56,7 +56,7 @@ public class BaseModelHandlerTest {
         TestModelHandler mock = spy(proxy);
         TestModel iface = BaseModelHandler.newModelInstance(TestModel.class, mock);
         iface.getInt();
-        verify(mock).get(TestModel.COL_INT);
+        verify(mock).get(TestModel.COL_INT, Integer.class);
     }
 
     @Test

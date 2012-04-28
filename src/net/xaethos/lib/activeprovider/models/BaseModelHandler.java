@@ -24,7 +24,7 @@ public abstract class BaseModelHandler implements InvocationHandler {
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 
         if (method.isAnnotationPresent(Getter.class)) {
-            return get(method.getAnnotation(Getter.class).value());
+            return get(method.getAnnotation(Getter.class).value(), method.getReturnType());
         }
         if (method.isAnnotationPresent(Setter.class)) {
             set(method.getAnnotation(Setter.class).value(), args[0]);
@@ -34,7 +34,7 @@ public abstract class BaseModelHandler implements InvocationHandler {
         throw new UnsupportedOperationException();
     }
 
-    public abstract Object get(String field);
+    public abstract Object get(String field, Class<?> klass);
 
     public abstract void set(String field, Object value);
 }
