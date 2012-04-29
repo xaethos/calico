@@ -2,11 +2,18 @@ package net.xaethos.lib.activeprovider.content;
 
 import android.content.ContentProvider;
 import android.content.ContentValues;
+import android.content.Context;
 import android.content.UriMatcher;
 import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteOpenHelper;
 import android.net.Uri;
+import android.provider.BaseColumns;
+import android.text.TextUtils;
 import net.xaethos.lib.activeprovider.annotations.Model;
 import net.xaethos.lib.activeprovider.annotations.Provider;
+
+import java.util.HashMap;
 
 public abstract class ActiveProvider extends ContentProvider {
 
@@ -17,21 +24,21 @@ public abstract class ActiveProvider extends ContentProvider {
 
     /////////////// Inner classes ///////////////
 
-//	private class DBHelper extends SQLiteOpenHelper {
-//
-//		public DBHelper(Context context) {
-//			super(context, getDatabaseName(), null, getDatabaseVersion());
-//		}
-//
-//		@Override
-//		public void onCreate(SQLiteDatabase db) {
+	public class DBHelper extends SQLiteOpenHelper {
+
+		public DBHelper(Context context) {
+			super(context, getDatabaseName(), null, getDatabaseVersion());
+		}
+
+		@Override
+		public void onCreate(SQLiteDatabase db) {
 //			for (RecordInfo record : getModels()) {
 //				db.execSQL(record.getSQLiteCreateTable());
 //			}
-//		}
-//
-//		@Override
-//		public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+		}
+
+		@Override
+		public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
 //			if (oldVersion > newVersion) {
 //				throw new MigrationException("Cannot downgrade database");
 //			}
@@ -46,14 +53,14 @@ public abstract class ActiveProvider extends ContentProvider {
 //			for (int i = oldVersion; i < newVersion; ++i) {
 //				migrations[i-1].onUpgrade(db);
 //			}
-//		}
-//
-//		@SuppressWarnings("unused")
-//		public void onDowngrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-//			throw new MigrationException("Cannot downgrade database");
-//		}
-//
-//	}
+		}
+
+		@SuppressWarnings("unused")
+		public void onDowngrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+			throw new UnsupportedOperationException("ActiveProvider cannot downgrade database");
+		}
+
+	}
 
 	/////////////// Static methods ///////////////
 
@@ -61,40 +68,42 @@ public abstract class ActiveProvider extends ContentProvider {
 		return (match % 2) == 1;
 	}
 
-//	private static String prependIdConstraint(Uri uri, String select) {
-//		String idConstraint = BaseColumns._ID + "=" + uri.getLastPathSegment();
-//		if (TextUtils.isEmpty(select)) {
-//			select = idConstraint;
-//		}
-//		else {
-//			select = idConstraint + " AND (" + select + ")";
-//		}
-//		return select;
-//	}
+	private static String prependIdConstraint(Uri uri, String select) {
+		String idConstraint = BaseColumns._ID + "=" + uri.getLastPathSegment();
+		if (TextUtils.isEmpty(select)) {
+			select = idConstraint;
+		}
+		else {
+			select = idConstraint + " AND (" + select + ")";
+		}
+		return select;
+	}
 
 	/////////////// Instance fields ///////////////
 
     private Provider mInfo;
     private Model[] mModels;
 
-    //	protected DBHelper mDBHelper;
+    protected DBHelper mDBHelper;
 	protected UriMatcher mUriMatcher;
+    protected HashMap<Model,HashMap<String,String>> mProjectionMaps;
 
 	/////////////// Instance methods ///////////////
 
-//	///// Abstract methods
-//
-//	protected abstract String getDatabaseName();
-//
+	///// Abstract methods
+
+	protected abstract String getDatabaseName();
+
 //	protected abstract Migration[] getMigrations();
 
 	///// Provider info
 
-//	public int getDatabaseVersion() {
+	public int getDatabaseVersion() {
 //		Migration[] migrations = getMigrations();
 //		if (migrations == null) return 1;
 //		return migrations.length + 1;
-//	}
+        return 1;
+	}
 
     public Provider getProviderInfo() {
         if (mInfo == null) {
@@ -141,51 +150,50 @@ public abstract class ActiveProvider extends ContentProvider {
 			mUriMatcher.addURI(authority, table + "/#", i++);
 		}
 
-//		mDBHelper = new DBHelper(getContext());
+		mDBHelper = new DBHelper(getContext());
 		return true;
     }
 
 	@Override
 	public String getType(Uri uri) {
 		int match = mUriMatcher.match(uri);
-		Model record = recordInfoFromUriMatch(match);
+		Model model = modelFromUriMatch(match);
 
-		if (isItemUri(match)) return MIME_BASE_ITEM + record.contentType();
-		return MIME_BASE_DIR + record.contentType();
+		if (isItemUri(match)) return MIME_BASE_ITEM + model.contentType();
+		return MIME_BASE_DIR + model.contentType();
 	}
 
 	@Override
 	public Cursor query(Uri uri, String[] projection, String selection,
 			String[] selectionArgs, String sortOrder) {
-//		int match = mUriMatcher.match(uri);
-//		RecordInfo record = recordInfoFromUriMatch(match);
-//
-//		if (isItemUri(match)) {
-//			selection = prependIdConstraint(uri, selection);
-//		}
-//
-//		// Project columns
-//		HashMap<String,String> projectionMap = record.getProjectionMap();
-//		String[] columns = null;
-//		if (projection != null) {
-//			columns = new String[projection.length];
-//			for (int i=0; i<projection.length; ++i) {
-//				columns[i] = projectionMap.get(projection[i]);
-//			}
-//		}
-//
-//		SQLiteDatabase db = mDBHelper.getReadableDatabase();
-//		Cursor cursor = db.query(
-//				record.getTableName(),
-//				columns,
-//				selection,
-//				selectionArgs,
-//				null,
-//				null,
-//				sortOrder);
-//		cursor.setNotificationUri(getContext().getContentResolver(), record.getContentUri());
-//		return cursor;
-        return null;
+		int match = mUriMatcher.match(uri);
+		Model model = modelFromUriMatch(match);
+
+		if (isItemUri(match)) {
+			selection = prependIdConstraint(uri, selection);
+		}
+
+		// Project columns
+		HashMap<String,String> projectionMap = mProjectionMaps.get(model);
+		String[] columns = null;
+		if (projection != null) {
+			columns = new String[projection.length];
+			for (int i=0; i<projection.length; ++i) {
+				columns[i] = projectionMap.get(projection[i]);
+			}
+		}
+
+		SQLiteDatabase db = mDBHelper.getReadableDatabase();
+		Cursor cursor = db.query(
+                model.tableName(),
+                columns,
+                selection,
+                selectionArgs,
+                null,
+                null,
+                sortOrder);
+		cursor.setNotificationUri(getContext().getContentResolver(), getContentUri(model));
+		return cursor;
 	}
 
 	@Override
@@ -196,7 +204,7 @@ public abstract class ActiveProvider extends ContentProvider {
 //			throw new IllegalArgumentException("Cannot insert to item URI: " + uri);
 //		}
 //
-//		RecordInfo record = recordInfoFromUriMatch(match);
+//		RecordInfo record = modelFromUriMatch(match);
 //		SQLiteDatabase db = mDBHelper.getWritableDatabase();
 //
 //		long id = db.insert(record.getTableName(), null, values);
@@ -210,7 +218,7 @@ public abstract class ActiveProvider extends ContentProvider {
 	@Override
 	public int update(Uri uri, ContentValues values,
 			String selection, String[] selectionArgs) {
-//		RecordInfo record = recordInfoFromUriMatch(mUriMatcher.match(uri));
+//		RecordInfo record = modelFromUriMatch(mUriMatcher.match(uri));
 //		SQLiteDatabase db = mDBHelper.getWritableDatabase();
 //
 //		if (isItemUri(mUriMatcher.match(uri))) {
@@ -227,7 +235,7 @@ public abstract class ActiveProvider extends ContentProvider {
 
 	@Override
 	public int delete(Uri uri, String selection, String[] selectionArgs) {
-//		RecordInfo record = recordInfoFromUriMatch(mUriMatcher.match(uri));
+//		RecordInfo record = modelFromUriMatch(mUriMatcher.match(uri));
 //		SQLiteDatabase db = mDBHelper.getWritableDatabase();
 //
 //		if (isItemUri(mUriMatcher.match(uri))) {
@@ -244,7 +252,7 @@ public abstract class ActiveProvider extends ContentProvider {
 
 	///// Helper methods
 
-	private Model recordInfoFromUriMatch(int match) {
+	private Model modelFromUriMatch(int match) {
 		Model[] models = getModels();
 		int index = match / 2;
 		if (match < 0 || index >= models.length) {
@@ -252,5 +260,13 @@ public abstract class ActiveProvider extends ContentProvider {
 		}
 		return models[index];
 	}
+
+    private Uri getContentUri(Model model) {
+        return new Uri.Builder()
+                .scheme("content")
+                .authority(model.authority())
+                .appendPath(model.tableName())
+                .build();
+    }
 
 }

@@ -1,7 +1,9 @@
 package net.xaethos.lib.activeprovider.content;
 
-import android.content.ContentUris;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
+import android.provider.BaseColumns;
 import com.example.fixtures.Data;
 import com.example.fixtures.DataProvider;
 import com.xtremelabs.robolectric.RobolectricTestRunner;
@@ -13,25 +15,42 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.util.Arrays;
+
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.core.IsCollectionContaining.hasItems;
 import static org.junit.Assert.assertThat;
 
 @UsingDatabaseMap(SQLiteMap.class)
 @RunWith(RobolectricTestRunner.class)
 public class ActiveProviderTest {
 
-//	static final String[] ID_PROJECTION = { BaseColumns._ID };
+	static final String[] ID_PROJECTION = { BaseColumns._ID };
 
 	DataProvider provider;
 
 //	ContentResolver resolver;
 //	ShadowContentResolver resolverShadow;
 
-	/////////////// Set up ///////////////
+    Model dataInfo;
+    Uri dirUri;
+    Uri itemUri;
 
-	@Before public void getProvider() {
+    /////////////// Set up ///////////////
+
+	@Before public void instantiateProvider() {
 		provider = new DataProvider();
 	}
+
+    @Before public void getModelInfo() {
+        dataInfo = Data.class.getAnnotation(Model.class);
+
+        String authority = dataInfo.authority();
+        String tableName = dataInfo.tableName();
+
+        dirUri = Uri.parse("content://" + authority + "/" + tableName);
+        itemUri = Uri.parse("content://" + authority + "/" + tableName + "/1");
+    }
 
 //	@Before public void getResolver() {
 //		resolver = Robolectric.application.getContentResolver();
@@ -59,32 +78,27 @@ public class ActiveProviderTest {
 	@Test public void canMatchUris() {
         provider.onCreate();
 
-        Model annotation = Data.class.getAnnotation(Model.class);
-        String authority = annotation.authority();
-        String tableName = annotation.tableName();
-        String type      = annotation.contentType();
+        String type = dataInfo.contentType();
 
-        Uri dirUri = Uri.parse("content://" + authority + "/" + tableName);
-        assertThat(provider.getType(dirUri),
-                is("vnd.android.cursor.dir/" + type));
-
-        Uri itemUri = Uri.parse("content://" + authority + "/" + tableName + "/1");
-        assertThat(provider.getType(itemUri),
-				is("vnd.android.cursor.item/" + type));
+        assertThat(provider.getType(dirUri), is("vnd.android.cursor.dir/" + type));
+        assertThat(provider.getType(itemUri), is("vnd.android.cursor.item/" + type));
 	}
 
-//	@Test public void queryHandlesProjections() {
-//		Cursor cursor;
-//
-//		cursor = (SQLiteCursor) provider.query(dataUri, null, null, null, null);
-//		assertThat(cursor.getColumnCount(), is(3));
-//		assertThat(Arrays.asList(cursor.getColumnNames()), hasItems(new String[]{"_id", "foo", "bar"}));
-//
-//		cursor = (SQLiteCursor) provider.query(dataUri, ID_PROJECTION, null, null, null);
-//		assertThat(cursor.getColumnCount(), is(1));
-//		assertThat(Arrays.asList(cursor.getColumnNames()), hasItems(ID_PROJECTION));
-//	}
-//
+    @Test public void queryHandlesProjections() throws Exception {
+        provider.onCreate();
+        prepareDatabase();
+
+        Cursor cursor;
+
+        cursor = provider.query(dirUri, null, null, null, null);
+        assertThat(cursor.getColumnCount(), is(3));
+        assertThat(Arrays.asList(cursor.getColumnNames()), hasItems("_id", "foo", "bar"));
+
+        cursor = provider.query(dirUri, ID_PROJECTION, null, null, null);
+        assertThat(cursor.getColumnCount(), is(1));
+        assertThat(Arrays.asList(cursor.getColumnNames()), hasItems(ID_PROJECTION));
+    }
+
 //	@Test public void querySetsNotificationUri() {
 //		SQLiteCursor cursor =
 //				(SQLiteCursor) provider.query(dataUri, null, null, null, null);
@@ -309,9 +323,14 @@ public class ActiveProviderTest {
 //
 //	//TODO Migration throws proper exceptions
 //	//TODO Migration rolls back on exception
-//
-//	/////////////// Helpers ///////////////
-//
+
+	/////////////// Helpers ///////////////
+
+    public void prepareDatabase() {
+        SQLiteDatabase database = provider.mDBHelper.getWritableDatabase();
+        database.execSQL("CREATE TABLE data (_id INTEGER PRIMARY KEY, info TEXT, created_at INTEGER);");
+    }
+
 //	private long newSimpleData(ContentValues values) {
 //		Uri uri = provider.insert(dataUri, values);
 //		return ContentUris.parseId(uri);
