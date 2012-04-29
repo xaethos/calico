@@ -22,7 +22,7 @@ public class BaseModelHandlerTest {
         }
     }
 
-    @Model(authority = "com.example.content", tableName = "table")
+    @Model(authority = "com.example.content", tableName = "table", contentType = "vnd.example.table")
     private static interface TestModel {
         public Integer badMethod();
 

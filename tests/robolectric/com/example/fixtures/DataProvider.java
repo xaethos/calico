@@ -1,7 +1,9 @@
 package com.example.fixtures;
 
+import net.xaethos.lib.activeprovider.annotations.Provider;
 import net.xaethos.lib.activeprovider.content.ActiveProvider;
 
+@Provider(models = { Data.class })
 public class DataProvider extends ActiveProvider {
 
 //	final public ArrayList<Migration> migrations = new ArrayList<Migration>();
@@ -17,7 +19,7 @@ public class DataProvider extends ActiveProvider {
 //	}
 
 //	@Override
-//	protected RecordInfo[] getRecordInfo() {
+//	protected RecordInfo[] getModels() {
 //		return mRecords;
 //	}
 

@@ -2,12 +2,20 @@ package net.xaethos.lib.activeprovider.content;
 
 import android.content.ContentProvider;
 import android.content.ContentValues;
+import android.content.UriMatcher;
 import android.database.Cursor;
 import android.net.Uri;
+import net.xaethos.lib.activeprovider.annotations.Model;
+import net.xaethos.lib.activeprovider.annotations.Provider;
 
 public abstract class ActiveProvider extends ContentProvider {
 
-	/////////////// Inner classes ///////////////
+	/////////////// Constants ///////////////
+
+    private static final String MIME_BASE_ITEM = "vnd.android.cursor.item/";
+    private static final String MIME_BASE_DIR  = "vnd.android.cursor.dir/";
+
+    /////////////// Inner classes ///////////////
 
 //	private class DBHelper extends SQLiteOpenHelper {
 //
@@ -17,7 +25,7 @@ public abstract class ActiveProvider extends ContentProvider {
 //
 //		@Override
 //		public void onCreate(SQLiteDatabase db) {
-//			for (RecordInfo record : getRecordInfo()) {
+//			for (RecordInfo record : getModels()) {
 //				db.execSQL(record.getSQLiteCreateTable());
 //			}
 //		}
@@ -46,13 +54,13 @@ public abstract class ActiveProvider extends ContentProvider {
 //		}
 //
 //	}
-//
-//	/////////////// Static methods ///////////////
-//
-//	private static boolean isItemUri(int match) {
-//		return (match % 2) == 1;
-//	}
-//
+
+	/////////////// Static methods ///////////////
+
+	private static boolean isItemUri(int match) {
+		return (match % 2) == 1;
+	}
+
 //	private static String prependIdConstraint(Uri uri, String select) {
 //		String idConstraint = BaseColumns._ID + "=" + uri.getLastPathSegment();
 //		if (TextUtils.isEmpty(select)) {
@@ -63,58 +71,87 @@ public abstract class ActiveProvider extends ContentProvider {
 //		}
 //		return select;
 //	}
-//
-//	/////////////// Instance fields ///////////////
-//
-//	protected DBHelper mDBHelper;
-//	protected UriMatcher mUriMatcher;
-//
-//	/////////////// Instance methods ///////////////
-//
+
+	/////////////// Instance fields ///////////////
+
+    private Provider mInfo;
+    private Model[] mModels;
+
+    //	protected DBHelper mDBHelper;
+	protected UriMatcher mUriMatcher;
+
+	/////////////// Instance methods ///////////////
+
 //	///// Abstract methods
 //
 //	protected abstract String getDatabaseName();
 //
-//	protected abstract RecordInfo[] getRecordInfo();
-//
 //	protected abstract Migration[] getMigrations();
-//
-//	///// Database info
-//
+
+	///// Provider info
+
 //	public int getDatabaseVersion() {
 //		Migration[] migrations = getMigrations();
 //		if (migrations == null) return 1;
 //		return migrations.length + 1;
 //	}
 
-	///// ContentProvider implementation
+    public Provider getProviderInfo() {
+        if (mInfo == null) {
+            Class<? extends ActiveProvider> cls = this.getClass();
+            if (!cls.isAnnotationPresent(Provider.class)) {
+                throw new IllegalArgumentException(
+                        cls.getName() + " is not annotated as @" + Provider.class.getSimpleName());
+            }
+            mInfo = cls.getAnnotation(Provider.class);
+        }
+
+        return mInfo;
+    }
+
+    public Model[] getModels() {
+        if (mModels == null) {
+            Class<?>[] modelClasses = getProviderInfo().models();
+            Model[] models = new Model[modelClasses.length];
+            for (int i=0; i<models.length; ++i) {
+                if (!modelClasses[i].isAnnotationPresent(Model.class)) {
+                    throw new IllegalArgumentException(
+                            modelClasses[i].getName() + " is not annotated as @" + Model.class.getSimpleName());
+                }
+                models[i] = modelClasses[i].getAnnotation(Model.class);
+            }
+            mModels = models;
+        }
+        return mModels;
+    }
+
+    ///// ContentProvider implementation
 
 	@Override
 	public boolean onCreate() {
-//		mUriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
-//
-//		int i = 0;
-//		String authority;
-//		String table;
-//		for (RecordInfo record : getRecordInfo()) {
-//			authority = record.getAuthority();
-//			table = record.getTableName();
-//			mUriMatcher.addURI(authority, table, i++);
-//			mUriMatcher.addURI(authority, table + "/#", i++);
-//		}
-//
+		mUriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
+
+		int i = 0;
+		String authority;
+		String table;
+		for (Model model : getModels()) {
+			authority = model.authority();
+			table = model.tableName();
+			mUriMatcher.addURI(authority, table, i++);
+			mUriMatcher.addURI(authority, table + "/#", i++);
+		}
+
 //		mDBHelper = new DBHelper(getContext());
 		return true;
     }
 
 	@Override
 	public String getType(Uri uri) {
-//		int match = mUriMatcher.match(uri);
-//		RecordInfo record = recordInfoFromUriMatch(match);
-//
-//		if (isItemUri(match)) return record.getContentItemType();
-//		return record.getContentType();
-        return null;
+		int match = mUriMatcher.match(uri);
+		Model record = recordInfoFromUriMatch(match);
+
+		if (isItemUri(match)) return MIME_BASE_ITEM + record.contentType();
+		return MIME_BASE_DIR + record.contentType();
 	}
 
 	@Override
@@ -207,13 +244,13 @@ public abstract class ActiveProvider extends ContentProvider {
 
 	///// Helper methods
 
-//	private RecordInfo recordInfoFromUriMatch(int match) {
-//		RecordInfo[] records = getRecordInfo();
-//		int index = match / 2;
-//		if (match < 0 || index >= records.length) {
-//			throw new IllegalArgumentException("Invalid match: " + match);
-//		}
-//		return records[index];
-//	}
+	private Model recordInfoFromUriMatch(int match) {
+		Model[] models = getModels();
+		int index = match / 2;
+		if (match < 0 || index >= models.length) {
+			throw new IllegalArgumentException("Invalid match: " + match);
+		}
+		return models[index];
+	}
 
 }

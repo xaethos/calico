@@ -1,9 +1,15 @@
 package net.xaethos.lib.activeprovider.content;
 
+import android.content.ContentUris;
+import android.net.Uri;
+import com.example.fixtures.Data;
 import com.example.fixtures.DataProvider;
 import com.xtremelabs.robolectric.RobolectricTestRunner;
 import com.xtremelabs.robolectric.util.DatabaseConfig.UsingDatabaseMap;
 import com.xtremelabs.robolectric.util.SQLiteMap;
+import net.xaethos.lib.activeprovider.annotations.Model;
+import net.xaethos.lib.activeprovider.annotations.Provider;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -16,70 +22,74 @@ public class ActiveProviderTest {
 
 //	static final String[] ID_PROJECTION = { BaseColumns._ID };
 
-//	DataProvider mProvider;
+	DataProvider provider;
 
-//	ContentResolver mResolver;
-//	ShadowContentResolver mResolverShadow;
-
-//	RecordInfo mSimpleRecord;
-//	RecordInfo mConcreteRecord;
-
-//	Uri mSimpleUri;
+//	ContentResolver resolver;
+//	ShadowContentResolver resolverShadow;
 
 	/////////////// Set up ///////////////
 
-//	@Before public void getProvider() {
-//		mProvider = new DataProvider();
-//		mProvider.onCreate();
-//	}
+	@Before public void getProvider() {
+		provider = new DataProvider();
+	}
 
 //	@Before public void getResolver() {
-//		mResolver = Robolectric.application.getContentResolver();
-//		mResolverShadow = Robolectric.shadowOf(mResolver);
-//	}
-
-//	@Before public void getRecords() {
-//		mSimpleRecord = new RecordInfo(SimpleData.class);
-//		mConcreteRecord = new RecordInfo(ConcreteData.class);
-//
-//		mSimpleUri = mSimpleRecord.getContentUri();
+//		resolver = Robolectric.application.getContentResolver();
+//		resolverShadow = Robolectric.shadowOf(resolver);
 //	}
 
 	/////////////// Tests ///////////////
 
 	@Test public void canCreate() {
-		assertThat(new DataProvider().onCreate(), is(true));
+		assertThat(provider.onCreate(), is(true));
 	}
 
-//	@Test public void canMatchUris() {
-//		assertThat(mProvider.getType(mConcreteRecord.getContentUri()),
-//				is(mConcreteRecord.getContentType()));
-//		assertThat(mProvider.getType(ContentUris.withAppendedId(mConcreteRecord.getContentUri(), 1)),
-//				is(mConcreteRecord.getContentItemType()));
-//
-//		assertThat(mProvider.getType(mSimpleUri),
-//				is(mSimpleRecord.getContentType()));
-//		assertThat(mProvider.getType(ContentUris.withAppendedId(mSimpleUri, 1)),
-//				is(mSimpleRecord.getContentItemType()));
-//	}
-//
+    @Test public void canGetProviderInfo() {
+        assertThat(provider.getProviderInfo(),
+                is(DataProvider.class.getAnnotation(Provider.class)));
+    }
+
+    @Test public void canGetModels() {
+        Model[] models = provider.getModels();
+        assertThat(models.length, is(1));
+        assertThat(models[0],
+                is(provider.getProviderInfo().models()[0].getAnnotation(Model.class)));
+    }
+
+	@Test public void canMatchUris() {
+        provider.onCreate();
+
+        Model annotation = Data.class.getAnnotation(Model.class);
+        String authority = annotation.authority();
+        String tableName = annotation.tableName();
+        String type      = annotation.contentType();
+
+        Uri dirUri = Uri.parse("content://" + authority + "/" + tableName);
+        assertThat(provider.getType(dirUri),
+                is("vnd.android.cursor.dir/" + type));
+
+        Uri itemUri = Uri.parse("content://" + authority + "/" + tableName + "/1");
+        assertThat(provider.getType(itemUri),
+				is("vnd.android.cursor.item/" + type));
+	}
+
 //	@Test public void queryHandlesProjections() {
 //		Cursor cursor;
 //
-//		cursor = (SQLiteCursor) mProvider.query(mSimpleUri, null, null, null, null);
+//		cursor = (SQLiteCursor) provider.query(dataUri, null, null, null, null);
 //		assertThat(cursor.getColumnCount(), is(3));
 //		assertThat(Arrays.asList(cursor.getColumnNames()), hasItems(new String[]{"_id", "foo", "bar"}));
 //
-//		cursor = (SQLiteCursor) mProvider.query(mSimpleUri, ID_PROJECTION, null, null, null);
+//		cursor = (SQLiteCursor) provider.query(dataUri, ID_PROJECTION, null, null, null);
 //		assertThat(cursor.getColumnCount(), is(1));
 //		assertThat(Arrays.asList(cursor.getColumnNames()), hasItems(ID_PROJECTION));
 //	}
 //
 //	@Test public void querySetsNotificationUri() {
 //		SQLiteCursor cursor =
-//				(SQLiteCursor) mProvider.query(mSimpleUri, null, null, null, null);
+//				(SQLiteCursor) provider.query(dataUri, null, null, null, null);
 //		ShadowSQLiteCursor shadow = Robolectric.shadowOf(cursor);
-//		assertThat(shadow.getNotificationUri_Compatibility(), is(mSimpleUri));
+//		assertThat(shadow.getNotificationUri_Compatibility(), is(dataUri));
 //	}
 //
 //	@Test public void queryHandlesDirAndItemUris() {
@@ -87,13 +97,13 @@ public class ActiveProviderTest {
 //		ContentValues values = new ContentValues();
 //		values.put("foo", "Hello");
 //
-//		Uri itemUri = mProvider.insert(mSimpleUri, values);
-//		mProvider.insert(mSimpleUri, values);
+//		Uri itemUri = provider.insert(dataUri, values);
+//		provider.insert(dataUri, values);
 //
-//		cursor = (SQLiteCursor) mProvider.query(mSimpleUri, ID_PROJECTION, null, null, null);
+//		cursor = (SQLiteCursor) provider.query(dataUri, ID_PROJECTION, null, null, null);
 //		assertThat(cursor.getCount(), is(2));
 //
-//		cursor = (SQLiteCursor) mProvider.query(itemUri, ID_PROJECTION, null, null, null);
+//		cursor = (SQLiteCursor) provider.query(itemUri, ID_PROJECTION, null, null, null);
 //		assertThat(cursor.getCount(), is(1));
 //		cursor.moveToFirst();
 //		assertThat(cursor.getLong(0), is(ContentUris.parseId(itemUri)));
@@ -103,8 +113,8 @@ public class ActiveProviderTest {
 //		Long[] ids = makeSimpleData("Hello", null, 2);
 //		makeSimpleData("Goodbye", null, 2);
 //
-//		Cursor cursor = mProvider.query(
-//				mSimpleUri, null,
+//		Cursor cursor = provider.query(
+//				dataUri, null,
 //				"foo=?", new String[]{"Hello"}, null);
 //		assertThat(cursor.getCount(), is(2));
 //		assertThat(cursorIdIterable(cursor), hasItems(ids));
@@ -115,11 +125,11 @@ public class ActiveProviderTest {
 //		long idBarFirst = makeSimpleData("B", "A");
 //		Cursor cursor;
 //
-//		cursor = mProvider.query(mSimpleUri, ID_PROJECTION, null, null, "foo ASC");
+//		cursor = provider.query(dataUri, ID_PROJECTION, null, null, "foo ASC");
 //		cursor.moveToFirst();
 //		assertThat(cursor.getLong(0), is(idFooFirst));
 //
-//		cursor = mProvider.query(mSimpleUri, ID_PROJECTION, null, null, "bar ASC");
+//		cursor = provider.query(dataUri, ID_PROJECTION, null, null, "bar ASC");
 //		cursor.moveToFirst();
 //		assertThat(cursor.getLong(0), is(idBarFirst));
 //	}
@@ -136,10 +146,10 @@ public class ActiveProviderTest {
 //		values.put("pShort", (short)42);
 //		values.put("pString", "Hello World!");
 //
-//		Uri uri = mProvider.insert(mConcreteRecord.getContentUri(), values);
-//		assertThat(mProvider.getType(uri), is(mConcreteRecord.getContentItemType()));
+//		Uri uri = provider.insert(mConcreteRecord.getContentUri(), values);
+//		assertThat(provider.getType(uri), is(mConcreteRecord.getContentItemType()));
 //
-//		Cursor cursor = mProvider.query(uri, null, null, null, null);
+//		Cursor cursor = provider.query(uri, null, null, null, null);
 //		assertThat(cursor.moveToFirst(), is(true));
 //		assertThat(cursor.getInt(cursor.getColumnIndex("pBoolean")), is(not(0)));
 //		assertThat((byte)cursor.getShort(cursor.getColumnIndex("pByte")), is((byte)16));
@@ -157,32 +167,32 @@ public class ActiveProviderTest {
 //	public void insertHandlesItemUris() {
 //		ContentValues values = new ContentValues();
 //		values.put("foo", "Hello");
-//		Uri uri = Uri.withAppendedPath(mSimpleUri, "1");
-//		mProvider.insert(uri, values);
+//		Uri uri = Uri.withAppendedPath(dataUri, "1");
+//		provider.insert(uri, values);
 //	}
 //
 //	@Test public void insertNotifiesUri() {
 //		ContentValues values = new ContentValues();
 //		values.put("foo", "Hello");
 //
-//		mResolverShadow.getNotifiedUris().clear();
-//		mProvider.insert(mSimpleUri, values);
-//		assertThat(mResolverShadow.getNotifiedUris().size(), is(1));
-//		assertThat(mResolverShadow.getNotifiedUris(), hasItems(mSimpleUri));
+//		resolverShadow.getNotifiedUris().clear();
+//		provider.insert(dataUri, values);
+//		assertThat(resolverShadow.getNotifiedUris().size(), is(1));
+//		assertThat(resolverShadow.getNotifiedUris(), hasItems(dataUri));
 //	}
 //
 //	@Test public void canUpdate() {
 //		ContentValues values = new ContentValues();
 //		values.put("foo", "Hello");
 //
-//		mProvider.insert(mSimpleRecord.getContentUri(), values);
+//		provider.insert(mSimpleRecord.getContentUri(), values);
 //
 //		values.remove("foo");
 //		values.put("bar", "Goodbye");
-//		assertThat(mProvider.update(mSimpleUri, values, null, null), is(1));
+//		assertThat(provider.update(dataUri, values, null, null), is(1));
 //
-//		Cursor cursor = mProvider.query(
-//				mSimpleUri, new String[]{"foo", "bar"}, null, null, null);
+//		Cursor cursor = provider.query(
+//				dataUri, new String[]{"foo", "bar"}, null, null, null);
 //		cursor.moveToFirst();
 //		assertThat(cursor.getString(0), is("Hello"));
 //		assertThat(cursor.getString(1), is("Goodbye"));
@@ -194,11 +204,11 @@ public class ActiveProviderTest {
 //
 //		ContentValues values = new ContentValues();
 //		values.put("foo", "Konnichiwa");
-//		assertThat(mProvider.update(
-//				mSimpleUri, values, "foo=?", new String[]{"Hello"}), is(2));
+//		assertThat(provider.update(
+//				dataUri, values, "foo=?", new String[]{"Hello"}), is(2));
 //
-//		Cursor cursor = mProvider.query(
-//				mSimpleUri, null,
+//		Cursor cursor = provider.query(
+//				dataUri, null,
 //				"foo=?", new String[]{"Konnichiwa"}, null);
 //		assertThat(cursor.getCount(), is(2));
 //		assertThat(cursorIdIterable(cursor), hasItems(ids));
@@ -206,18 +216,18 @@ public class ActiveProviderTest {
 //
 //	@Test public void canUpdateById() {
 //		Long[] ids = makeSimpleData("Hello", null, 2);
-//		Uri hiUri = ContentUris.withAppendedId(mSimpleUri, ids[0]);
-//		Uri byeUri = ContentUris.withAppendedId(mSimpleUri, ids[1]);
+//		Uri hiUri = ContentUris.withAppendedId(dataUri, ids[0]);
+//		Uri byeUri = ContentUris.withAppendedId(dataUri, ids[1]);
 //
 //		ContentValues values = new ContentValues();
 //		values.put("foo", "Goodbye");
-//		assertThat(mProvider.update(byeUri, values, null, null), is(1));
+//		assertThat(provider.update(byeUri, values, null, null), is(1));
 //
 //		Cursor cursor;
-//		cursor = mProvider.query(hiUri, new String[]{"foo"}, null, null, null);
+//		cursor = provider.query(hiUri, new String[]{"foo"}, null, null, null);
 //		cursor.moveToFirst();
 //		assertThat(cursor.getString(0), is("Hello"));
-//		cursor = mProvider.query(byeUri, new String[]{"foo"}, null, null, null);
+//		cursor = provider.query(byeUri, new String[]{"foo"}, null, null, null);
 //		cursor.moveToFirst();
 //		assertThat(cursor.getString(0), is("Goodbye"));
 //	}
@@ -225,35 +235,35 @@ public class ActiveProviderTest {
 //	@Test public void updateNotifiesUri() {
 //		ContentValues values = new ContentValues();
 //		values.put("foo", "Hello");
-//		Uri uri = mProvider.insert(mSimpleUri, values);
+//		Uri uri = provider.insert(dataUri, values);
 //
-//		mResolverShadow.getNotifiedUris().clear();
+//		resolverShadow.getNotifiedUris().clear();
 //		values.put("foo", "Goodbye");
-//		mProvider.update(uri, values, null, null);
-//		assertThat(mResolverShadow.getNotifiedUris().size(), is(1));
-//		assertThat(mResolverShadow.getNotifiedUris(), hasItems(uri));
+//		provider.update(uri, values, null, null);
+//		assertThat(resolverShadow.getNotifiedUris().size(), is(1));
+//		assertThat(resolverShadow.getNotifiedUris(), hasItems(uri));
 //	}
 //
 //	@Test public void canDelete() {
 //		ContentValues values = new ContentValues();
 //		values.put("foo", "Hello");
 //
-//		mProvider.insert(mSimpleUri, values);
+//		provider.insert(dataUri, values);
 //
-//		assertThat(mProvider.delete(mSimpleUri, null, null), is(1));
+//		assertThat(provider.delete(dataUri, null, null), is(1));
 //
-//		Cursor cursor = mProvider.query(mSimpleUri, null, null, null, null);
+//		Cursor cursor = provider.query(dataUri, null, null, null, null);
 //		assertThat(cursor.getCount(), is(0));
 //	}
 //
 //	@Test public void canDeleteById() {
 //		Long[] ids = makeSimpleData("Hello", null, 2);
-//		Uri delUri = ContentUris.withAppendedId(mSimpleUri, ids[0]);
+//		Uri delUri = ContentUris.withAppendedId(dataUri, ids[0]);
 //
-//		assertThat(mProvider.delete(delUri, null, null), is(1));
+//		assertThat(provider.delete(delUri, null, null), is(1));
 //
 //		Cursor cursor;
-//		cursor = mProvider.query(mSimpleUri, new String[]{"_id"}, null, null, null);
+//		cursor = provider.query(dataUri, new String[]{"_id"}, null, null, null);
 //		assertThat(cursor.getCount(), is(1));
 //		cursor.moveToFirst();
 //		assertThat(cursor.getLong(0), is(ids[1]));
@@ -262,12 +272,12 @@ public class ActiveProviderTest {
 //	@Test public void deleteNotifiesUri() {
 //		ContentValues values = new ContentValues();
 //		values.put("foo", "Hello");
-//		Uri uri = mProvider.insert(mSimpleUri, values);
+//		Uri uri = provider.insert(dataUri, values);
 //
-//		mResolverShadow.getNotifiedUris().clear();
-//		mProvider.delete(uri, null, null);
-//		assertThat(mResolverShadow.getNotifiedUris().size(), is(1));
-//		assertThat(mResolverShadow.getNotifiedUris(), hasItems(uri));
+//		resolverShadow.getNotifiedUris().clear();
+//		provider.delete(uri, null, null);
+//		assertThat(resolverShadow.getNotifiedUris().size(), is(1));
+//		assertThat(resolverShadow.getNotifiedUris(), hasItems(uri));
 //	}
 //
 //	@Test public void canInferDatabaseVersionFromMigrationCount() {
@@ -281,17 +291,17 @@ public class ActiveProviderTest {
 //	}
 //
 //	@Test public void onUpgradeCallsMigrationOnce() {
-//		SQLiteOpenHelper dbHelper = mProvider.getDBHelper();
+//		SQLiteOpenHelper dbHelper = provider.getDBHelper();
 //		SQLiteDatabase db = dbHelper.getWritableDatabase();
 //		NullMigration mig1to2 = new NullMigration();
 //		NullMigration mig2to3 = new NullMigration();
 //
-//		mProvider.migrations.add(mig1to2);
+//		provider.migrations.add(mig1to2);
 //		dbHelper.onUpgrade(db, 1, 2);
 //		assertThat(mig1to2.didUpgrade, is(true));
 //
 //		mig1to2.didUpgrade = false;
-//		mProvider.migrations.add(mig2to3);
+//		provider.migrations.add(mig2to3);
 //		dbHelper.onUpgrade(db, 2, 3);
 //		assertThat(mig1to2.didUpgrade, is(false));
 //		assertThat(mig2to3.didUpgrade, is(true));
@@ -303,7 +313,7 @@ public class ActiveProviderTest {
 //	/////////////// Helpers ///////////////
 //
 //	private long newSimpleData(ContentValues values) {
-//		Uri uri = mProvider.insert(mSimpleUri, values);
+//		Uri uri = provider.insert(dataUri, values);
 //		return ContentUris.parseId(uri);
 //	}
 //
