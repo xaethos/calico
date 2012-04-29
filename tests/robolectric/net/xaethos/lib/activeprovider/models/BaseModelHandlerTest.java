@@ -11,7 +11,7 @@ import static org.mockito.Mockito.verify;
 
 public class BaseModelHandlerTest {
 
-    private static class TestModelHandler extends BaseModelHandler {
+    public static class TestModelHandler extends BaseModelHandler {
         @Override
         public Object get(String field) {
             return null;
