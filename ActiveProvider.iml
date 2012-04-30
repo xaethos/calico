@@ -41,6 +41,7 @@
     <orderEntry type="jdk" jdkName="Android 2.3.3 Platform" jdkType="Android SDK" />
     <orderEntry type="module" module-name="Robolectric" scope="TEST" />
     <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="library" scope="TEST" name="android-support-v4" level="application" />
   </component>
 </module>
 

@@ -1,12 +1,16 @@
 package net.xaethos.lib.activeprovider.content;
 
+import android.content.ContentUris;
+import android.content.ContentValues;
 import android.database.Cursor;
+import android.database.sqlite.SQLiteCursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.provider.BaseColumns;
 import com.example.fixtures.Data;
 import com.example.fixtures.DataProvider;
 import com.xtremelabs.robolectric.RobolectricTestRunner;
+import com.xtremelabs.robolectric.shadows.ShadowSQLiteCursor;
 import com.xtremelabs.robolectric.util.DatabaseConfig.UsingDatabaseMap;
 import com.xtremelabs.robolectric.util.SQLiteMap;
 import net.xaethos.lib.activeprovider.annotations.Model;
@@ -16,7 +20,10 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.util.Arrays;
+import java.util.Iterator;
+import java.util.NoSuchElementException;
 
+import static com.xtremelabs.robolectric.Robolectric.shadowOf;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.core.IsCollectionContaining.hasItems;
 import static org.junit.Assert.assertThat;
@@ -40,6 +47,8 @@ public class ActiveProviderTest {
 
 	@Before public void instantiateProvider() {
 		provider = new DataProvider();
+        provider.onCreate();
+        prepareDatabase();
 	}
 
     @Before public void getModelInfo() {
@@ -60,7 +69,7 @@ public class ActiveProviderTest {
 	/////////////// Tests ///////////////
 
 	@Test public void canCreate() {
-		assertThat(provider.onCreate(), is(true));
+		assertThat(new DataProvider().onCreate(), is(true));
 	}
 
     @Test public void canGetProviderInfo() {
@@ -76,8 +85,6 @@ public class ActiveProviderTest {
     }
 
 	@Test public void canMatchUris() {
-        provider.onCreate();
-
         String type = dataInfo.contentType();
 
         assertThat(provider.getType(dirUri), is("vnd.android.cursor.dir/" + type));
@@ -85,69 +92,66 @@ public class ActiveProviderTest {
 	}
 
     @Test public void queryHandlesProjections() throws Exception {
-        provider.onCreate();
-        prepareDatabase();
-
         Cursor cursor;
 
         cursor = provider.query(dirUri, null, null, null, null);
-        assertThat(cursor.getColumnCount(), is(3));
-        assertThat(Arrays.asList(cursor.getColumnNames()), hasItems("_id", "foo", "bar"));
+        assertThat(cursor.getColumnCount(), is(4));
+        assertThat(Arrays.asList(cursor.getColumnNames()), hasItems("_id", "foo", "bar", "created_at"));
 
         cursor = provider.query(dirUri, ID_PROJECTION, null, null, null);
         assertThat(cursor.getColumnCount(), is(1));
         assertThat(Arrays.asList(cursor.getColumnNames()), hasItems(ID_PROJECTION));
     }
 
-//	@Test public void querySetsNotificationUri() {
-//		SQLiteCursor cursor =
-//				(SQLiteCursor) provider.query(dataUri, null, null, null, null);
-//		ShadowSQLiteCursor shadow = Robolectric.shadowOf(cursor);
-//		assertThat(shadow.getNotificationUri_Compatibility(), is(dataUri));
-//	}
-//
-//	@Test public void queryHandlesDirAndItemUris() {
-//		Cursor cursor;
-//		ContentValues values = new ContentValues();
-//		values.put("foo", "Hello");
-//
-//		Uri itemUri = provider.insert(dataUri, values);
-//		provider.insert(dataUri, values);
-//
-//		cursor = (SQLiteCursor) provider.query(dataUri, ID_PROJECTION, null, null, null);
-//		assertThat(cursor.getCount(), is(2));
-//
-//		cursor = (SQLiteCursor) provider.query(itemUri, ID_PROJECTION, null, null, null);
-//		assertThat(cursor.getCount(), is(1));
-//		cursor.moveToFirst();
-//		assertThat(cursor.getLong(0), is(ContentUris.parseId(itemUri)));
-//	}
-//
-//	@Test public void queryCanFilter() {
-//		Long[] ids = makeSimpleData("Hello", null, 2);
-//		makeSimpleData("Goodbye", null, 2);
-//
-//		Cursor cursor = provider.query(
-//				dataUri, null,
-//				"foo=?", new String[]{"Hello"}, null);
-//		assertThat(cursor.getCount(), is(2));
-//		assertThat(cursorIdIterable(cursor), hasItems(ids));
-//	}
-//
-//	@Test public void queryCanSort() {
-//		long idFooFirst = makeSimpleData("A", "B");
-//		long idBarFirst = makeSimpleData("B", "A");
-//		Cursor cursor;
-//
-//		cursor = provider.query(dataUri, ID_PROJECTION, null, null, "foo ASC");
-//		cursor.moveToFirst();
-//		assertThat(cursor.getLong(0), is(idFooFirst));
-//
-//		cursor = provider.query(dataUri, ID_PROJECTION, null, null, "bar ASC");
-//		cursor.moveToFirst();
-//		assertThat(cursor.getLong(0), is(idBarFirst));
-//	}
-//
+	@Test public void querySetsNotificationUri() {
+		SQLiteCursor cursor =
+				(SQLiteCursor) provider.query(dirUri, null, null, null, null);
+		ShadowSQLiteCursor shadow = shadowOf(cursor);
+		assertThat(shadow.getNotificationUri_Compatibility(), is(dirUri));
+	}
+
+	@Test public void queryHandlesDirAndItemUris() {
+		Cursor cursor;
+		ContentValues values = new ContentValues();
+		values.put("foo", "Hello");
+
+		Uri itemUri = provider.insert(dirUri, values);
+		provider.insert(dirUri, values);
+
+		cursor = provider.query(dirUri, ID_PROJECTION, null, null, null);
+		assertThat(cursor.getCount(), is(2));
+
+		cursor = provider.query(itemUri, ID_PROJECTION, null, null, null);
+		assertThat(cursor.getCount(), is(1));
+		cursor.moveToFirst();
+		assertThat(cursor.getLong(0), is(ContentUris.parseId(itemUri)));
+	}
+
+	@Test public void queryCanFilter() {
+		Long[] ids = makeSimpleData("Hello", null, 2);
+		makeSimpleData("Goodbye", null, 2);
+
+		Cursor cursor = provider.query(
+                dirUri, null,
+				"foo=?", new String[]{"Hello"}, null);
+		assertThat(cursor.getCount(), is(2));
+		assertThat(cursorIdIterable(cursor), hasItems(ids));
+	}
+
+	@Test public void queryCanSort() {
+		long idFooFirst = makeSimpleData("A", "B");
+		long idBarFirst = makeSimpleData("B", "A");
+		Cursor cursor;
+
+		cursor = provider.query(dirUri, ID_PROJECTION, null, null, "foo ASC");
+		cursor.moveToFirst();
+		assertThat(cursor.getLong(0), is(idFooFirst));
+
+		cursor = provider.query(dirUri, ID_PROJECTION, null, null, "bar ASC");
+		cursor.moveToFirst();
+		assertThat(cursor.getLong(0), is(idBarFirst));
+	}
+
 //	@Test public void canInsert() {
 //		ContentValues values = new ContentValues();
 //		values.put("pBoolean", true);
@@ -181,7 +185,7 @@ public class ActiveProviderTest {
 //	public void insertHandlesItemUris() {
 //		ContentValues values = new ContentValues();
 //		values.put("foo", "Hello");
-//		Uri uri = Uri.withAppendedPath(dataUri, "1");
+//		Uri uri = Uri.withAppendedPath(dirUri, "1");
 //		provider.insert(uri, values);
 //	}
 //
@@ -190,9 +194,9 @@ public class ActiveProviderTest {
 //		values.put("foo", "Hello");
 //
 //		resolverShadow.getNotifiedUris().clear();
-//		provider.insert(dataUri, values);
+//		provider.insert(dirUri, values);
 //		assertThat(resolverShadow.getNotifiedUris().size(), is(1));
-//		assertThat(resolverShadow.getNotifiedUris(), hasItems(dataUri));
+//		assertThat(resolverShadow.getNotifiedUris(), hasItems(dirUri));
 //	}
 //
 //	@Test public void canUpdate() {
@@ -203,10 +207,10 @@ public class ActiveProviderTest {
 //
 //		values.remove("foo");
 //		values.put("bar", "Goodbye");
-//		assertThat(provider.update(dataUri, values, null, null), is(1));
+//		assertThat(provider.update(dirUri, values, null, null), is(1));
 //
 //		Cursor cursor = provider.query(
-//				dataUri, new String[]{"foo", "bar"}, null, null, null);
+//				dirUri, new String[]{"foo", "bar"}, null, null, null);
 //		cursor.moveToFirst();
 //		assertThat(cursor.getString(0), is("Hello"));
 //		assertThat(cursor.getString(1), is("Goodbye"));
@@ -219,10 +223,10 @@ public class ActiveProviderTest {
 //		ContentValues values = new ContentValues();
 //		values.put("foo", "Konnichiwa");
 //		assertThat(provider.update(
-//				dataUri, values, "foo=?", new String[]{"Hello"}), is(2));
+//				dirUri, values, "foo=?", new String[]{"Hello"}), is(2));
 //
 //		Cursor cursor = provider.query(
-//				dataUri, null,
+//				dirUri, null,
 //				"foo=?", new String[]{"Konnichiwa"}, null);
 //		assertThat(cursor.getCount(), is(2));
 //		assertThat(cursorIdIterable(cursor), hasItems(ids));
@@ -230,8 +234,8 @@ public class ActiveProviderTest {
 //
 //	@Test public void canUpdateById() {
 //		Long[] ids = makeSimpleData("Hello", null, 2);
-//		Uri hiUri = ContentUris.withAppendedId(dataUri, ids[0]);
-//		Uri byeUri = ContentUris.withAppendedId(dataUri, ids[1]);
+//		Uri hiUri = ContentUris.withAppendedId(dirUri, ids[0]);
+//		Uri byeUri = ContentUris.withAppendedId(dirUri, ids[1]);
 //
 //		ContentValues values = new ContentValues();
 //		values.put("foo", "Goodbye");
@@ -249,7 +253,7 @@ public class ActiveProviderTest {
 //	@Test public void updateNotifiesUri() {
 //		ContentValues values = new ContentValues();
 //		values.put("foo", "Hello");
-//		Uri uri = provider.insert(dataUri, values);
+//		Uri uri = provider.insert(dirUri, values);
 //
 //		resolverShadow.getNotifiedUris().clear();
 //		values.put("foo", "Goodbye");
@@ -262,22 +266,22 @@ public class ActiveProviderTest {
 //		ContentValues values = new ContentValues();
 //		values.put("foo", "Hello");
 //
-//		provider.insert(dataUri, values);
+//		provider.insert(dirUri, values);
 //
-//		assertThat(provider.delete(dataUri, null, null), is(1));
+//		assertThat(provider.delete(dirUri, null, null), is(1));
 //
-//		Cursor cursor = provider.query(dataUri, null, null, null, null);
+//		Cursor cursor = provider.query(dirUri, null, null, null, null);
 //		assertThat(cursor.getCount(), is(0));
 //	}
 //
 //	@Test public void canDeleteById() {
 //		Long[] ids = makeSimpleData("Hello", null, 2);
-//		Uri delUri = ContentUris.withAppendedId(dataUri, ids[0]);
+//		Uri delUri = ContentUris.withAppendedId(dirUri, ids[0]);
 //
 //		assertThat(provider.delete(delUri, null, null), is(1));
 //
 //		Cursor cursor;
-//		cursor = provider.query(dataUri, new String[]{"_id"}, null, null, null);
+//		cursor = provider.query(dirUri, new String[]{"_id"}, null, null, null);
 //		assertThat(cursor.getCount(), is(1));
 //		cursor.moveToFirst();
 //		assertThat(cursor.getLong(0), is(ids[1]));
@@ -286,7 +290,7 @@ public class ActiveProviderTest {
 //	@Test public void deleteNotifiesUri() {
 //		ContentValues values = new ContentValues();
 //		values.put("foo", "Hello");
-//		Uri uri = provider.insert(dataUri, values);
+//		Uri uri = provider.insert(dirUri, values);
 //
 //		resolverShadow.getNotifiedUris().clear();
 //		provider.delete(uri, null, null);
@@ -328,59 +332,60 @@ public class ActiveProviderTest {
 
     public void prepareDatabase() {
         SQLiteDatabase database = provider.mDBHelper.getWritableDatabase();
-        database.execSQL("CREATE TABLE data (_id INTEGER PRIMARY KEY, info TEXT, created_at INTEGER);");
+        database.execSQL("CREATE TABLE data (_id INTEGER PRIMARY KEY, foo TEXT, bar TEXT, created_at INTEGER);");
     }
 
-//	private long newSimpleData(ContentValues values) {
-//		Uri uri = provider.insert(dataUri, values);
-//		return ContentUris.parseId(uri);
-//	}
-//
-//	private long makeSimpleData(String foo, String bar) {
-//		return makeSimpleData(foo, bar, 1)[0];
-//	}
-//
-//	private Long[] makeSimpleData(String foo, String bar, int count) {
-//		Long[] ids = new Long[count];
-//		ContentValues values = new ContentValues();
-//		if (foo!= null) values.put("foo", foo);
-//		if (bar!= null) values.put("bar", bar);
-//
-//		for (int i=0; i<count; ++i) {
-//			ids[i] = newSimpleData(values);
-//		}
-//
-//		return ids;
-//	}
-//
-//	private Iterable<Long> cursorIdIterable(final Cursor cursor) {
-//		cursor.moveToPosition(0);
-//		final int idColumn = cursor.getColumnIndex("_id");
-//		return new Iterable<Long>() {
-//			@Override public Iterator<Long> iterator() {
-//				return new Iterator<Long>() {
-//					@Override public void remove() {
-//						throw new UnsupportedOperationException();
-//					}
-//
-//					@Override public Long next() {
-//						if (cursor.isAfterLast()) {
-//							throw new NoSuchElementException();
-//						}
-//						long id = cursor.getLong(idColumn);
-//						cursor.moveToNext();
-//						return id;
-//					}
-//
-//					@Override
-//					public boolean hasNext() {
-//						return !cursor.isAfterLast();
-//					}
-//				};
-//			}
-//		};
-//	}
-//
+	private long makeSimpleData(ContentValues values) {
+		Uri uri = provider.insert(dirUri, values);
+		return ContentUris.parseId(uri);
+	}
+
+	private long makeSimpleData(String foo, String bar) {
+		return makeSimpleData(foo, bar, 1)[0];
+	}
+
+	private Long[] makeSimpleData(String foo, String bar, int count) {
+		Long[] ids = new Long[count];
+		ContentValues values = new ContentValues();
+		if (foo!= null) values.put(Data.FOO, foo);
+		if (bar!= null) values.put(Data.BAR, bar);
+        values.put(Data.CREATED_AT, System.currentTimeMillis());
+
+		for (int i=0; i<count; ++i) {
+			ids[i] = makeSimpleData(values);
+		}
+
+		return ids;
+	}
+
+	private Iterable<Long> cursorIdIterable(final Cursor cursor) {
+		cursor.moveToPosition(0);
+		final int idColumn = cursor.getColumnIndex(BaseColumns._ID);
+		return new Iterable<Long>() {
+			@Override public Iterator<Long> iterator() {
+				return new Iterator<Long>() {
+					@Override public void remove() {
+						throw new UnsupportedOperationException();
+					}
+
+					@Override public Long next() {
+						if (cursor.isAfterLast()) {
+							throw new NoSuchElementException();
+						}
+						long id = cursor.getLong(idColumn);
+						cursor.moveToNext();
+						return id;
+					}
+
+					@Override
+					public boolean hasNext() {
+						return !cursor.isAfterLast();
+					}
+				};
+			}
+		};
+	}
+
 //	class NullMigration extends Migration {
 //		public boolean didUpgrade = false;
 //		@Override public boolean onUpgrade(SQLiteDatabase db) {

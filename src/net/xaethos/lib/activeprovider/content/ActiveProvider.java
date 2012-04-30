@@ -1,9 +1,6 @@
 package net.xaethos.lib.activeprovider.content;
 
-import android.content.ContentProvider;
-import android.content.ContentValues;
-import android.content.Context;
-import android.content.UriMatcher;
+import android.content.*;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
@@ -14,6 +11,7 @@ import net.xaethos.lib.activeprovider.annotations.Model;
 import net.xaethos.lib.activeprovider.annotations.Provider;
 
 import java.util.HashMap;
+import java.util.regex.Pattern;
 
 public abstract class ActiveProvider extends ContentProvider {
 
@@ -139,6 +137,7 @@ public abstract class ActiveProvider extends ContentProvider {
 	@Override
 	public boolean onCreate() {
 		mUriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
+        mProjectionMaps = new HashMap<Model, HashMap<String, String>>();
 
 		int i = 0;
 		String authority;
@@ -174,7 +173,7 @@ public abstract class ActiveProvider extends ContentProvider {
 		}
 
 		// Project columns
-		HashMap<String,String> projectionMap = mProjectionMaps.get(model);
+		HashMap<String,String> projectionMap = getProjectionMap(model);
 		String[] columns = null;
 		if (projection != null) {
 			columns = new String[projection.length];
@@ -198,21 +197,20 @@ public abstract class ActiveProvider extends ContentProvider {
 
 	@Override
 	public Uri insert(Uri uri, ContentValues values) {
-//		int match = mUriMatcher.match(uri);
-//
-//		if (isItemUri(match)) {
-//			throw new IllegalArgumentException("Cannot insert to item URI: " + uri);
-//		}
-//
-//		RecordInfo record = modelFromUriMatch(match);
-//		SQLiteDatabase db = mDBHelper.getWritableDatabase();
-//
-//		long id = db.insert(record.getTableName(), null, values);
-//		if (id < 0) return null;
-//
-//		getContext().getContentResolver().notifyChange(uri, null);
-//		return ContentUris.withAppendedId(record.getContentUri(), id);
-        return null;
+		int match = mUriMatcher.match(uri);
+
+		if (isItemUri(match)) {
+			throw new IllegalArgumentException("Cannot insert to item URI: " + uri);
+		}
+
+		Model model = modelFromUriMatch(match);
+		SQLiteDatabase db = mDBHelper.getWritableDatabase();
+
+		long id = db.insert(model.tableName(), null, values);
+		if (id < 0) return null;
+
+		getContext().getContentResolver().notifyChange(uri, null);
+		return ContentUris.withAppendedId(getContentUri(model), id);
 	}
 
 	@Override
@@ -267,6 +265,39 @@ public abstract class ActiveProvider extends ContentProvider {
                 .authority(model.authority())
                 .appendPath(model.tableName())
                 .build();
+    }
+
+    private HashMap<String,String> getProjectionMap(Model model) {
+        if (!mProjectionMaps.containsKey(model)) {
+            String tableName = model.tableName();
+            validateSQLNameOrThrow(tableName);
+            String baseName = tableName + ".";
+            Cursor cursor = mDBHelper.getReadableDatabase().rawQuery(
+                    "PRAGMA table_info('" + tableName + "');", null);
+            HashMap<String,String> projection =
+                    new HashMap<String, String>(cursor.getCount());
+
+            if (cursor.moveToFirst()) {
+                while(!cursor.isAfterLast()) {
+                    String columnName = cursor.getString(1);
+                    projection.put(columnName, baseName + columnName);
+                    cursor.moveToNext();
+                }
+            }
+            cursor.close();
+            mProjectionMaps.put(model, projection);
+        }
+        return mProjectionMaps.get(model);
+    }
+
+    private boolean validateSQLName(CharSequence name) {
+        return Pattern.matches("\\w+", name);
+    }
+
+    private void validateSQLNameOrThrow(CharSequence name) {
+        if (!validateSQLName(name)) {
+            throw new IllegalArgumentException("the tableName '" + name + "' is invalid");
+        }
     }
 
 }

@@ -13,13 +13,17 @@ import net.xaethos.lib.activeprovider.annotations.Setter;
 )
 public interface Data {
     public static final String ID         = BaseColumns._ID;
-    public static final String INFO       = "info";
+    public static final String FOO        = "foo";
+    public static final String BAR        = "bar";
     public static final String CREATED_AT = "created_at";
 
     @Getter(ID) public Long getId();
 
-    @Getter(INFO) public String getInfo();
-    @Setter(INFO) public String setInfo();
+    @Getter(FOO) public String getFoo();
+    @Setter(FOO) public String setFoo();
+
+    @Getter(BAR) public String getBar();
+    @Setter(BAR) public String setBar();
 
     @Getter(CREATED_AT) public Long getCreatedAt();
 }
