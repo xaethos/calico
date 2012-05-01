@@ -11,8 +11,6 @@ import com.example.fixtures.Data;
 import com.example.fixtures.DataProvider;
 import com.xtremelabs.robolectric.RobolectricTestRunner;
 import com.xtremelabs.robolectric.shadows.ShadowSQLiteCursor;
-import com.xtremelabs.robolectric.util.DatabaseConfig.UsingDatabaseMap;
-import com.xtremelabs.robolectric.util.SQLiteMap;
 import net.xaethos.lib.activeprovider.annotations.Model;
 import net.xaethos.lib.activeprovider.annotations.Provider;
 import org.junit.Before;
@@ -28,7 +26,6 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.core.IsCollectionContaining.hasItems;
 import static org.junit.Assert.assertThat;
 
-@UsingDatabaseMap(SQLiteMap.class)
 @RunWith(RobolectricTestRunner.class)
 public class ActiveProviderTest {
 

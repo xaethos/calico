@@ -9,16 +9,12 @@ import android.provider.BaseColumns;
 import android.text.TextUtils;
 import net.xaethos.lib.activeprovider.annotations.Model;
 import net.xaethos.lib.activeprovider.annotations.Provider;
+import net.xaethos.lib.activeprovider.models.ModelManager;
 
 import java.util.HashMap;
 import java.util.regex.Pattern;
 
 public abstract class ActiveProvider extends ContentProvider {
-
-	/////////////// Constants ///////////////
-
-    private static final String MIME_BASE_ITEM = "vnd.android.cursor.item/";
-    private static final String MIME_BASE_DIR  = "vnd.android.cursor.dir/";
 
     /////////////// Inner classes ///////////////
 
@@ -118,14 +114,10 @@ public abstract class ActiveProvider extends ContentProvider {
 
     public Model[] getModels() {
         if (mModels == null) {
-            Class<?>[] modelClasses = getProviderInfo().models();
-            Model[] models = new Model[modelClasses.length];
-            for (int i=0; i<models.length; ++i) {
-                if (!modelClasses[i].isAnnotationPresent(Model.class)) {
-                    throw new IllegalArgumentException(
-                            modelClasses[i].getName() + " is not annotated as @" + Model.class.getSimpleName());
-                }
-                models[i] = modelClasses[i].getAnnotation(Model.class);
+            Class<?>[] modelInterfaces = getProviderInfo().models();
+            Model[] models = new Model[modelInterfaces.length];
+            for (int i=0; i<modelInterfaces.length; ++i) {
+                models[i] = ModelManager.getModelInfo(modelInterfaces[i]);
             }
             mModels = models;
         }
@@ -158,8 +150,12 @@ public abstract class ActiveProvider extends ContentProvider {
 		int match = mUriMatcher.match(uri);
 		Model model = modelFromUriMatch(match);
 
-		if (isItemUri(match)) return MIME_BASE_ITEM + model.contentType();
-		return MIME_BASE_DIR + model.contentType();
+		if (isItemUri(match)) {
+            return ModelManager.getContentItemType(model);
+        }
+        else {
+            return ModelManager.getContentDirType(model);
+        }
 	}
 
 	@Override
@@ -191,7 +187,7 @@ public abstract class ActiveProvider extends ContentProvider {
                 null,
                 null,
                 sortOrder);
-		cursor.setNotificationUri(getContext().getContentResolver(), getContentUri(model));
+		cursor.setNotificationUri(getContext().getContentResolver(), ModelManager.getContentUri(model));
 		return cursor;
 	}
 
@@ -210,7 +206,7 @@ public abstract class ActiveProvider extends ContentProvider {
 		if (id < 0) return null;
 
 		getContext().getContentResolver().notifyChange(uri, null);
-		return ContentUris.withAppendedId(getContentUri(model), id);
+		return ContentUris.withAppendedId(ModelManager.getContentUri(model), id);
 	}
 
 	@Override
@@ -259,14 +255,6 @@ public abstract class ActiveProvider extends ContentProvider {
 		return models[index];
 	}
 
-    private Uri getContentUri(Model model) {
-        return new Uri.Builder()
-                .scheme("content")
-                .authority(model.authority())
-                .appendPath(model.tableName())
-                .build();
-    }
-
     private HashMap<String,String> getProjectionMap(Model model) {
         if (!mProjectionMaps.containsKey(model)) {
             String tableName = model.tableName();
@@ -296,7 +284,7 @@ public abstract class ActiveProvider extends ContentProvider {
 
     private void validateSQLNameOrThrow(CharSequence name) {
         if (!validateSQLName(name)) {
-            throw new IllegalArgumentException("the tableName '" + name + "' is invalid");
+            throw new IllegalArgumentException("the name '" + name + "' is invalid");
         }
     }
 
