@@ -51,16 +51,17 @@ is important (i.e. JUnit4 should be before Android), the following one works:
 2.  Robolectric test libraries (submodules/robolectric/lib/test/*)
 3.  Robolectric
 4.  Android SDK
-5.  ActiveProvider sources
+5.  Android Compatibility package v4
+6.  ActiveProvider sources
 
 ### Robolectric
 
-Robolectric is its own project, but its documentation is very much lacking.  To build it the following dependency order works:
+Robolectric is its own project, but its documentation is very much lacking.  To
+build it the following dependency order works:
 
 1.  Robolectric main libraries (submodules/robolectric/lib/main/*)
-2.  Robolectric test libraries (submodules/robolectric/lib/test/*)
-3.  Android SDK 2.3.3 with Google APIs (android-10)
-4.  Android Compatibility package v4
-5.  Java 1.6
-6.  Robolectric sources
+2.  Android SDK 2.3.3 with Google APIs (android-10)
+3.  Android Compatibility package v4
+4.  Java 1.6
+5.  Robolectric sources
 
