@@ -15,14 +15,23 @@
 # generated files
 bin/
 gen/
+out/
 
 # Local configuration file (sdk path, etc)
 local.properties
+local-libs/
+
+## Eclipse ignores
+.project
+.classpath
+.settings
 
 ## IntelliJ ignores
+*.iml
 .idea/*
-!.idea/libraries/
 
 ## Misc
 tmp/
+*.swp
+*~
 
