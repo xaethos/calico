@@ -214,105 +214,109 @@ public class ActiveProviderTest {
 		assertThat(notifiedUris.get(0).uri, is(dirUri));
 	}
 
-//	@Test public void canUpdate() {
-//		ContentValues values = new ContentValues();
-//		values.put("foo", "Hello");
-//
-//		provider.insert(mSimpleRecord.getContentUri(), values);
-//
-//		values.remove("foo");
-//		values.put("bar", "Goodbye");
-//		assertThat(provider.update(dirUri, values, null, null), is(1));
-//
-//		Cursor cursor = provider.query(
-//				dirUri, new String[]{"foo", "bar"}, null, null, null);
-//		cursor.moveToFirst();
-//		assertThat(cursor.getString(0), is("Hello"));
-//		assertThat(cursor.getString(1), is("Goodbye"));
-//	}
-//
-//	@Test public void canUpdateMany() {
-//		Long[] ids = makeSimpleData("Hello", null, 2);
-//		makeSimpleData("Hola", null, 2);
-//
-//		ContentValues values = new ContentValues();
-//		values.put("foo", "Konnichiwa");
-//		assertThat(provider.update(
-//				dirUri, values, "foo=?", new String[]{"Hello"}), is(2));
-//
-//		Cursor cursor = provider.query(
-//				dirUri, null,
-//				"foo=?", new String[]{"Konnichiwa"}, null);
-//		assertThat(cursor.getCount(), is(2));
-//		assertThat(cursorIdIterable(cursor), hasItems(ids));
-//	}
-//
-//	@Test public void canUpdateById() {
-//		Long[] ids = makeSimpleData("Hello", null, 2);
-//		Uri hiUri = ContentUris.withAppendedId(dirUri, ids[0]);
-//		Uri byeUri = ContentUris.withAppendedId(dirUri, ids[1]);
-//
-//		ContentValues values = new ContentValues();
-//		values.put("foo", "Goodbye");
-//		assertThat(provider.update(byeUri, values, null, null), is(1));
-//
-//		Cursor cursor;
-//		cursor = provider.query(hiUri, new String[]{"foo"}, null, null, null);
-//		cursor.moveToFirst();
-//		assertThat(cursor.getString(0), is("Hello"));
-//		cursor = provider.query(byeUri, new String[]{"foo"}, null, null, null);
-//		cursor.moveToFirst();
-//		assertThat(cursor.getString(0), is("Goodbye"));
-//	}
-//
-//	@Test public void updateNotifiesUri() {
-//		ContentValues values = new ContentValues();
-//		values.put("foo", "Hello");
-//		Uri uri = provider.insert(dirUri, values);
-//
-//		resolverShadow.getNotifiedUris().clear();
-//		values.put("foo", "Goodbye");
-//		provider.update(uri, values, null, null);
-//		assertThat(resolverShadow.getNotifiedUris().size(), is(1));
-//		assertThat(resolverShadow.getNotifiedUris(), hasItems(uri));
-//	}
-//
-//	@Test public void canDelete() {
-//		ContentValues values = new ContentValues();
-//		values.put("foo", "Hello");
-//
-//		provider.insert(dirUri, values);
-//
-//		assertThat(provider.delete(dirUri, null, null), is(1));
-//
-//		Cursor cursor = provider.query(dirUri, null, null, null, null);
-//		assertThat(cursor.getCount(), is(0));
-//	}
-//
-//	@Test public void canDeleteById() {
-//		Long[] ids = makeSimpleData("Hello", null, 2);
-//		Uri delUri = ContentUris.withAppendedId(dirUri, ids[0]);
-//
-//		assertThat(provider.delete(delUri, null, null), is(1));
-//
-//		Cursor cursor;
-//		cursor = provider.query(dirUri, new String[]{"_id"}, null, null, null);
-//		assertThat(cursor.getCount(), is(1));
-//		cursor.moveToFirst();
-//		assertThat(cursor.getLong(0), is(ids[1]));
-//	}
-//
-//	@Test public void deleteNotifiesUri() {
-//		ContentValues values = new ContentValues();
-//		values.put("foo", "Hello");
-//		Uri uri = provider.insert(dirUri, values);
-//
-//		resolverShadow.getNotifiedUris().clear();
-//		provider.delete(uri, null, null);
-//		assertThat(resolverShadow.getNotifiedUris().size(), is(1));
-//		assertThat(resolverShadow.getNotifiedUris(), hasItems(uri));
-//	}
-//
+	@Test public void canUpdate() {
+		ContentValues values = new ContentValues();
+		values.put("foo", "Hello");
+
+		provider.insert(ModelManager.getContentUri(Data.class), values);
+
+		values.remove("foo");
+		values.put("bar", "Goodbye");
+		assertThat(provider.update(dirUri, values, null, null), is(1));
+
+		Cursor cursor = provider.query(
+				dirUri, new String[]{"foo", "bar"}, null, null, null);
+		cursor.moveToFirst();
+		assertThat(cursor.getString(0), is("Hello"));
+		assertThat(cursor.getString(1), is("Goodbye"));
+	}
+
+	@Test public void canUpdateMany() {
+		Long[] ids = makeSimpleData("Hello", null, 2);
+		makeSimpleData("Hola", null, 2);
+
+		ContentValues values = new ContentValues();
+		values.put("foo", "Konnichiwa");
+		assertThat(provider.update(
+				dirUri, values, "foo=?", new String[]{"Hello"}), is(2));
+
+		Cursor cursor = provider.query(
+				dirUri, null,
+				"foo=?", new String[]{"Konnichiwa"}, null);
+		assertThat(cursor.getCount(), is(2));
+		assertThat(cursorIdIterable(cursor), hasItems(ids));
+	}
+
+	@Test public void canUpdateById() {
+		Long[] ids = makeSimpleData("Hello", null, 2);
+		Uri hiUri = ContentUris.withAppendedId(dirUri, ids[0]);
+		Uri byeUri = ContentUris.withAppendedId(dirUri, ids[1]);
+
+		ContentValues values = new ContentValues();
+		values.put("foo", "Goodbye");
+		assertThat(provider.update(byeUri, values, null, null), is(1));
+
+		Cursor cursor;
+		cursor = provider.query(hiUri, new String[]{"foo"}, null, null, null);
+		cursor.moveToFirst();
+		assertThat(cursor.getString(0), is("Hello"));
+		cursor = provider.query(byeUri, new String[]{"foo"}, null, null, null);
+		cursor.moveToFirst();
+		assertThat(cursor.getString(0), is("Goodbye"));
+	}
+
+	@Test public void updateNotifiesUri() {
+		ContentValues values = new ContentValues();
+		values.put("foo", "Hello");
+		Uri uri = provider.insert(dirUri, values);
+
+		resolverShadow.getNotifiedUris().clear();
+		values.put("foo", "Goodbye");
+		provider.update(uri, values, null, null);
+        List<ShadowContentResolver.NotifiedUri> notifiedUris = resolverShadow.getNotifiedUris();
+
+        assertThat(notifiedUris.size(), is(1));
+        assertThat(notifiedUris.get(0).uri, is(uri));
+    }
+
+	@Test public void canDelete() {
+		ContentValues values = new ContentValues();
+		values.put("foo", "Hello");
+
+		provider.insert(dirUri, values);
+
+		assertThat(provider.delete(dirUri, null, null), is(1));
+
+		Cursor cursor = provider.query(dirUri, null, null, null, null);
+		assertThat(cursor.getCount(), is(0));
+	}
+
+	@Test public void canDeleteById() {
+		Long[] ids = makeSimpleData("Hello", null, 2);
+		Uri delUri = ContentUris.withAppendedId(dirUri, ids[0]);
+
+		assertThat(provider.delete(delUri, null, null), is(1));
+
+		Cursor cursor;
+		cursor = provider.query(dirUri, new String[]{"_id"}, null, null, null);
+		assertThat(cursor.getCount(), is(1));
+		cursor.moveToFirst();
+		assertThat(cursor.getLong(0), is(ids[1]));
+	}
+
+	@Test public void deleteNotifiesUri() {
+		ContentValues values = new ContentValues();
+		values.put("foo", "Hello");
+		Uri uri = provider.insert(dirUri, values);
+
+		resolverShadow.getNotifiedUris().clear();
+		provider.delete(uri, null, null);
+        List<ShadowContentResolver.NotifiedUri> notifiedUris = resolverShadow.getNotifiedUris();
+
+        assertThat(notifiedUris.size(), is(1));
+        assertThat(notifiedUris.get(0).uri, is(uri));
+    }
+
 //	@Test public void canInferDatabaseVersionFromMigrationCount() {
 //		DataProvider provider = new DataProvider();
 //		assertThat(provider.migrations.size(), is(0));

@@ -212,36 +212,34 @@ public abstract class ActiveProvider extends ContentProvider {
 	@Override
 	public int update(Uri uri, ContentValues values,
 			String selection, String[] selectionArgs) {
-//		RecordInfo record = modelFromUriMatch(mUriMatcher.match(uri));
-//		SQLiteDatabase db = mDBHelper.getWritableDatabase();
-//
-//		if (isItemUri(mUriMatcher.match(uri))) {
-//			selection = prependIdConstraint(uri, selection);
-//		}
-//
-//		int count = db.update(record.getTableName(), values, selection, selectionArgs);
-//		if (count > 0) {
-//			getContext().getContentResolver().notifyChange(uri, null);
-//		}
-//		return count;
-        return -1;
+		Model model = modelFromUriMatch(mUriMatcher.match(uri));
+		SQLiteDatabase db = mDBHelper.getWritableDatabase();
+
+		if (isItemUri(mUriMatcher.match(uri))) {
+			selection = prependIdConstraint(uri, selection);
+		}
+
+		int count = db.update(model.tableName(), values, selection, selectionArgs);
+		if (count > 0) {
+			getContext().getContentResolver().notifyChange(uri, null);
+		}
+		return count;
 	}
 
 	@Override
 	public int delete(Uri uri, String selection, String[] selectionArgs) {
-//		RecordInfo record = modelFromUriMatch(mUriMatcher.match(uri));
-//		SQLiteDatabase db = mDBHelper.getWritableDatabase();
-//
-//		if (isItemUri(mUriMatcher.match(uri))) {
-//			selection = prependIdConstraint(uri, selection);
-//		}
-//
-//		int count = db.delete(record.getTableName(), selection, selectionArgs);
-//		if (count > 0) {
-//			getContext().getContentResolver().notifyChange(uri, null);
-//		}
-//		return count;
-        return -1;
+		Model model = modelFromUriMatch(mUriMatcher.match(uri));
+		SQLiteDatabase db = mDBHelper.getWritableDatabase();
+
+		if (isItemUri(mUriMatcher.match(uri))) {
+			selection = prependIdConstraint(uri, selection);
+		}
+
+		int count = db.delete(model.tableName(), selection, selectionArgs);
+		if (count > 0) {
+			getContext().getContentResolver().notifyChange(uri, null);
+		}
+		return count;
 	}
 
 	///// Helper methods
