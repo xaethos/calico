@@ -1,9 +1,7 @@
 package net.xaethos.lib.activeprovider.models;
 
 import android.database.Cursor;
-import net.xaethos.lib.activeprovider.annotations.Getter;
-import net.xaethos.lib.activeprovider.annotations.Model;
-import net.xaethos.lib.activeprovider.annotations.Setter;
+import com.example.fixtures.Data;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -16,45 +14,16 @@ import static org.mockito.Mockito.when;
 
 public class CursorModelHandlerTest {
 
-    @Model(authority = "", contentType = "", tableName = "")
-    private static interface TestModel {
-        public static final String STRING  = "string";
-        public static final String INTEGER = "integer";
-        public static final String BOOLEAN = "boolean";
-        public static final String SHORT   = "short";
-        public static final String LONG    = "long";
-        public static final String FLOAT   = "float";
-        public static final String DOUBLE  = "double";
-        public static final String BLOB    = "blob";
-
-        @Getter(STRING) public String   getString();
-        @Setter(STRING) public void     setString(String s);
-        @Getter(INTEGER) public Integer getInteger();
-        @Setter(INTEGER) public void    setInteger(Integer d);
-        @Getter(BOOLEAN) public Boolean  isTrue();
-        @Setter(BOOLEAN) public void    setTrue(Boolean flag);
-        @Getter(SHORT) public Short     getShort();
-        @Setter(SHORT) public void      setShort(Short sd);
-        @Getter(LONG) public Long       getLong();
-        @Setter(LONG) public void       setLong(Long ld);
-        @Getter(FLOAT) public Float     getFloat();
-        @Setter(FLOAT) public void      setFloat(Float f);
-        @Getter(DOUBLE) public Double   getDouble();
-        @Setter(DOUBLE) public void     setDouble(Double lf);
-        @Getter(BLOB) public byte[]     getData();
-        @Setter(BLOB) public void       setData(byte[] data);
-    }
-
     Cursor cursor;
     CursorModelHandler handler;
-    TestModel model;
+    Data model;
 
     @Before
     public void instantiateHandler() {
         cursor = mock(Cursor.class);
         when(cursor.getColumnIndexOrThrow(anyString())).thenReturn(1);
         handler = new CursorModelHandler(cursor);
-        model = CursorModelHandler.newModelInstance(TestModel.class, handler);
+        model = CursorModelHandler.newModelInstance(Data.class, handler);
     }
 
     @Test
@@ -70,34 +39,34 @@ public class CursorModelHandlerTest {
     @Test
     public void testGetString() throws Exception {
         when(cursor.getString(1)).thenReturn("foo");
-        assertThat(model.getString(), is("foo"));
+        assertThat(model.getFoo(), is("foo"));
     }
     @Test(expected = UnsupportedOperationException.class)
     public void testSetString() throws Exception {
-        model.setString("foo");
-        assertThat(model.getString(), is("foo"));
+        model.setFoo("foo");
+        assertThat(model.getFoo(), is("foo"));
     }
 
     @Test
     public void testGetInteger() throws Exception {
         when(cursor.getInt(1)).thenReturn(25);
-        assertThat(model.getInteger(), is(25));
+        assertThat(model.getInt(), is(25));
     }
     @Test(expected = UnsupportedOperationException.class)
     public void testSetInteger() throws Exception {
-        model.setInteger(25);
-        assertThat(model.getInteger(), is(25));
+        model.setInt(25);
+        assertThat(model.getInt(), is(25));
     }
 
     @Test
     public void testGetBoolean() throws Exception {
         when(cursor.getInt(1)).thenReturn(1);
-        assertThat(model.isTrue(), is(true));
+        assertThat(model.getBool(), is(true));
     }
     @Test(expected = UnsupportedOperationException.class)
     public void testSetBoolean() throws Exception {
-        model.setTrue(true);
-        assertThat(model.isTrue(), is(true));
+        model.setBool(true);
+        assertThat(model.getBool(), is(true));
     }
 
     @Test

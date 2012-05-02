@@ -26,9 +26,9 @@ public class BaseModelHandlerTest {
     private static interface TestModel {
         public Integer badMethod();
 
-        public static final String COL_INT = "int";
-        @Getter(COL_INT) public Integer getInt();
-        @Setter(COL_INT) public void setInt(Integer i);
+        public static final String INT = "int";
+        @Getter(INT) public Integer getInt();
+        @Setter(INT) public void setInt(Integer i);
     }
 
     private static interface BadInterface {}
@@ -47,24 +47,24 @@ public class BaseModelHandlerTest {
 
     @Test(expected = UnsupportedOperationException.class)
     public void shouldNotHandleUnsupportedMethods() {
-        TestModel iface = BaseModelHandler.newModelInstance(TestModel.class, proxy);
-        iface.badMethod();
+        TestModel model = BaseModelHandler.newModelInstance(TestModel.class, proxy);
+        model.badMethod();
     }
 
     @Test
     public void shouldForwardGetterMethodsToGet() {
         TestModelHandler mock = spy(proxy);
-        TestModel iface = BaseModelHandler.newModelInstance(TestModel.class, mock);
-        iface.getInt();
-        verify(mock).get(TestModel.COL_INT, Integer.class);
+        TestModel model = BaseModelHandler.newModelInstance(TestModel.class, mock);
+        model.getInt();
+        verify(mock).get(TestModel.INT, Integer.class);
     }
 
     @Test
     public void shouldForwardSetterMethodsToSet() {
         TestModelHandler mock = spy(proxy);
-        TestModel iface = BaseModelHandler.newModelInstance(TestModel.class, mock);
-        iface.setInt(42);
-        verify(mock).set(TestModel.COL_INT, 42);
+        TestModel model = BaseModelHandler.newModelInstance(TestModel.class, mock);
+        model.setInt(42);
+        verify(mock).set(TestModel.INT, 42);
     }
 
 }

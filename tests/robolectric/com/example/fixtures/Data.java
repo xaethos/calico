@@ -1,7 +1,6 @@
 package com.example.fixtures;
 
 
-import android.provider.BaseColumns;
 import net.xaethos.lib.activeprovider.annotations.Getter;
 import net.xaethos.lib.activeprovider.annotations.Model;
 import net.xaethos.lib.activeprovider.annotations.Setter;
@@ -12,7 +11,7 @@ import net.xaethos.lib.activeprovider.annotations.Setter;
         contentType = "vnd.example.data"
 )
 public interface Data {
-    public static final String ID         = BaseColumns._ID;
+//    public static final String ID         = BaseColumns._ID;
     public static final String FOO        = "foo";
     public static final String BAR        = "bar";
     public static final String BOOL       = "bool";
@@ -23,37 +22,37 @@ public interface Data {
     public static final String DOUBLE     = "double";
     public static final String DATA       = "data";
     public static final String CREATED_AT = "created_at";
-    public static final String UPDATED_AT = "updated_at";
+//    public static final String UPDATED_AT = "updated_at";
 
-    @Getter(ID) public Long getId();
+//    @Getter(ID) public Long getId();
 
     @Getter(FOO) public String getFoo();
-    @Setter(FOO) public String setFoo();
+    @Setter(FOO) public void setFoo(String value);
 
-    @Getter(BAR) public String getBar();
-    @Setter(BAR) public String setBar();
+//    @Getter(BAR) public String getBar();
+//    @Setter(BAR) public void setBar(String value);
 
     @Getter(BOOL) public Boolean getBool();
-    @Setter(BOOL) public Boolean setBool();
+    @Setter(BOOL) public void setBool(Boolean value);
 
     @Getter(SHORT) public Short getShort();
-    @Setter(SHORT) public Short setShort();
+    @Setter(SHORT) public void setShort(Short value);
 
     @Getter(INT) public Integer getInt();
-    @Setter(INT) public Integer setInt();
+    @Setter(INT) public void setInt(Integer value);
 
     @Getter(LONG) public Long getLong();
-    @Setter(LONG) public Long setLong();
+    @Setter(LONG) public void setLong(Long value);
 
     @Getter(FLOAT) public Float getFloat();
-    @Setter(FLOAT) public Float setFloat();
+    @Setter(FLOAT) public void setFloat(Float value);
 
     @Getter(DOUBLE) public Double getDouble();
-    @Setter(DOUBLE) public Double setDouble();
+    @Setter(DOUBLE) public void setDouble(Double value);
 
     @Getter(DATA) public byte[] getData();
-    @Setter(DATA) public byte[] setData();
+    @Setter(DATA) public void setData(byte[] value);
 
-    @Getter(CREATED_AT) public Long getCreatedAt();
-    @Getter(UPDATED_AT) public Long getUpdatedAt();
+//    @Getter(CREATED_AT) public Long getCreatedAt();
+//    @Getter(UPDATED_AT) public Long getUpdatedAt();
 }
