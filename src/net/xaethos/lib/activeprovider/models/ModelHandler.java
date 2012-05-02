@@ -6,9 +6,9 @@ import net.xaethos.lib.activeprovider.annotations.Setter;
 
 import java.lang.reflect.*;
 
-public abstract class BaseModelHandler implements InvocationHandler {
+public class ModelHandler implements InvocationHandler {
 
-    protected static <T> T newModelInstance(Class<T> modelType, BaseModelHandler handler) {
+    protected static <T> T newModelInstance(Class<T> modelType, ModelHandler handler) {
         if (!modelType.isAnnotationPresent(Model.class)) {
             throw new IllegalArgumentException("model interface must have the Model annotation");
         }
@@ -24,17 +24,25 @@ public abstract class BaseModelHandler implements InvocationHandler {
                 cls.getSimpleName());
     }
 
+    protected final boolean isReadable() {
+        return ReadableModelHandler.class.isInstance(this);
+    }
+
+    protected final boolean isWritable() {
+        return WritableModelHandler.class.isInstance(this);
+    }
+
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 
-        if (method.isAnnotationPresent(Getter.class)) {
+        if (isReadable() && method.isAnnotationPresent(Getter.class)) {
             Class<?>[] params = method.getParameterTypes();
             if (params.length != 0) {
                 throw new IllegalArgumentException("@Getter methods must take no parameters");
             }
             return invokeGetter(method.getAnnotation(Getter.class).value(), method.getReturnType());
         }
-        if (method.isAnnotationPresent(Setter.class)) {
+        if (isWritable() && method.isAnnotationPresent(Setter.class)) {
             Class<?>[] params = method.getParameterTypes();
             if (params.length != 1) {
                 throw new IllegalArgumentException("@Setter methods must take a single parameter");
@@ -71,30 +79,8 @@ public abstract class BaseModelHandler implements InvocationHandler {
             }
         }
         else {
-            setNull(field);
+            ((WritableModelHandler)this).setNull(field);
         }
     }
-
-    public abstract String  getString(String field);
-    public abstract Boolean getBoolean(String field);
-    public abstract Byte    getByte(String field);
-    public abstract Short   getShort(String field);
-    public abstract Integer getInteger(String field);
-    public abstract Long    getLong(String field);
-    public abstract Float   getFloat(String field);
-    public abstract Double  getDouble(String field);
-    public abstract byte[]  getbyteArray(String field);
-
-    public abstract void set(String field, String value);
-    public abstract void set(String field, Byte value);
-    public abstract void set(String field, Short value);
-    public abstract void set(String field, Integer value);
-    public abstract void set(String field, Long value);
-    public abstract void set(String field, Float value);
-    public abstract void set(String field, Double value);
-    public abstract void set(String field, Boolean value);
-    public abstract void set(String field, byte[] value);
-
-    public abstract void setNull(String field);
 
 }

@@ -2,7 +2,8 @@ package net.xaethos.lib.activeprovider.models;
 
 import android.database.Cursor;
 
-public class CursorModelHandler extends BaseModelHandler {
+public class CursorModelHandler extends ModelHandler
+implements ReadableModelHandler {
 
     private final Cursor mCursor;
 
@@ -23,17 +24,5 @@ public class CursorModelHandler extends BaseModelHandler {
     @Override public Float   getFloat(String field)     { Cursor c = mCursor; int i = c.getColumnIndexOrThrow(field); return c.isNull(i)?null:c.getFloat (i); }
     @Override public Double  getDouble(String field)    { Cursor c = mCursor; int i = c.getColumnIndexOrThrow(field); return c.isNull(i)?null:c.getDouble(i); }
     @Override public byte[]  getbyteArray(String field) { Cursor c = mCursor; int i = c.getColumnIndexOrThrow(field); return c.isNull(i)?null:c.getBlob  (i); }
-
-    @Override public void set(String field, String value)  { throw new UnsupportedOperationException(); }
-    @Override public void set(String field, Boolean value) { throw new UnsupportedOperationException(); }
-    @Override public void set(String field, Byte value)    { throw new UnsupportedOperationException(); }
-    @Override public void set(String field, Short value)   { throw new UnsupportedOperationException(); }
-    @Override public void set(String field, Integer value) { throw new UnsupportedOperationException(); }
-    @Override public void set(String field, Long value)    { throw new UnsupportedOperationException(); }
-    @Override public void set(String field, Float value)   { throw new UnsupportedOperationException(); }
-    @Override public void set(String field, Double value)  { throw new UnsupportedOperationException(); }
-    @Override public void set(String field, byte[] value)  { throw new UnsupportedOperationException(); }
-
-    @Override public void setNull(String field) {}
 
 }

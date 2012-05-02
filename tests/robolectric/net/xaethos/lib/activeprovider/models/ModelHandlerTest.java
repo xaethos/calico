@@ -11,9 +11,9 @@ import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 
-public class BaseModelHandlerTest {
+public class ModelHandlerTest {
 
-    public class TestModelHandler extends BaseModelHandler {
+    public class ROModelHandler extends ModelHandler implements ReadableModelHandler {
         @Override public String  getString(String field)    { return null; }
         @Override public Boolean getBoolean(String field)   { return null; }
         @Override public Byte    getByte(String field)      { return null; }
@@ -23,7 +23,9 @@ public class BaseModelHandlerTest {
         @Override public Float   getFloat(String field)     { return null; }
         @Override public Double  getDouble(String field)    { return null; }
         @Override public byte[]  getbyteArray(String field) { return null; }
+    }
 
+    public class RWModelHandler extends ROModelHandler implements WritableModelHandler {
         @Override public void set(String field, String value)  {}
         @Override public void set(String field, Boolean value) {}
         @Override public void set(String field, Byte value)    {}
@@ -49,45 +51,59 @@ public class BaseModelHandlerTest {
 
     private static interface BadInterface {}
 
-    private TestModelHandler proxy;
+    private RWModelHandler proxy;
 
     @Before
     public void mockProxy() {
-        proxy = new TestModelHandler();
+        proxy = new RWModelHandler();
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void shouldNotHandleUnannotatedInterfaces() {
-        BaseModelHandler.newModelInstance(BadInterface.class, proxy);
+        ModelHandler.newModelInstance(BadInterface.class, proxy);
     }
 
     @Test(expected = UnsupportedOperationException.class)
     public void shouldNotHandleUnsupportedMethods() {
-        TestModel model = BaseModelHandler.newModelInstance(TestModel.class, proxy);
+        TestModel model = ModelHandler.newModelInstance(TestModel.class, proxy);
         model.badMethod();
     }
 
     @Test
     public void shouldForwardGetterMethodsToProperGetter() {
-        TestModelHandler mock = spy(proxy);
-        TestModel model = BaseModelHandler.newModelInstance(TestModel.class, mock);
+        RWModelHandler mock = spy(proxy);
+        TestModel model = ModelHandler.newModelInstance(TestModel.class, mock);
         model.getInt();
         verify(mock).getInteger(TestModel.INT);
     }
 
     @Test
     public void shouldForwardSetterMethodsToSet() {
-        TestModelHandler mock = spy(proxy);
-        TestModel model = BaseModelHandler.newModelInstance(TestModel.class, mock);
+        RWModelHandler mock = spy(proxy);
+        TestModel model = ModelHandler.newModelInstance(TestModel.class, mock);
         model.setInt(42);
         verify(mock).set(TestModel.INT, 42);
     }
 
     @Test
     public void testGetGetterName() throws Throwable {
-        assertThat(BaseModelHandler.getGetterName(String.class), is("getString"));
-        assertThat(BaseModelHandler.getGetterName(byte[].class), is("getbyteArray"));
-        assertThat(BaseModelHandler.getGetterName(TestModelHandler.class), is("getTestModelHandler"));
+        assertThat(ModelHandler.getGetterName(String.class), is("getString"));
+        assertThat(ModelHandler.getGetterName(byte[].class), is("getbyteArray"));
+        assertThat(ModelHandler.getGetterName(RWModelHandler.class), is("getRWModelHandler"));
+    }
+
+    @Test
+    public void testIsReadable() {
+        assertThat(new ModelHandler().isReadable(), is(false));
+        assertThat(new ROModelHandler().isReadable(), is(true));
+        assertThat(new RWModelHandler().isReadable(), is(true));
+    }
+
+    @Test
+    public void testIsWritable() {
+        assertThat(new ModelHandler().isWritable(), is(false));
+        assertThat(new ROModelHandler().isWritable(), is(false));
+        assertThat(new RWModelHandler().isWritable(), is(true));
     }
 
 }

@@ -2,7 +2,8 @@ package net.xaethos.lib.activeprovider.models;
 
 import android.content.ContentValues;
 
-public class ValuesModelHandler extends BaseModelHandler {
+public class ValuesModelHandler extends ModelHandler
+implements ReadableModelHandler, WritableModelHandler {
 
     private final ContentValues mContent;
 
