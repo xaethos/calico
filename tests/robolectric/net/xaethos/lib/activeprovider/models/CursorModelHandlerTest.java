@@ -31,11 +31,6 @@ public class CursorModelHandlerTest {
         assertThat(handler.getCursor(), is(sameInstance(cursor)));
     }
 
-    @Test(expected = UnsupportedOperationException.class)
-    public void getShouldBalkAtUnhandledTypes() {
-        handler.get("anything", Cursor.class);
-    }
-
     @Test
     public void testGetString() throws Exception {
         when(cursor.getString(1)).thenReturn("foo");
@@ -45,17 +40,6 @@ public class CursorModelHandlerTest {
     public void testSetString() throws Exception {
         model.setFoo("foo");
         assertThat(model.getFoo(), is("foo"));
-    }
-
-    @Test
-    public void testGetInteger() throws Exception {
-        when(cursor.getInt(1)).thenReturn(25);
-        assertThat(model.getInt(), is(25));
-    }
-    @Test(expected = UnsupportedOperationException.class)
-    public void testSetInteger() throws Exception {
-        model.setInt(25);
-        assertThat(model.getInt(), is(25));
     }
 
     @Test
@@ -70,6 +54,17 @@ public class CursorModelHandlerTest {
     }
 
     @Test
+    public void testGetByte() throws Exception {
+        when(cursor.getShort(1)).thenReturn((short)7);
+        assertThat(model.getByte(), is((byte) 7));
+    }
+    @Test(expected = UnsupportedOperationException.class)
+    public void testSetByte() throws Exception {
+        model.setByte((byte) 7);
+        assertThat(model.getByte(), is((byte) 7));
+    }
+
+    @Test
     public void testGetShort() throws Exception {
         when(cursor.getShort(1)).thenReturn((short)8);
         assertThat(model.getShort(), is((short)8));
@@ -78,6 +73,17 @@ public class CursorModelHandlerTest {
     public void testSetShort() throws Exception {
         model.setShort((short) 8);
         assertThat(model.getShort(), is((short) 8));
+    }
+
+    @Test
+    public void testGetInteger() throws Exception {
+        when(cursor.getInt(1)).thenReturn(25);
+        assertThat(model.getInt(), is(25));
+    }
+    @Test(expected = UnsupportedOperationException.class)
+    public void testSetInteger() throws Exception {
+        model.setInt(25);
+        assertThat(model.getInt(), is(25));
     }
 
     @Test

@@ -14,26 +14,26 @@ public class CursorModelHandler extends BaseModelHandler {
         return mCursor;
     }
 
-    @Override
-    public Object get(String field, Class<?> type) {
-        Cursor cursor = mCursor;
-        int index = cursor.getColumnIndexOrThrow(field);
+    @Override public String  getString(String field)    { Cursor c = mCursor; int i = c.getColumnIndexOrThrow(field); return c.isNull(i)?null:c.getString(i); }
+    @Override public Boolean getBoolean(String field)   { Cursor c = mCursor; int i = c.getColumnIndexOrThrow(field); return c.isNull(i)?null:c.getInt(i) != 0; }
+    @Override public Byte    getByte(String field)      { Cursor c = mCursor; int i = c.getColumnIndexOrThrow(field); return c.isNull(i)?null:(byte)c.getShort(i); }
+    @Override public Short   getShort(String field)     { Cursor c = mCursor; int i = c.getColumnIndexOrThrow(field); return c.isNull(i)?null:c.getShort (i); }
+    @Override public Integer getInteger(String field)   { Cursor c = mCursor; int i = c.getColumnIndexOrThrow(field); return c.isNull(i)?null:c.getInt   (i); }
+    @Override public Long    getLong(String field)      { Cursor c = mCursor; int i = c.getColumnIndexOrThrow(field); return c.isNull(i)?null:c.getLong  (i); }
+    @Override public Float   getFloat(String field)     { Cursor c = mCursor; int i = c.getColumnIndexOrThrow(field); return c.isNull(i)?null:c.getFloat (i); }
+    @Override public Double  getDouble(String field)    { Cursor c = mCursor; int i = c.getColumnIndexOrThrow(field); return c.isNull(i)?null:c.getDouble(i); }
+    @Override public byte[]  getbyteArray(String field) { Cursor c = mCursor; int i = c.getColumnIndexOrThrow(field); return c.isNull(i)?null:c.getBlob  (i); }
 
-        if (type.isAssignableFrom(Long.class))    return cursor.getLong(index);
-        if (type.isAssignableFrom(String.class))  return cursor.getString(index);
-        if (type.isAssignableFrom(Integer.class)) return cursor.getInt(index);
-        if (type.isAssignableFrom(Boolean.class)) return cursor.getInt(index) != 0;
-        if (type.isAssignableFrom(byte[].class))  return cursor.getBlob(index);
-        if (type.isAssignableFrom(Float.class))   return cursor.getFloat(index);
-        if (type.isAssignableFrom(Double.class))  return cursor.getDouble(index);
-        if (type.isAssignableFrom(Short.class))   return cursor.getShort(index);
+    @Override public void set(String field, String value)  { throw new UnsupportedOperationException(); }
+    @Override public void set(String field, Boolean value) { throw new UnsupportedOperationException(); }
+    @Override public void set(String field, Byte value)    { throw new UnsupportedOperationException(); }
+    @Override public void set(String field, Short value)   { throw new UnsupportedOperationException(); }
+    @Override public void set(String field, Integer value) { throw new UnsupportedOperationException(); }
+    @Override public void set(String field, Long value)    { throw new UnsupportedOperationException(); }
+    @Override public void set(String field, Float value)   { throw new UnsupportedOperationException(); }
+    @Override public void set(String field, Double value)  { throw new UnsupportedOperationException(); }
+    @Override public void set(String field, byte[] value)  { throw new UnsupportedOperationException(); }
 
-        throw new UnsupportedOperationException("Cannot handle type " + type.getSimpleName());
-    }
-
-    @Override
-    public void set(String field, Object value) {
-        throw new UnsupportedOperationException();
-    }
+    @Override public void setNull(String field) {}
 
 }
