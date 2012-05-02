@@ -14,8 +14,8 @@ import com.xtremelabs.robolectric.Robolectric;
 import com.xtremelabs.robolectric.RobolectricTestRunner;
 import com.xtremelabs.robolectric.shadows.ShadowContentResolver;
 import com.xtremelabs.robolectric.shadows.ShadowSQLiteCursor;
-import net.xaethos.lib.activeprovider.annotations.Model;
-import net.xaethos.lib.activeprovider.annotations.Provider;
+import net.xaethos.lib.activeprovider.annotations.ModelInfo;
+import net.xaethos.lib.activeprovider.annotations.ProviderInfo;
 import net.xaethos.lib.activeprovider.models.ModelManager;
 import org.junit.Before;
 import org.junit.Test;
@@ -42,7 +42,7 @@ public class ActiveProviderTest {
 	ContentResolver resolver;
 	ShadowContentResolver resolverShadow;
 
-    Model dataInfo;
+    ModelInfo dataInfo;
     Uri dirUri;
     Uri itemUri;
 
@@ -55,7 +55,7 @@ public class ActiveProviderTest {
 	}
 
     @Before public void getModelInfo() {
-        dataInfo = Data.class.getAnnotation(Model.class);
+        dataInfo = Data.class.getAnnotation(ModelInfo.class);
 
         String authority = dataInfo.authority();
         String tableName = dataInfo.tableName();
@@ -77,14 +77,14 @@ public class ActiveProviderTest {
 
     @Test public void canGetProviderInfo() {
         assertThat(provider.getProviderInfo(),
-                is(DataProvider.class.getAnnotation(Provider.class)));
+                is(DataProvider.class.getAnnotation(ProviderInfo.class)));
     }
 
     @Test public void canGetModels() {
-        Model[] models = provider.getModels();
+        ModelInfo[] models = provider.getModels();
         assertThat(models.length, is(1));
         assertThat(models[0],
-                is(provider.getProviderInfo().models()[0].getAnnotation(Model.class)));
+                is(provider.getProviderInfo().models()[0].getAnnotation(ModelInfo.class)));
     }
 
 	@Test public void canMatchUris() {

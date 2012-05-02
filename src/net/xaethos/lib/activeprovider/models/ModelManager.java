@@ -1,7 +1,7 @@
 package net.xaethos.lib.activeprovider.models;
 
 import android.net.Uri;
-import net.xaethos.lib.activeprovider.annotations.Model;
+import net.xaethos.lib.activeprovider.annotations.ModelInfo;
 
 public class ModelManager {
 
@@ -13,18 +13,18 @@ public class ModelManager {
     /////////////// Static methods ///////////////
 
     public static boolean isModelInterface(Class<?> modelType) {
-        return modelType.isInterface() && modelType.isAnnotationPresent(Model.class);
+        return modelType.isInterface() && modelType.isAnnotationPresent(ModelInfo.class);
     }
 
-    public static Model getModelInfo(Class<?> modelType) {
+    public static ModelInfo getModelInfo(Class<?> modelType) {
         if (!isModelInterface(modelType)) {
             throw new IllegalArgumentException(
-                    modelType.getName() + "must be an interface with the annotation @" + Model.class.getSimpleName());
+                    modelType.getName() + "must be an interface with the annotation @" + ModelInfo.class.getSimpleName());
         }
-        return modelType.getAnnotation(Model.class);
+        return modelType.getAnnotation(ModelInfo.class);
     }
 
-    public static Uri getContentUri(Model model) {
+    public static Uri getContentUri(ModelInfo model) {
         return new Uri.Builder()
                 .scheme("content")
                 .authority(model.authority())
@@ -33,10 +33,10 @@ public class ModelManager {
     }
 
     public static Uri getContentUri(Class<?> modelType) {
-        return getContentUri(modelType.getAnnotation(Model.class));
+        return getContentUri(modelType.getAnnotation(ModelInfo.class));
     }
 
-    public static String getContentDirType(Model model) {
+    public static String getContentDirType(ModelInfo model) {
         return MIME_BASE_DIR + model.contentType();
     }
 
@@ -44,7 +44,7 @@ public class ModelManager {
         return getContentDirType(getModelInfo(modelInterface));
     }
 
-    public static String getContentItemType(Model model) {
+    public static String getContentItemType(ModelInfo model) {
         return MIME_BASE_ITEM + model.contentType();
     }
 

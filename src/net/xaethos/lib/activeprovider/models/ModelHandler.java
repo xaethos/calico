@@ -1,7 +1,7 @@
 package net.xaethos.lib.activeprovider.models;
 
 import net.xaethos.lib.activeprovider.annotations.Getter;
-import net.xaethos.lib.activeprovider.annotations.Model;
+import net.xaethos.lib.activeprovider.annotations.ModelInfo;
 import net.xaethos.lib.activeprovider.annotations.Setter;
 
 import java.lang.reflect.*;
@@ -9,8 +9,9 @@ import java.lang.reflect.*;
 public class ModelHandler implements InvocationHandler {
 
     protected static <T> T newModelInstance(Class<T> modelType, ModelHandler handler) {
-        if (!modelType.isAnnotationPresent(Model.class)) {
-            throw new IllegalArgumentException("model interface must have the Model annotation");
+        if (!modelType.isAnnotationPresent(ModelInfo.class)) {
+            throw new IllegalArgumentException(
+                    "model interface must have the annotation @" + ModelInfo.class.getSimpleName());
         }
 
         return modelType.cast(Proxy.newProxyInstance(modelType.getClassLoader(),

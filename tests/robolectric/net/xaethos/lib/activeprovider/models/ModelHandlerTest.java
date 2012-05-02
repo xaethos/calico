@@ -1,7 +1,7 @@
 package net.xaethos.lib.activeprovider.models;
 
 import net.xaethos.lib.activeprovider.annotations.Getter;
-import net.xaethos.lib.activeprovider.annotations.Model;
+import net.xaethos.lib.activeprovider.annotations.ModelInfo;
 import net.xaethos.lib.activeprovider.annotations.Setter;
 import org.junit.Before;
 import org.junit.Test;
@@ -44,7 +44,7 @@ public class ModelHandlerTest {
 
     }
 
-    @Model(authority = "com.example.content", tableName = "table", contentType = "vnd.example.table")
+    @ModelInfo(authority = "com.example.content", tableName = "table", contentType = "vnd.example.table")
     private static interface TestModel {
         public Integer badMethod();
 

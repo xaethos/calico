@@ -2,12 +2,12 @@ package com.example.fixtures;
 
 
 import net.xaethos.lib.activeprovider.annotations.Getter;
-import net.xaethos.lib.activeprovider.annotations.Model;
+import net.xaethos.lib.activeprovider.annotations.ModelInfo;
 import net.xaethos.lib.activeprovider.annotations.Setter;
 
 import java.util.Date;
 
-@Model(
+@ModelInfo(
         authority   = "com.example",
         tableName   = "data",
         contentType = "vnd.example.data"

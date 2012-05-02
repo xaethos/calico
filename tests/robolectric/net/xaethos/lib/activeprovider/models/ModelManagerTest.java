@@ -3,7 +3,7 @@ package net.xaethos.lib.activeprovider.models;
 import android.net.Uri;
 import com.example.fixtures.Data;
 import com.xtremelabs.robolectric.RobolectricTestRunner;
-import net.xaethos.lib.activeprovider.annotations.Model;
+import net.xaethos.lib.activeprovider.annotations.ModelInfo;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -15,7 +15,7 @@ public class ModelManagerTest {
 
     private interface NotAModel {}
 
-    @Model(authority = "", contentType = "", tableName = "")
+    @ModelInfo(authority = "", contentType = "", tableName = "")
     private class NotAnInterface {}
 
     @Test
@@ -29,7 +29,7 @@ public class ModelManagerTest {
     @Test
     public void testGetModelInfo() {
         assertThat(ModelManager.getModelInfo(Data.class),
-                is(Data.class.getAnnotation(Model.class)));
+                is(Data.class.getAnnotation(ModelInfo.class)));
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -40,21 +40,21 @@ public class ModelManagerTest {
     @Test
     public void testGetContentUri() throws Exception {
         Uri uri = Uri.parse("content://com.example/data");
-        assertThat(ModelManager.getContentUri(Data.class.getAnnotation(Model.class)), is(uri));
+        assertThat(ModelManager.getContentUri(Data.class.getAnnotation(ModelInfo.class)), is(uri));
         assertThat(ModelManager.getContentUri(Data.class), is(uri));
     }
 
     @Test
     public void testGetContentDirType() {
         String mimeType = "vnd.android.cursor.dir/vnd.example.data";
-        assertThat(ModelManager.getContentDirType(Data.class.getAnnotation(Model.class)), is(mimeType));
+        assertThat(ModelManager.getContentDirType(Data.class.getAnnotation(ModelInfo.class)), is(mimeType));
         assertThat(ModelManager.getContentDirType(Data.class), is(mimeType));
     }
 
     @Test
     public void testGetContentItemType() {
         String mimeType = "vnd.android.cursor.item/vnd.example.data";
-        assertThat(ModelManager.getContentItemType(Data.class.getAnnotation(Model.class)), is(mimeType));
+        assertThat(ModelManager.getContentItemType(Data.class.getAnnotation(ModelInfo.class)), is(mimeType));
         assertThat(ModelManager.getContentItemType(Data.class), is(mimeType));
     }
 
