@@ -4,6 +4,7 @@ package com.example.fixtures;
 import net.xaethos.lib.activeprovider.annotations.Getter;
 import net.xaethos.lib.activeprovider.annotations.ModelInfo;
 import net.xaethos.lib.activeprovider.annotations.Setter;
+import net.xaethos.lib.activeprovider.models.Model;
 
 import java.util.Date;
 
@@ -12,10 +13,8 @@ import java.util.Date;
         tableName   = "data",
         contentType = "vnd.example.data"
 )
-public interface Data {
-//    public static final String ID         = BaseColumns._ID;
-    public static final String FOO        = "foo";
-    public static final String BAR        = "bar";
+public interface Data extends Model {
+    public static final String STRING     = "string";
     public static final String BOOL       = "bool";
     public static final String BYTE       = "byte";
     public static final String SHORT      = "short";
@@ -25,16 +24,9 @@ public interface Data {
     public static final String DOUBLE     = "double";
     public static final String DATA       = "data";
     public static final String DATE       = "timestamp";
-    public static final String CREATED_AT = "created_at";
-//    public static final String UPDATED_AT = "updated_at";
 
-//    @Getter(ID) public Long getId();
-
-    @Getter(FOO) public String getFoo();
-    @Setter(FOO) public void setFoo(String value);
-
-//    @Getter(BAR) public String getBar();
-//    @Setter(BAR) public void setBar(String value);
+    @Getter(STRING) public String getString();
+    @Setter(STRING) public void setString(String value);
 
     @Getter(BOOL) public Boolean getBool();
     @Setter(BOOL) public void setBool(Boolean value);
@@ -63,6 +55,4 @@ public interface Data {
     @Getter(DATE) public Date getTimestamp();
     @Setter(DATE) public void setTimestamp(Date value);
 
-//    @Getter(CREATED_AT) public Date getCreatedAt();
-//    @Getter(UPDATED_AT) public Date getUpdatedAt();
 }

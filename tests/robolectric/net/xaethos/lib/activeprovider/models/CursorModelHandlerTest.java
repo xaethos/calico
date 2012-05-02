@@ -36,7 +36,7 @@ public class CursorModelHandlerTest {
     @Test
     public void testGetString() throws Exception {
         when(cursor.getString(1)).thenReturn("foo");
-        assertThat(model.getFoo(), is("foo"));
+        assertThat(model.getString(), is("foo"));
     }
 
     @Test
@@ -47,7 +47,7 @@ public class CursorModelHandlerTest {
 
     @Test
     public void testGetByte() throws Exception {
-        when(cursor.getShort(1)).thenReturn((short)7);
+        when(cursor.getShort(1)).thenReturn((short) 7);
         assertThat(model.getByte(), is((byte) 7));
     }
 

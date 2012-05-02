@@ -13,17 +13,22 @@ import static org.junit.Assert.assertThat;
 @RunWith(RobolectricTestRunner.class)
 public class ModelManagerTest {
 
-    private interface NotAModel {}
+    private interface NotAnnotated extends Model {}
 
     @ModelInfo(authority = "", contentType = "", tableName = "")
-    private class NotAnInterface {}
+    private abstract class NotAnInterface implements Model {}
+
+    @ModelInfo(authority = "", contentType = "", tableName = "")
+    private interface NotExtendingModel {}
+
 
     @Test
     public void testIsModelInterface() {
         assertThat(ModelManager.isModelInterface(Data.class), is(true));
 
-        assertThat(ModelManager.isModelInterface(NotAModel.class), is(false));
+        assertThat(ModelManager.isModelInterface(NotAnnotated.class), is(false));
         assertThat(ModelManager.isModelInterface(NotAnInterface.class), is(false));
+        assertThat(ModelManager.isModelInterface(NotExtendingModel.class), is(false));
     }
 
     @Test
@@ -34,7 +39,7 @@ public class ModelManagerTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void getModelInfoShouldThrowException() {
-        ModelManager.getModelInfo(NotAModel.class);
+        ModelManager.getModelInfo(NotAnnotated.class);
     }
 
     @Test

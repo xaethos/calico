@@ -28,24 +28,24 @@ public class ValuesModelHandlerTest {
     @Test
     public void shouldBeAbleToGetValuesFromSeededContent() {
         ContentValues values = new ContentValues(1);
-        values.put(Data.FOO, "foo");
+        values.put(Data.STRING, "foo");
         model = ValuesModelHandler.newModelInstance(Data.class, new ValuesModelHandler(values));
 
-        assertThat(model.getFoo(), is("foo"));
+        assertThat(model.getString(), is("foo"));
 
-        values.put(Data.FOO, "bar");
-        assertThat(model.getFoo(), is("foo"));
+        values.put(Data.STRING, "bar");
+        assertThat(model.getString(), is("foo"));
     }
 
     @Test
     public void testGetString() throws Exception {
-        values.put(Data.FOO, "foo");
-        assertThat(model.getFoo(), is("foo"));
+        values.put(Data.STRING, "foo");
+        assertThat(model.getString(), is("foo"));
     }
     @Test
     public void testSetString() throws Exception {
-        model.setFoo("foo");
-        assertThat(model.getFoo(), is("foo"));
+        model.setString("foo");
+        assertThat(model.getString(), is("foo"));
     }
 
     @Test
