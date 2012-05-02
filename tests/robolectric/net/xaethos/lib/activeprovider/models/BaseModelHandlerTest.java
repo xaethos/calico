@@ -11,7 +11,7 @@ import static org.mockito.Mockito.verify;
 
 public class BaseModelHandlerTest {
 
-    private static class TestModelHandler extends BaseModelHandler {
+    public static class TestModelHandler extends BaseModelHandler {
         @Override
         public Object get(String field, Class<?> cls) {
             return null;
@@ -22,7 +22,7 @@ public class BaseModelHandlerTest {
         }
     }
 
-    @Model
+    @Model(authority = "com.example.content", tableName = "table", contentType = "vnd.example.table")
     private static interface TestModel {
         public Integer badMethod();
 

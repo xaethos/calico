@@ -7,8 +7,6 @@ import java.lang.annotation.Target;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
-public @interface Model {
-    String tableName();
-    String authority();
-    String contentType();
+public @interface Provider {
+    Class<?>[] models();
 }

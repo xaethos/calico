@@ -16,7 +16,7 @@ import static org.mockito.Mockito.when;
 
 public class CursorModelHandlerTest {
 
-    @Model
+    @Model(authority = "", contentType = "", tableName = "")
     private static interface TestModel {
         public static final String STRING  = "string";
         public static final String INTEGER = "integer";

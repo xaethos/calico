@@ -12,7 +12,7 @@ import static org.junit.Assert.assertThat;
 
 public class HashModelHandlerTest {
 
-    @Model
+    @Model(authority = "", contentType = "", tableName = "")
     private static interface TestModel {
 
         public static final String NAME = "name";
