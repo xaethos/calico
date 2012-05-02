@@ -7,8 +7,8 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.net.Uri;
 import android.provider.BaseColumns;
 import android.text.TextUtils;
-import net.xaethos.lib.activeprovider.annotations.Model;
-import net.xaethos.lib.activeprovider.annotations.Provider;
+import net.xaethos.lib.activeprovider.annotations.ModelInfo;
+import net.xaethos.lib.activeprovider.annotations.ProviderInfo;
 import net.xaethos.lib.activeprovider.models.ModelManager;
 
 import java.util.HashMap;
@@ -75,12 +75,12 @@ public abstract class ActiveProvider extends ContentProvider {
 
 	/////////////// Instance fields ///////////////
 
-    private Provider mInfo;
-    private Model[] mModels;
+    private ProviderInfo mInfo;
+    private ModelInfo[] mModels;
 
     protected DBHelper mDBHelper;
 	protected UriMatcher mUriMatcher;
-    protected HashMap<Model,HashMap<String,String>> mProjectionMaps;
+    protected HashMap<ModelInfo,HashMap<String,String>> mProjectionMaps;
 
 	/////////////// Instance methods ///////////////
 
@@ -99,23 +99,23 @@ public abstract class ActiveProvider extends ContentProvider {
         return 1;
 	}
 
-    public Provider getProviderInfo() {
+    public ProviderInfo getProviderInfo() {
         if (mInfo == null) {
             Class<? extends ActiveProvider> cls = this.getClass();
-            if (!cls.isAnnotationPresent(Provider.class)) {
+            if (!cls.isAnnotationPresent(ProviderInfo.class)) {
                 throw new IllegalArgumentException(
-                        cls.getName() + " is not annotated as @" + Provider.class.getSimpleName());
+                        cls.getName() + " is not annotated as @" + ProviderInfo.class.getSimpleName());
             }
-            mInfo = cls.getAnnotation(Provider.class);
+            mInfo = cls.getAnnotation(ProviderInfo.class);
         }
 
         return mInfo;
     }
 
-    public Model[] getModels() {
+    public ModelInfo[] getModels() {
         if (mModels == null) {
             Class<?>[] modelInterfaces = getProviderInfo().models();
-            Model[] models = new Model[modelInterfaces.length];
+            ModelInfo[] models = new ModelInfo[modelInterfaces.length];
             for (int i=0; i<modelInterfaces.length; ++i) {
                 models[i] = ModelManager.getModelInfo(modelInterfaces[i]);
             }
@@ -129,12 +129,12 @@ public abstract class ActiveProvider extends ContentProvider {
 	@Override
 	public boolean onCreate() {
 		mUriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
-        mProjectionMaps = new HashMap<Model, HashMap<String, String>>();
+        mProjectionMaps = new HashMap<ModelInfo, HashMap<String, String>>();
 
 		int i = 0;
 		String authority;
 		String table;
-		for (Model model : getModels()) {
+		for (ModelInfo model : getModels()) {
 			authority = model.authority();
 			table = model.tableName();
 			mUriMatcher.addURI(authority, table, i++);
@@ -148,7 +148,7 @@ public abstract class ActiveProvider extends ContentProvider {
 	@Override
 	public String getType(Uri uri) {
 		int match = mUriMatcher.match(uri);
-		Model model = modelFromUriMatch(match);
+		ModelInfo model = modelFromUriMatch(match);
 
 		if (isItemUri(match)) {
             return ModelManager.getContentItemType(model);
@@ -162,7 +162,7 @@ public abstract class ActiveProvider extends ContentProvider {
 	public Cursor query(Uri uri, String[] projection, String selection,
 			String[] selectionArgs, String sortOrder) {
 		int match = mUriMatcher.match(uri);
-		Model model = modelFromUriMatch(match);
+		ModelInfo model = modelFromUriMatch(match);
 
 		if (isItemUri(match)) {
 			selection = prependIdConstraint(uri, selection);
@@ -199,7 +199,7 @@ public abstract class ActiveProvider extends ContentProvider {
 			throw new IllegalArgumentException("Cannot insert to item URI: " + uri);
 		}
 
-		Model model = modelFromUriMatch(match);
+		ModelInfo model = modelFromUriMatch(match);
 		SQLiteDatabase db = mDBHelper.getWritableDatabase();
 
 		long id = db.insert(model.tableName(), null, values);
@@ -212,7 +212,7 @@ public abstract class ActiveProvider extends ContentProvider {
 	@Override
 	public int update(Uri uri, ContentValues values,
 			String selection, String[] selectionArgs) {
-		Model model = modelFromUriMatch(mUriMatcher.match(uri));
+		ModelInfo model = modelFromUriMatch(mUriMatcher.match(uri));
 		SQLiteDatabase db = mDBHelper.getWritableDatabase();
 
 		if (isItemUri(mUriMatcher.match(uri))) {
@@ -228,7 +228,7 @@ public abstract class ActiveProvider extends ContentProvider {
 
 	@Override
 	public int delete(Uri uri, String selection, String[] selectionArgs) {
-		Model model = modelFromUriMatch(mUriMatcher.match(uri));
+		ModelInfo model = modelFromUriMatch(mUriMatcher.match(uri));
 		SQLiteDatabase db = mDBHelper.getWritableDatabase();
 
 		if (isItemUri(mUriMatcher.match(uri))) {
@@ -244,8 +244,8 @@ public abstract class ActiveProvider extends ContentProvider {
 
 	///// Helper methods
 
-	private Model modelFromUriMatch(int match) {
-		Model[] models = getModels();
+	private ModelInfo modelFromUriMatch(int match) {
+		ModelInfo[] models = getModels();
 		int index = match / 2;
 		if (match < 0 || index >= models.length) {
 			throw new IllegalArgumentException("Invalid match: " + match);
@@ -253,7 +253,7 @@ public abstract class ActiveProvider extends ContentProvider {
 		return models[index];
 	}
 
-    private HashMap<String,String> getProjectionMap(Model model) {
+    private HashMap<String,String> getProjectionMap(ModelInfo model) {
         if (!mProjectionMaps.containsKey(model)) {
             String tableName = model.tableName();
             validateSQLNameOrThrow(tableName);
