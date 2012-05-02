@@ -1,5 +1,7 @@
 package net.xaethos.lib.activeprovider.models;
 
+import java.util.Date;
+
 @SuppressWarnings("UnusedDeclaration")
 public interface WritableModelHandler {
 
@@ -12,6 +14,7 @@ public interface WritableModelHandler {
     public abstract void set(String field, Double value);
     public abstract void set(String field, Boolean value);
     public abstract void set(String field, byte[] value);
+    public abstract void set(String field, Date value);
 
     public abstract void setNull(String field);
 

@@ -5,6 +5,8 @@ import net.xaethos.lib.activeprovider.annotations.Getter;
 import net.xaethos.lib.activeprovider.annotations.Model;
 import net.xaethos.lib.activeprovider.annotations.Setter;
 
+import java.util.Date;
+
 @Model(
         authority   = "com.example",
         tableName   = "data",
@@ -22,6 +24,7 @@ public interface Data {
     public static final String FLOAT      = "float";
     public static final String DOUBLE     = "double";
     public static final String DATA       = "data";
+    public static final String DATE       = "timestamp";
     public static final String CREATED_AT = "created_at";
 //    public static final String UPDATED_AT = "updated_at";
 
@@ -57,6 +60,9 @@ public interface Data {
     @Getter(DATA) public byte[] getData();
     @Setter(DATA) public void setData(byte[] value);
 
-//    @Getter(CREATED_AT) public Long getCreatedAt();
-//    @Getter(UPDATED_AT) public Long getUpdatedAt();
+    @Getter(DATE) public Date getTimestamp();
+    @Setter(DATE) public void setTimestamp(Date value);
+
+//    @Getter(CREATED_AT) public Date getCreatedAt();
+//    @Getter(UPDATED_AT) public Date getUpdatedAt();
 }

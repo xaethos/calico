@@ -6,6 +6,8 @@ import net.xaethos.lib.activeprovider.annotations.Setter;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.util.Date;
+
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.spy;
@@ -23,6 +25,7 @@ public class ModelHandlerTest {
         @Override public Float   getFloat(String field)     { return null; }
         @Override public Double  getDouble(String field)    { return null; }
         @Override public byte[]  getbyteArray(String field) { return null; }
+        @Override public Date    getDate(String field)      { return null; }
     }
 
     public class RWModelHandler extends ROModelHandler implements WritableModelHandler {
@@ -35,6 +38,7 @@ public class ModelHandlerTest {
         @Override public void set(String field, Float value)   {}
         @Override public void set(String field, Double value)  {}
         @Override public void set(String field, byte[] value)  {}
+        @Override public void set(String field, Date value)  {}
 
         @Override public void setNull(String field) {}
 

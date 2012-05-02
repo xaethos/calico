@@ -1,5 +1,7 @@
 package net.xaethos.lib.activeprovider.models;
 
+import java.util.Date;
+
 @SuppressWarnings("UnusedDeclaration")
 public interface ReadableModelHandler {
 
@@ -12,5 +14,6 @@ public interface ReadableModelHandler {
     public abstract Float   getFloat(String field);
     public abstract Double  getDouble(String field);
     public abstract byte[]  getbyteArray(String field);
+    public abstract Date    getDate(String field);
 
 }
