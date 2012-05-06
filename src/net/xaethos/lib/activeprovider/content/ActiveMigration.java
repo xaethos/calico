@@ -3,7 +3,7 @@ package net.xaethos.lib.activeprovider.content;
 import android.database.sqlite.SQLiteDatabase;
 import android.provider.BaseColumns;
 
-public abstract class Migration {
+public abstract class ActiveMigration {
 
 	/////////////// Inner classes ///////////////
 

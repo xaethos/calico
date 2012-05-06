@@ -1,21 +1,37 @@
 package com.example.fixtures;
 
+import android.database.sqlite.SQLiteDatabase;
 import net.xaethos.lib.activeprovider.annotations.ProviderInfo;
+import net.xaethos.lib.activeprovider.content.ActiveMigration;
 import net.xaethos.lib.activeprovider.content.ActiveProvider;
 
-@ProviderInfo(models = { Data.class })
+@ProviderInfo(
+        databaseName = "test",
+        models = { Data.class },
+        migrations = {
+                DataProvider.Migration1.class,
+                DataProvider.Migration2.class,
+                DataProvider.Migration3.class
+        }
+)
 public class DataProvider extends ActiveProvider {
 
-//	final public ArrayList<Migration> migrations = new ArrayList<Migration>();
+    public static class Migration1 extends ActiveMigration {
+        @Override public boolean onUpgrade(SQLiteDatabase db) {
+            return false;
+        }
+    }
 
-	@Override
-	protected String getDatabaseName() {
-		return "test.db";
-	}
+    public static class Migration2 extends ActiveMigration {
+        @Override public boolean onUpgrade(SQLiteDatabase db) {
+            return false;
+        }
+    }
 
-//	@Override
-//	protected Migration[] getMigrations() {
-//		return migrations.toArray(new Migration[migrations.size()]);
-//	}
+    public static class Migration3 extends ActiveMigration {
+        @Override public boolean onUpgrade(SQLiteDatabase db) {
+            return false;
+        }
+    }
 
 }

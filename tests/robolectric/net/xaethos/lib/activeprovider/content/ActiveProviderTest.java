@@ -3,6 +3,7 @@ package net.xaethos.lib.activeprovider.content;
 import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.ContentValues;
+import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteCursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -27,9 +28,9 @@ import java.util.List;
 import java.util.NoSuchElementException;
 
 import static com.xtremelabs.robolectric.Robolectric.shadowOf;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.not;
+import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.core.IsCollectionContaining.hasItems;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 
 @RunWith(RobolectricTestRunner.class)
@@ -322,36 +323,6 @@ public class ActiveProviderTest {
         assertThat(notifiedUris.get(0).uri, is(uri));
     }
 
-//	@Test public void canInferDatabaseVersionFromMigrationCount() {
-//		DataProvider provider = new DataProvider();
-//		assertThat(provider.migrations.size(), is(0));
-//		assertThat(provider.getDatabaseVersion(), is(1));
-//
-//		provider.migrations.add(new NullMigration());
-//		provider.migrations.add(new NullMigration());
-//		assertThat(provider.getDatabaseVersion(), is(3));
-//	}
-//
-//	@Test public void onUpgradeCallsMigrationOnce() {
-//		SQLiteOpenHelper dbHelper = provider.getDBHelper();
-//		SQLiteDatabase db = dbHelper.getWritableDatabase();
-//		NullMigration mig1to2 = new NullMigration();
-//		NullMigration mig2to3 = new NullMigration();
-//
-//		provider.migrations.add(mig1to2);
-//		dbHelper.onUpgrade(db, 1, 2);
-//		assertThat(mig1to2.didUpgrade, is(true));
-//
-//		mig1to2.didUpgrade = false;
-//		provider.migrations.add(mig2to3);
-//		dbHelper.onUpgrade(db, 2, 3);
-//		assertThat(mig1to2.didUpgrade, is(false));
-//		assertThat(mig2to3.didUpgrade, is(true));
-//	}
-//
-//	//TODO Migration throws proper exceptions
-//	//TODO Migration rolls back on exception
-
 	/////////////// Helpers ///////////////
 
     public void prepareDatabase() {
@@ -425,12 +396,86 @@ public class ActiveProviderTest {
 		};
 	}
 
-//	class NullMigration extends Migration {
-//		public boolean didUpgrade = false;
-//		@Override public boolean onUpgrade(SQLiteDatabase db) {
-//			didUpgrade = true;
-//			return true;
-//		}
-//	}
+    @RunWith(RobolectricTestRunner.class)
+    public static class DBHelper {
+
+        Context context;
+        ProviderInfo info;
+        ActiveProvider.DBHelper helper;
+
+        @Before public void setup() {
+            context = Robolectric.application;
+            info = DataProvider.class.getAnnotation(ProviderInfo.class);
+            helper = new ActiveProvider.DBHelper(context, info);
+        }
+
+        @Test
+        public void onOpen_queriesTableNames() {
+            SQLiteDatabase db = SQLiteDatabase.openDatabase(null, null, 0);
+            db.execSQL("CREATE TABLE foo (bar);");
+
+            assertNull(helper.getTableNames());
+            helper.onOpen(db);
+
+            String[] tableNames = helper.getTableNames();
+            assertThat(tableNames.length, is(1));
+            assertThat(tableNames[0], is("foo"));
+        }
+
+//        @Test
+//        public void TODO onOpen_runsMissingMigrations() {
+//            SQLiteDatabase db = helper.getWritableDatabase();
+//            assertThat(db, is(notNullValue()));
+//        }
+
+        @Test public void onCreate_createsMigrationsTable() {
+            SQLiteDatabase db = SQLiteDatabase.openDatabase(null, null, 0);
+            assertThat(Arrays.asList(ActiveProvider.DBHelper.queryTableNames(db)),
+                    not(hasItem(ActiveProvider.MIGRATIONS_TABLE)));
+            helper.onCreate(db);
+            assertThat(Arrays.asList(ActiveProvider.DBHelper.queryTableNames(db)),
+                    hasItem(ActiveProvider.MIGRATIONS_TABLE));
+        }
+
+        @Test public void queryTableNames() {
+            SQLiteDatabase db = SQLiteDatabase.openDatabase(null, null, 0);
+            db.execSQL("CREATE TABLE foo (bar);");
+
+            String[] tableNames = ActiveProvider.DBHelper.queryTableNames(db);
+            assertThat(tableNames.length, is(1));
+            assertThat(tableNames[0], is("foo"));
+        }
+
+        @Test public void getMissingMigrations() {
+            SQLiteDatabase db = SQLiteDatabase.openDatabase(null, null, 0);
+            setMigrations(db, "Migration2");
+
+            List<ActiveMigration> migrations = helper.getMissingMigrations(db);
+            assertThat(migrations.size(), is(2));
+            assertThat(migrations.get(0), is(instanceOf(DataProvider.Migration1.class)));
+            assertThat(migrations.get(1), is(instanceOf(DataProvider.Migration3.class)));
+        }
+
+        private void setMigrations(SQLiteDatabase db, String... migrations) {
+            db.execSQL("DROP TABLE IF EXISTS " + ActiveProvider.MIGRATIONS_TABLE);
+            helper.onCreate(db);
+            ContentValues values = new ContentValues(1);
+            db.beginTransaction();
+            try {
+                for (String migration : migrations) {
+                    values.put("name", migration);
+                    db.insert(ActiveProvider.MIGRATIONS_TABLE, null, values);
+                }
+                db.setTransactionSuccessful();
+            }
+            finally {
+                db.endTransaction();
+            }
+        }
+
+        //TODO Migration throws proper exceptions
+        //TODO Migration rolls back on exception
+
+    }
 
 }

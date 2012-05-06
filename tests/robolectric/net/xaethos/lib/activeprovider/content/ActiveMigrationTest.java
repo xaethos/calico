@@ -10,7 +10,7 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 
 @RunWith(RobolectricTestRunner.class)
-public class MigrationTest {
+public class ActiveMigrationTest {
 
 	/////////////// Constants ///////////////
 
@@ -35,7 +35,7 @@ public class MigrationTest {
 	/////////////// Tests ///////////////
 
 	@Test public void callsOnUpgrade() {
-		class TestMigration extends Migration {
+		class TestMigration extends ActiveMigration {
 			public boolean onUpgradeCalled;
 			@Override public boolean onUpgrade(SQLiteDatabase db) {
 				onUpgradeCalled = true;
@@ -50,14 +50,14 @@ public class MigrationTest {
 
 	@Test(expected=NullPointerException.class)
 	public void mustHaveADatabase() {
-		new Migration() {
+		new ActiveMigration() {
 			@Override public boolean onUpgrade(SQLiteDatabase db) { return true; }
 		}.upgrade(null);
 	}
 
 	@Test(expected=MigrationException.class)
 	public void balksAtMigrationFailure() {
-		new Migration() {
+		new ActiveMigration() {
 			@Override public boolean onUpgrade(SQLiteDatabase db) { return false; }
 		}.upgrade(db);
 	}
@@ -73,7 +73,7 @@ public class MigrationTest {
 
 	@Test public void canDropTable() throws Exception {
 		createTestTable();
-		new Migration() {
+		new ActiveMigration() {
 			@Override public boolean onUpgrade(SQLiteDatabase db) {
 				dropTable("foo");
 				return true;
@@ -86,7 +86,7 @@ public class MigrationTest {
 
 	@Test public void canRenameTable() throws Exception {
 		createTestTable();
-		new Migration() {
+		new ActiveMigration() {
 			@Override public boolean onUpgrade(SQLiteDatabase db) {
 				renameTable("foo", "bar");
 				return true;
@@ -101,7 +101,7 @@ public class MigrationTest {
 
 	@Test public void canAddColumn() throws Exception {
 		createTestTable();
-		new Migration() {
+		new ActiveMigration() {
 			@Override public boolean onUpgrade(SQLiteDatabase db) {
 				addColumn("foo", Column.text("bar"));
 				return true;
@@ -118,7 +118,7 @@ public class MigrationTest {
 		createTestTable("table", Column.text("name"));
 		insertValues("table", "_id", "1", "name", "Alice");
 
-		new Migration() {
+		new ActiveMigration() {
 			@Override public boolean onUpgrade(SQLiteDatabase db) {
 				addColumn("table", Column.text("surname"));
 				return true;
@@ -139,7 +139,7 @@ public class MigrationTest {
 				Column.text("cat"),
 				Column.text("dog"));
 
-		new Migration() {
+		new ActiveMigration() {
 			@Override public boolean onUpgrade(SQLiteDatabase db) {
 				dropColumn("foo", "bar", "dog");
 				return true;
@@ -172,7 +172,7 @@ TODO remove_column(table_name, column_name):
 	}
 
 	private void createTestTable(final String tableName, final Column...columns) {
-		new Migration() {
+		new ActiveMigration() {
 			@Override public boolean onUpgrade(SQLiteDatabase db) {
 				createTable(tableName, columns);
 				return true;
