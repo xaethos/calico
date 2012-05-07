@@ -4,6 +4,7 @@ import android.content.*;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.database.sqlite.SQLiteStatement;
 import android.net.Uri;
 import android.provider.BaseColumns;
 import android.text.TextUtils;
@@ -11,50 +12,89 @@ import net.xaethos.lib.activeprovider.annotations.ModelInfo;
 import net.xaethos.lib.activeprovider.annotations.ProviderInfo;
 import net.xaethos.lib.activeprovider.models.ModelManager;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.regex.Pattern;
 
 public abstract class ActiveProvider extends ContentProvider {
 
+    protected static final String MIGRATIONS_TABLE = "activeprovider_migrations";
+
     /////////////// Inner classes ///////////////
 
-	public class DBHelper extends SQLiteOpenHelper {
+	public static class DBHelper extends SQLiteOpenHelper {
 
-		public DBHelper(Context context) {
-			super(context, getDatabaseName(), null, getDatabaseVersion());
+        public static String[] queryTableNames(SQLiteDatabase db) {
+            Cursor cursor = db.rawQuery("SELECT name FROM sqlite_master WHERE type='table'", null);
+            String[] tableNames = new String[cursor.getCount()];
+            for (int i=0; i<tableNames.length; ++i) {
+                cursor.moveToPosition(i);
+                tableNames[i] = cursor.getString(0);
+            }
+            cursor.close();
+            return tableNames;
+        }
+
+        private final ProviderInfo mInfo;
+
+        private String[] mTableNames;
+
+		public DBHelper(Context context, ProviderInfo info) {
+            super(context, info.databaseName(), null, 1);
+            mInfo = info;
 		}
 
-		@Override
-		public void onCreate(SQLiteDatabase db) {
-//			for (RecordInfo record : getModels()) {
-//				db.execSQL(record.getSQLiteCreateTable());
-//			}
-		}
+        public String[] getTableNames() {
+            return mTableNames;
+        }
 
-		@Override
-		public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-//			if (oldVersion > newVersion) {
-//				throw new MigrationException("Cannot downgrade database");
-//			}
-//
-//			if (oldVersion < 1) {
-//				throw new IllegalArgumentException("Version code must be greater than 0");
-//			}
-//
-//			Migration[] migrations = getMigrations();
-//
-//			// Version codes are 1-based.
-//			for (int i = oldVersion; i < newVersion; ++i) {
-//				migrations[i-1].onUpgrade(db);
-//			}
-		}
+        @Override
+        public void onCreate(SQLiteDatabase db) {
+            db.execSQL("CREATE TABLE " + MIGRATIONS_TABLE + "(name TEXT)");
+        }
 
-		@SuppressWarnings("unused")
-		public void onDowngrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-			throw new UnsupportedOperationException("ActiveProvider cannot downgrade database");
-		}
+        @Override
+        public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {}
 
-	}
+        @SuppressWarnings("unused")
+        public void onDowngrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+            throw new UnsupportedOperationException("ActiveProvider cannot downgrade database");
+        }
+
+        @Override
+        public void onOpen(SQLiteDatabase db) {
+            super.onOpen(db);
+
+            for (ActiveMigration migration : getMissingMigrations(db)) {
+                migration.upgrade(db);
+            }
+
+            mTableNames = queryTableNames(db);
+        }
+
+        public List<ActiveMigration> getMissingMigrations(SQLiteDatabase db) {
+            SQLiteStatement statement = db.compileStatement(
+                    "SELECT COUNT() FROM " + MIGRATIONS_TABLE + " WHERE name=?");
+            ArrayList<ActiveMigration> missingMigrations = new ArrayList<ActiveMigration>();
+
+            try {
+                for (Class<? extends ActiveMigration> migration : mInfo.migrations()) {
+                    statement.bindString(1, migration.getSimpleName());
+                    if (statement.simpleQueryForLong() == 0) {
+                        missingMigrations.add(migration.newInstance());
+                    }
+                }
+            } catch (InstantiationException e) {
+                throw new MigrationException("Couldn't instantiate migration", e);
+            } catch (IllegalAccessException e) {
+                throw new MigrationException("Couldn't instantiate migration", e);
+            }
+
+            return missingMigrations;
+        }
+
+    }
 
 	/////////////// Static methods ///////////////
 
@@ -84,20 +124,7 @@ public abstract class ActiveProvider extends ContentProvider {
 
 	/////////////// Instance methods ///////////////
 
-	///// Abstract methods
-
-	protected abstract String getDatabaseName();
-
-//	protected abstract Migration[] getMigrations();
-
 	///// Provider info
-
-	public int getDatabaseVersion() {
-//		Migration[] migrations = getMigrations();
-//		if (migrations == null) return 1;
-//		return migrations.length + 1;
-        return 1;
-	}
 
     public ProviderInfo getProviderInfo() {
         if (mInfo == null) {
@@ -141,7 +168,7 @@ public abstract class ActiveProvider extends ContentProvider {
 			mUriMatcher.addURI(authority, table + "/#", i++);
 		}
 
-		mDBHelper = new DBHelper(getContext());
+		mDBHelper = new DBHelper(getContext(), getProviderInfo());
 		return true;
     }
 
