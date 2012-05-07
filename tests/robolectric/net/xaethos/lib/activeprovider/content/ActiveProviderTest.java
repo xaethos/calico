@@ -486,9 +486,6 @@ public class ActiveProviderTest {
             }
         }
 
-        //TODO Migration throws proper exceptions
-        //TODO Migration rolls back on exception
-
     }
 
 }

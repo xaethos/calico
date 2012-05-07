@@ -1,13 +1,21 @@
 package net.xaethos.lib.activeprovider.content;
 
 import android.database.sqlite.SQLiteDatabase;
+import com.example.fixtures.DataProvider;
+import com.xtremelabs.robolectric.Robolectric;
 import com.xtremelabs.robolectric.RobolectricTestRunner;
+import net.xaethos.lib.activeprovider.annotations.ProviderInfo;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import static org.hamcrest.CoreMatchers.is;
+import java.util.List;
+
+import static org.hamcrest.CoreMatchers.*;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.*;
 
 @RunWith(RobolectricTestRunner.class)
 public class ActiveMigrationTest {
@@ -25,12 +33,16 @@ public class ActiveMigrationTest {
 	/////////////// Fields ///////////////
 
 	SQLiteDatabase db;
+    ActiveProvider.DBHelper helper;
 
 	/////////////// Set up ///////////////
 
-	@Before public void initDatabase() {
+	@Before public void setup() {
 		db = SQLiteDatabase.openDatabase(null, null, 0);
-	}
+        helper = new ActiveProvider.DBHelper(Robolectric.application,
+                DataProvider.class.getAnnotation(ProviderInfo.class));
+        helper.onCreate(db);
+    }
 
 	/////////////// Tests ///////////////
 
@@ -61,6 +73,51 @@ public class ActiveMigrationTest {
 			@Override public boolean onUpgrade(SQLiteDatabase db) { return false; }
 		}.upgrade(db);
 	}
+
+    @Test
+    public void upgrade_marksMigrationAsApplied() {
+        List<ActiveMigration> migrations = helper.getMissingMigrations(db);
+        assertFalse(migrations.isEmpty());
+        for (ActiveMigration migration : migrations) migration.upgrade(db);
+        assertTrue(helper.getMissingMigrations(db).isEmpty());
+    }
+
+    @Test
+    public void onUpgrade_happensInTransaction() {
+        SQLiteDatabase mockDB = mock(SQLiteDatabase.class);
+        new ActiveMigration() {
+            @Override public boolean onUpgrade(SQLiteDatabase db) {
+                verify(db, times(1)).beginTransaction();
+                verify(db, never()).setTransactionSuccessful();
+                verify(db, never()).endTransaction();
+                return true;
+            }
+        }.upgrade(mockDB);
+
+        verify(mockDB, times(1)).beginTransaction();
+        verify(mockDB, times(1)).setTransactionSuccessful();
+        verify(mockDB, times(1)).endTransaction();
+    }
+
+    @Test
+    public void onUpgrade_rollsBackIfFalse() {
+        SQLiteDatabase mockDB = mock(SQLiteDatabase.class);
+        try {
+        new ActiveMigration() {
+            @Override public boolean onUpgrade(SQLiteDatabase db) {
+                verify(db, times(1)).beginTransaction();
+                verify(db, never()).setTransactionSuccessful();
+                verify(db, never()).endTransaction();
+                return false;
+            }
+        }.upgrade(mockDB);
+        }
+        catch (MigrationException e) {}
+
+        verify(mockDB, times(1)).beginTransaction();
+        verify(mockDB, never()).setTransactionSuccessful();
+        verify(mockDB, times(1)).endTransaction();
+    }
 
     /*
 	@Test public void canCreateTable() throws Exception {

@@ -68,8 +68,17 @@ public abstract class ActiveMigration {
 
 	public void upgrade(SQLiteDatabase db) throws MigrationException {
 		if (db == null) throw new NullPointerException();
-//		mDatabase = db;
-		if (!onUpgrade(db)) throw new MigrationException();
+
+        db.beginTransaction();
+        try {
+            if (!onUpgrade(db)) throw new MigrationException();
+            db.execSQL("INSERT INTO " + ActiveProvider.MIGRATIONS_TABLE + " VALUES (?)",
+                    new String[]{ this.getClass().getSimpleName() });
+            db.setTransactionSuccessful();
+        }
+        finally {
+            db.endTransaction();
+        }
 	}
 
 	///// Migration helpers
