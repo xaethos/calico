@@ -18,19 +18,19 @@ public class DataProvider extends ActiveProvider {
 
     public static class Migration1 extends ActiveMigration {
         @Override public boolean onUpgrade(SQLiteDatabase db) {
-            return false;
+            return true;
         }
     }
 
     public static class Migration2 extends ActiveMigration {
         @Override public boolean onUpgrade(SQLiteDatabase db) {
-            return false;
+            return true;
         }
     }
 
     public static class Migration3 extends ActiveMigration {
         @Override public boolean onUpgrade(SQLiteDatabase db) {
-            return false;
+            return true;
         }
     }
 

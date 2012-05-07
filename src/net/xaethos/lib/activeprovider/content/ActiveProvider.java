@@ -66,6 +66,10 @@ public abstract class ActiveProvider extends ContentProvider {
         public void onOpen(SQLiteDatabase db) {
             super.onOpen(db);
 
+            for (ActiveMigration migration : getMissingMigrations(db)) {
+                migration.upgrade(db);
+            }
+
             mTableNames = queryTableNames(db);
         }
 

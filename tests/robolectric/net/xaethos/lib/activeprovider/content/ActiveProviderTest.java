@@ -32,6 +32,7 @@ import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.core.IsCollectionContaining.hasItems;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
+import static org.mockito.Mockito.*;
 
 @RunWith(RobolectricTestRunner.class)
 public class ActiveProviderTest {
@@ -412,21 +413,33 @@ public class ActiveProviderTest {
         @Test
         public void onOpen_queriesTableNames() {
             SQLiteDatabase db = SQLiteDatabase.openDatabase(null, null, 0);
+            helper.onCreate(db);
             db.execSQL("CREATE TABLE foo (bar);");
 
             assertNull(helper.getTableNames());
             helper.onOpen(db);
 
             String[] tableNames = helper.getTableNames();
-            assertThat(tableNames.length, is(1));
-            assertThat(tableNames[0], is("foo"));
+            assertThat(tableNames.length, is(2));
+            assertThat(Arrays.asList(tableNames),
+                    hasItems("foo", ActiveProvider.MIGRATIONS_TABLE));
         }
 
-//        @Test
-//        public void TODO onOpen_runsMissingMigrations() {
-//            SQLiteDatabase db = helper.getWritableDatabase();
-//            assertThat(db, is(notNullValue()));
-//        }
+        @Test
+        public void onOpen_runsMissingMigrations() {
+            SQLiteDatabase db = SQLiteDatabase.openDatabase(null, null, 0);
+            helper.onCreate(db);
+
+            DataProvider.Migration1 m1 = mock(DataProvider.Migration1.class);
+            DataProvider.Migration2 m2 = mock(DataProvider.Migration2.class);
+
+            ActiveProvider.DBHelper helperSpy = spy(helper);
+            when(helperSpy.getMissingMigrations(db)).thenReturn(Arrays.asList(m1, m2));
+
+            helperSpy.onOpen(db);
+            verify(m1).upgrade(db);
+            verify(m2).upgrade(db);
+        }
 
         @Test public void onCreate_createsMigrationsTable() {
             SQLiteDatabase db = SQLiteDatabase.openDatabase(null, null, 0);
