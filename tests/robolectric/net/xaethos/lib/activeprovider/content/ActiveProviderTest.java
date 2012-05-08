@@ -426,9 +426,9 @@ public class ActiveProviderTest {
         }
 
         @Test
-        public void onOpen_runsMissingMigrations() {
+        public void onUpgrade_runsMissingMigrations() {
             SQLiteDatabase db = SQLiteDatabase.openDatabase(null, null, 0);
-            helper.onCreate(db);
+            ActiveProvider.DBHelper.createMigrationsTable(db);
 
             DataProvider.Migration1 m1 = mock(DataProvider.Migration1.class);
             DataProvider.Migration2 m2 = mock(DataProvider.Migration2.class);
@@ -436,7 +436,7 @@ public class ActiveProviderTest {
             ActiveProvider.DBHelper helperSpy = spy(helper);
             when(helperSpy.getMissingMigrations(db)).thenReturn(Arrays.asList(m1, m2));
 
-            helperSpy.onOpen(db);
+            helperSpy.onUpgrade(db, db.getVersion(), helper.getProviderVersion());
             verify(m1).upgrade(db);
             verify(m2).upgrade(db);
         }
@@ -471,7 +471,8 @@ public class ActiveProviderTest {
 
         private void setMigrations(SQLiteDatabase db, String... migrations) {
             db.execSQL("DROP TABLE IF EXISTS " + ActiveProvider.MIGRATIONS_TABLE);
-            helper.onCreate(db);
+            ActiveProvider.DBHelper.createMigrationsTable(db);
+
             ContentValues values = new ContentValues(1);
             db.beginTransaction();
             try {

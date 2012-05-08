@@ -33,15 +33,12 @@ public class ActiveMigrationTest {
 	/////////////// Fields ///////////////
 
 	SQLiteDatabase db;
-    ActiveProvider.DBHelper helper;
 
 	/////////////// Set up ///////////////
 
 	@Before public void setup() {
 		db = SQLiteDatabase.openDatabase(null, null, 0);
-        helper = new ActiveProvider.DBHelper(Robolectric.application,
-                DataProvider.class.getAnnotation(ProviderInfo.class));
-        helper.onCreate(db);
+        ActiveProvider.DBHelper.createMigrationsTable(db);
     }
 
 	/////////////// Tests ///////////////
@@ -76,6 +73,8 @@ public class ActiveMigrationTest {
 
     @Test
     public void upgrade_marksMigrationAsApplied() {
+        ActiveProvider.DBHelper helper = new ActiveProvider.DBHelper(Robolectric.application,
+                DataProvider.class.getAnnotation(ProviderInfo.class));
         List<ActiveMigration> migrations = helper.getMissingMigrations(db);
         assertFalse(migrations.isEmpty());
         for (ActiveMigration migration : migrations) migration.upgrade(db);

@@ -14,7 +14,7 @@ public class ModelManager {
 
     public static boolean isModelInterface(Class<?> modelType) {
         return modelType.isInterface() &&
-                Model.class.isAssignableFrom(modelType) &&
+                ActiveModel.class.isAssignableFrom(modelType) &&
                 modelType.isAnnotationPresent(ModelInfo.class);
     }
 
