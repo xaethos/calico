@@ -53,7 +53,6 @@ public class ActiveProviderTest {
 	@Before public void instantiateProvider() {
 		provider = new DataProvider();
         provider.onCreate();
-        prepareDatabase();
 	}
 
     @Before public void getModelInfo() {
@@ -326,24 +325,6 @@ public class ActiveProviderTest {
 
 	/////////////// Helpers ///////////////
 
-    public void prepareDatabase() {
-        SQLiteDatabase database = provider.mDBHelper.getWritableDatabase();
-        database.execSQL("CREATE TABLE data (" +
-                "_id INTEGER PRIMARY KEY," +
-                "string TEXT," +
-                "bool INTEGER," +
-                "byte INTEGER," +
-                "short INTEGER," +
-                "int INTEGER," +
-                "long INTEGER," +
-                "float REAL," +
-                "double REAL," +
-                "data BLOB," +
-                "timestamp INTEGER," +
-                "created_at INTEGER," +
-                "updated_at INTEGER);");
-    }
-
 	private long makeSimpleData(ContentValues values) {
 		Uri uri = provider.insert(dirUri, values);
 		return ContentUris.parseId(uri);
@@ -413,16 +394,14 @@ public class ActiveProviderTest {
         @Test
         public void onOpen_queriesTableNames() {
             SQLiteDatabase db = SQLiteDatabase.openDatabase(null, null, 0);
-            helper.onCreate(db);
             db.execSQL("CREATE TABLE foo (bar);");
 
             assertNull(helper.getTableNames());
             helper.onOpen(db);
 
             String[] tableNames = helper.getTableNames();
-            assertThat(tableNames.length, is(2));
-            assertThat(Arrays.asList(tableNames),
-                    hasItems("foo", ActiveProvider.MIGRATIONS_TABLE));
+            assertThat(tableNames.length, is(1));
+            assertThat(tableNames[0], is("foo"));
         }
 
         @Test

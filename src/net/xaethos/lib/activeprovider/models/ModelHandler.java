@@ -8,7 +8,7 @@ import java.lang.reflect.*;
 
 public class ModelHandler implements InvocationHandler {
 
-    protected static <T> T newModelInstance(Class<T> modelType, ModelHandler handler) {
+    public static <T> T newModelInstance(Class<T> modelType, ModelHandler handler) {
         if (!modelType.isAnnotationPresent(ModelInfo.class)) {
             throw new IllegalArgumentException(
                     "model interface must have the annotation @" + ModelInfo.class.getSimpleName());
@@ -50,6 +50,9 @@ public class ModelHandler implements InvocationHandler {
             }
             invokeSetter(method.getAnnotation(Setter.class).value(), args[0], params[0]);
             return null;
+        }
+        if (method.getDeclaringClass() == Object.class) {
+            return method.invoke(this, args);
         }
 
         throw new UnsupportedOperationException("Unhandled method: " + method.getName());
