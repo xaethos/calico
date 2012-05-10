@@ -4,6 +4,7 @@ import android.net.Uri;
 import com.example.fixtures.Data;
 import com.xtremelabs.robolectric.RobolectricTestRunner;
 import net.xaethos.lib.activeprovider.annotations.ModelInfo;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -21,9 +22,13 @@ public class ModelManagerTest {
     @ModelInfo(authority = "", contentType = "", tableName = "")
     private interface NotExtendingModel {}
 
+    ModelInfo dataInfo;
 
-    @Test
-    public void testIsModelInterface() {
+    @Before public void getDataInfo() {
+        dataInfo = Data.class.getAnnotation(ModelInfo.class);
+    }
+
+    @Test public void isModelInterface() {
         assertThat(ModelManager.isModelInterface(Data.class), is(true));
 
         assertThat(ModelManager.isModelInterface(NotAnnotated.class), is(false));
@@ -31,35 +36,31 @@ public class ModelManagerTest {
         assertThat(ModelManager.isModelInterface(NotExtendingModel.class), is(false));
     }
 
-    @Test
-    public void testGetModelInfo() {
+    @Test public void getModelInfo() {
         assertThat(ModelManager.getModelInfo(Data.class),
-                is(Data.class.getAnnotation(ModelInfo.class)));
+                is(dataInfo));
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void getModelInfoShouldThrowException() {
+    public void getModelInfo_shouldThrowException() {
         ModelManager.getModelInfo(NotAnnotated.class);
     }
 
-    @Test
-    public void testGetContentUri() throws Exception {
+    @Test public void getContentUri() throws Exception {
         Uri uri = Uri.parse("content://com.example/data");
-        assertThat(ModelManager.getContentUri(Data.class.getAnnotation(ModelInfo.class)), is(uri));
+        assertThat(ModelManager.getContentUri(dataInfo), is(uri));
         assertThat(ModelManager.getContentUri(Data.class), is(uri));
     }
 
-    @Test
-    public void testGetContentDirType() {
+    @Test public void getContentDirType() {
         String mimeType = "vnd.android.cursor.dir/vnd.example.data";
-        assertThat(ModelManager.getContentDirType(Data.class.getAnnotation(ModelInfo.class)), is(mimeType));
+        assertThat(ModelManager.getContentDirType(dataInfo), is(mimeType));
         assertThat(ModelManager.getContentDirType(Data.class), is(mimeType));
     }
 
-    @Test
-    public void testGetContentItemType() {
+    @Test public void getContentItemType() {
         String mimeType = "vnd.android.cursor.item/vnd.example.data";
-        assertThat(ModelManager.getContentItemType(Data.class.getAnnotation(ModelInfo.class)), is(mimeType));
+        assertThat(ModelManager.getContentItemType(dataInfo), is(mimeType));
         assertThat(ModelManager.getContentItemType(Data.class), is(mimeType));
     }
 
