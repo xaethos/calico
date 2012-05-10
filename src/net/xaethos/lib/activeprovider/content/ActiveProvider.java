@@ -45,7 +45,7 @@ public abstract class ActiveProvider extends ContentProvider {
 
         private String[] mTableNames;
 
-		public DBHelper(Context context, ProviderInfo info) {
+        public DBHelper(Context context, ProviderInfo info) {
             super(context, info.databaseName(), null, info.migrations().length + 1);
             mProviderInfo = info;
             mProviderVersion = info.migrations().length + 1;
@@ -93,10 +93,15 @@ public abstract class ActiveProvider extends ContentProvider {
                         missingMigrations.add(migration.newInstance());
                     }
                 }
-            } catch (InstantiationException e) {
+            }
+            catch (InstantiationException e) {
                 throw new MigrationException("Couldn't instantiate migration", e);
-            } catch (IllegalAccessException e) {
+            }
+            catch (IllegalAccessException e) {
                 throw new MigrationException("Couldn't instantiate migration", e);
+            }
+            finally {
+                statement.close();
             }
 
             return missingMigrations;
