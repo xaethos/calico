@@ -13,10 +13,10 @@ import static org.junit.Assert.assertThat;
 @RunWith(RobolectricTestRunner.class)
 public class ModelManagerTest {
 
-    private interface NotAnnotated extends Model {}
+    private interface NotAnnotated extends ActiveModel {}
 
     @ModelInfo(authority = "", contentType = "", tableName = "")
-    private abstract class NotAnInterface implements Model {}
+    private abstract class NotAnInterface implements ActiveModel {}
 
     @ModelInfo(authority = "", contentType = "", tableName = "")
     private interface NotExtendingModel {}

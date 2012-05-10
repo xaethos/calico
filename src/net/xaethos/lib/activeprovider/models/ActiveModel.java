@@ -6,7 +6,7 @@ import net.xaethos.lib.activeprovider.annotations.Getter;
 import java.util.Date;
 
 @SuppressWarnings("UnusedDeclaration")
-public interface Model {
+public interface ActiveModel {
     public static final String _ID = BaseColumns._ID;
     public static final String _CREATED_AT = "created_at";
     public static final String _UPDATED_AT = "updated_at";

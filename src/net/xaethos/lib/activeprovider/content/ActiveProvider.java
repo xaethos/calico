@@ -25,6 +25,10 @@ public abstract class ActiveProvider extends ContentProvider {
 
 	public static class DBHelper extends SQLiteOpenHelper {
 
+        public static void createMigrationsTable(SQLiteDatabase db) {
+            db.execSQL("CREATE TABLE " + MIGRATIONS_TABLE + "(name TEXT)");
+        }
+
         public static String[] queryTableNames(SQLiteDatabase db) {
             Cursor cursor = db.rawQuery("SELECT name FROM sqlite_master WHERE type='table'", null);
             String[] tableNames = new String[cursor.getCount()];
@@ -36,13 +40,15 @@ public abstract class ActiveProvider extends ContentProvider {
             return tableNames;
         }
 
-        private final ProviderInfo mInfo;
+        private final ProviderInfo mProviderInfo;
+        private final int mProviderVersion;
 
         private String[] mTableNames;
 
 		public DBHelper(Context context, ProviderInfo info) {
-            super(context, info.databaseName(), null, 1);
-            mInfo = info;
+            super(context, info.databaseName(), null, info.migrations().length + 1);
+            mProviderInfo = info;
+            mProviderVersion = info.migrations().length + 1;
 		}
 
         public String[] getTableNames() {
@@ -51,11 +57,18 @@ public abstract class ActiveProvider extends ContentProvider {
 
         @Override
         public void onCreate(SQLiteDatabase db) {
-            db.execSQL("CREATE TABLE " + MIGRATIONS_TABLE + "(name TEXT)");
+            createMigrationsTable(db);
+            if (mProviderVersion > 1) {
+                onUpgrade(db, 1, mProviderVersion);
+            }
         }
 
         @Override
-        public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {}
+        public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+            for (ActiveMigration migration : getMissingMigrations(db)) {
+                migration.upgrade(db);
+            }
+        }
 
         @SuppressWarnings("unused")
         public void onDowngrade(SQLiteDatabase db, int oldVersion, int newVersion) {
@@ -65,11 +78,6 @@ public abstract class ActiveProvider extends ContentProvider {
         @Override
         public void onOpen(SQLiteDatabase db) {
             super.onOpen(db);
-
-            for (ActiveMigration migration : getMissingMigrations(db)) {
-                migration.upgrade(db);
-            }
-
             mTableNames = queryTableNames(db);
         }
 
@@ -79,7 +87,7 @@ public abstract class ActiveProvider extends ContentProvider {
             ArrayList<ActiveMigration> missingMigrations = new ArrayList<ActiveMigration>();
 
             try {
-                for (Class<? extends ActiveMigration> migration : mInfo.migrations()) {
+                for (Class<? extends ActiveMigration> migration : mProviderInfo.migrations()) {
                     statement.bindString(1, migration.getSimpleName());
                     if (statement.simpleQueryForLong() == 0) {
                         missingMigrations.add(migration.newInstance());
@@ -94,6 +102,9 @@ public abstract class ActiveProvider extends ContentProvider {
             return missingMigrations;
         }
 
+        public int getProviderVersion() {
+            return mProviderVersion;
+        }
     }
 
 	/////////////// Static methods ///////////////
