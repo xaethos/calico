@@ -1,5 +1,6 @@
 package net.xaethos.lib.activeprovider.content;
 
+import android.content.ContentUris;
 import android.content.ContentValues;
 import android.net.Uri;
 import com.example.fixtures.Data;
@@ -40,6 +41,17 @@ public class ActiveResolverTest {
                 is(notNullValue()));
         verify(resolverSpy).query(
                 ModelManager.getContentUri(Data.class), projection, where, whereArgs, orderBy);
+    }
+
+    @Test public void query_convenienceMethods() {
+        ActiveResolver resolverSpy = spy(resolver);
+        Uri dataUri = ModelManager.getContentUri(Data.class);
+
+        resolverSpy.query(Data.class);
+        verify(resolverSpy).query(dataUri, null, null, null, null);
+
+        resolverSpy.query(Data.class, 42);
+        verify(resolverSpy).query(ContentUris.withAppendedId(dataUri, 42), null, null, null, null);
     }
 
     @RunWith(RobolectricTestRunner.class)

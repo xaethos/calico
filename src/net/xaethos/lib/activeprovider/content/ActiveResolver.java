@@ -1,6 +1,7 @@
 package net.xaethos.lib.activeprovider.content;
 
 import android.content.ContentResolver;
+import android.content.ContentUris;
 import android.content.Context;
 import android.database.CursorWrapper;
 import net.xaethos.lib.activeprovider.models.ActiveModel;
@@ -37,7 +38,17 @@ public class ActiveResolver extends ContentResolver {
     }
 
     public <T extends ActiveModel> Cursor<T> query(Class<T> modelClass, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
-        return new Cursor<T>(modelClass, query(ModelManager.getContentUri(modelClass), projection, selection, selectionArgs, sortOrder));
+        return new Cursor<T>(modelClass, query(
+                ModelManager.getContentUri(modelClass), projection, selection, selectionArgs, sortOrder));
+    }
+
+    public <T extends ActiveModel> Cursor<T> query(Class<T> modelClass) {
+        return query(modelClass, null, null, null, null);
+    }
+
+    public <T extends ActiveModel> Cursor<T> query(Class<T> modelClass, long id) {
+        return new Cursor<T>(modelClass, query(
+                ContentUris.withAppendedId(ModelManager.getContentUri(modelClass), id), null, null, null, null));
     }
 
 }
