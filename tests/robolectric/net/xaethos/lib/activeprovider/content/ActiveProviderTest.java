@@ -17,7 +17,7 @@ import com.xtremelabs.robolectric.shadows.ShadowContentResolver;
 import com.xtremelabs.robolectric.shadows.ShadowSQLiteCursor;
 import net.xaethos.lib.activeprovider.annotations.ModelInfo;
 import net.xaethos.lib.activeprovider.annotations.ProviderInfo;
-import net.xaethos.lib.activeprovider.models.ModelManager;
+import net.xaethos.lib.activeprovider.models.ActiveModel;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -99,6 +99,8 @@ public class ActiveProviderTest {
         Cursor cursor;
         String[] projection = {
                 Data._ID,
+                Data._CREATED_AT,
+                Data._UPDATED_AT,
                 Data.STRING,
                 Data.BOOL,
                 Data.BYTE,
@@ -109,8 +111,6 @@ public class ActiveProviderTest {
                 Data.DOUBLE,
                 Data.DATA,
                 Data.DATE,
-                Data._CREATED_AT,
-                Data._UPDATED_AT
         };
 
         cursor = provider.query(dirUri, null, null, null, null);
@@ -184,8 +184,8 @@ public class ActiveProviderTest {
         values.put(Data.DATA, new byte[]{0,1,2,3});
         values.putNull(Data.DATE);
 
-        Uri uri = provider.insert(ModelManager.getContentUri(Data.class), values);
-		assertThat(provider.getType(uri), is(ModelManager.getContentItemType(Data.class)));
+        Uri uri = provider.insert(ActiveModel.getContentUri(Data.class), values);
+		assertThat(provider.getType(uri), is(ActiveModel.getContentItemType(Data.class)));
 
 		Cursor cursor = provider.query(uri, null, null, null, null);
 		assertThat(cursor.moveToFirst(), is(true));
@@ -224,7 +224,7 @@ public class ActiveProviderTest {
 		ContentValues values = new ContentValues();
 		values.put(Data.STRING, "Hello");
 
-		provider.insert(ModelManager.getContentUri(Data.class), values);
+		provider.insert(ActiveModel.getContentUri(Data.class), values);
 
 		values.remove(Data.STRING);
 		values.put(Data.INT, 42);

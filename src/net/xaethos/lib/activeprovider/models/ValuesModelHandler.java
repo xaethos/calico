@@ -1,25 +1,45 @@
 package net.xaethos.lib.activeprovider.models;
 
 import android.content.ContentValues;
+import android.database.Cursor;
+import android.database.DatabaseUtils;
 
 import java.util.Date;
 
-public class ValuesModelHandler extends ModelHandler
-implements ReadableModelHandler, WritableModelHandler {
+public class ValuesModelHandler<T extends ActiveModel.Base> extends ModelHandler<T>
+implements ReadWriteModelHandler {
 
     private final ContentValues mValues;
 
-    public ValuesModelHandler() {
+    public ValuesModelHandler(Class<T> modelInterface) {
+        super(modelInterface);
         mValues = new ContentValues();
     }
 
-    public ValuesModelHandler(ContentValues values) {
+    public ValuesModelHandler(Class<T> modelInterface, ContentValues values) {
+        super(modelInterface);
         mValues = new ContentValues(values);
+    }
+
+    public ValuesModelHandler(Class<T> modelInterface, Cursor cursor) {
+        super(modelInterface);
+        ContentValues values = new ContentValues(cursor.getColumnCount());
+        DatabaseUtils.cursorRowToContentValues(cursor, values);
+        mValues = values;
     }
 
     public ContentValues getValues() {
         return mValues;
     }
+
+    ////////// ActiveModel.Base //////////
+
+    @Override
+    public ActiveModel.Base writableCopy() {
+        return new ValuesModelHandler<T>(getModelInterface()).getModelProxy();
+    }
+
+    ////////// ReadWriteModelHandler //////////
 
     @Override public String  getString(String field)    { return mValues.getAsString(field); }
     @Override public Boolean getBoolean(String field)   { return mValues.getAsBoolean(field); }

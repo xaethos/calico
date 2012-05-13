@@ -6,13 +6,12 @@ import android.content.Context;
 import android.database.CursorWrapper;
 import net.xaethos.lib.activeprovider.models.ActiveModel;
 import net.xaethos.lib.activeprovider.models.CursorModelHandler;
-import net.xaethos.lib.activeprovider.models.ModelManager;
 
 public class ActiveResolver extends ContentResolver {
 
     /////////////// Inner classes ///////////////
 
-    public static class Cursor<T extends ActiveModel> extends CursorWrapper {
+    public static class Cursor<T extends ActiveModel.Base> extends CursorWrapper {
 
         protected final Class<T> mModelClass;
 
@@ -25,8 +24,7 @@ public class ActiveResolver extends ContentResolver {
             if (this.isClosed() || this.isBeforeFirst() || this.isAfterLast()) {
                 return null;
             }
-            return CursorModelHandler.newModelInstance(
-                    mModelClass, new CursorModelHandler(this));
+            return new CursorModelHandler<T>(mModelClass, this).getModelProxy();
         }
 
     }
@@ -37,18 +35,18 @@ public class ActiveResolver extends ContentResolver {
         super(context);
     }
 
-    public <T extends ActiveModel> Cursor<T> query(Class<T> modelClass, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
+    public <T extends ActiveModel.Base> Cursor<T> query(Class<T> modelClass, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
         return new Cursor<T>(modelClass, query(
-                ModelManager.getContentUri(modelClass), projection, selection, selectionArgs, sortOrder));
+                ActiveModel.getContentUri(modelClass), projection, selection, selectionArgs, sortOrder));
     }
 
-    public <T extends ActiveModel> Cursor<T> query(Class<T> modelClass) {
+    public <T extends ActiveModel.Base> Cursor<T> query(Class<T> modelClass) {
         return query(modelClass, null, null, null, null);
     }
 
-    public <T extends ActiveModel> Cursor<T> query(Class<T> modelClass, long id) {
+    public <T extends ActiveModel.Base> Cursor<T> query(Class<T> modelClass, long id) {
         return new Cursor<T>(modelClass, query(
-                ContentUris.withAppendedId(ModelManager.getContentUri(modelClass), id), null, null, null, null));
+                ContentUris.withAppendedId(ActiveModel.getContentUri(modelClass), id), null, null, null, null));
     }
 
 }

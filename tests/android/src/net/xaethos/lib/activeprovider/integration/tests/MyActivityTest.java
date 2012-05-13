@@ -7,7 +7,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 import net.xaethos.lib.activeprovider.integration.MyActivity;
 import net.xaethos.lib.activeprovider.integration.models.User;
-import net.xaethos.lib.activeprovider.models.ModelManager;
+import net.xaethos.lib.activeprovider.models.ActiveModel;
 
 public class MyActivityTest extends ActivityInstrumentationTestCase2<MyActivity> {
 
@@ -21,7 +21,7 @@ public class MyActivityTest extends ActivityInstrumentationTestCase2<MyActivity>
     protected void setUp() throws Exception {
         super.setUp();
 
-        usersUri = ModelManager.getContentUri(User.class);
+        usersUri = ActiveModel.getContentUri(User.class);
         getInstrumentation().getTargetContext().getContentResolver().delete(usersUri, null, null);
     }
 

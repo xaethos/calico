@@ -4,18 +4,29 @@ import android.database.Cursor;
 
 import java.util.Date;
 
-public class CursorModelHandler extends ModelHandler
-implements ReadableModelHandler {
+public class CursorModelHandler<T extends ActiveModel.Base> extends ModelHandler<T>
+implements ReadOnlyModelHandler {
 
     private final Cursor mCursor;
 
-    public CursorModelHandler(Cursor cursor) {
+    public CursorModelHandler(Class<T> modelInterface, Cursor cursor) {
+        super(modelInterface);
         mCursor = cursor;
     }
 
     public Cursor getCursor() {
         return mCursor;
     }
+
+    ////////// ActiveModel.Base //////////
+
+    @Override
+    public ActiveModel.Base writableCopy() {
+        ValuesModelHandler handler = new ValuesModelHandler<T>(getModelInterface(), mCursor);
+        return handler.getModelProxy();
+    }
+
+    ////////// ReadOnlyModelHandler //////////
 
     @Override public String  getString(String field)    { Cursor c = mCursor; int i = c.getColumnIndexOrThrow(field); return c.isNull(i)?null:c.getString(i); }
     @Override public Boolean getBoolean(String field)   { Cursor c = mCursor; int i = c.getColumnIndexOrThrow(field); return c.isNull(i)?null:c.getInt(i) != 0; }

@@ -8,7 +8,7 @@ import com.example.fixtures.DataProvider;
 import com.xtremelabs.robolectric.Robolectric;
 import com.xtremelabs.robolectric.RobolectricTestRunner;
 import com.xtremelabs.robolectric.shadows.ShadowContentResolver;
-import net.xaethos.lib.activeprovider.models.ModelManager;
+import net.xaethos.lib.activeprovider.models.ActiveModel;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -40,12 +40,12 @@ public class ActiveResolverTest {
         assertThat(resolverSpy.query(Data.class, projection, where, whereArgs, orderBy),
                 is(notNullValue()));
         verify(resolverSpy).query(
-                ModelManager.getContentUri(Data.class), projection, where, whereArgs, orderBy);
+                ActiveModel.getContentUri(Data.class), projection, where, whereArgs, orderBy);
     }
 
     @Test public void query_convenienceMethods() {
         ActiveResolver resolverSpy = spy(resolver);
-        Uri dataUri = ModelManager.getContentUri(Data.class);
+        Uri dataUri = ActiveModel.getContentUri(Data.class);
 
         resolverSpy.query(Data.class);
         verify(resolverSpy).query(dataUri, null, null, null, null);
@@ -66,7 +66,7 @@ public class ActiveResolverTest {
 
             String[] projection = {Data._ID, Data.STRING};
             cursor = new ActiveResolver.Cursor<Data>(Data.class, resolver.query(
-                    ModelManager.getContentUri(Data.class), projection, null, null, Data.STRING));
+                    ActiveModel.getContentUri(Data.class), projection, null, null, Data.STRING));
         }
 
         @Test public void constructor() {
@@ -101,9 +101,9 @@ public class ActiveResolverTest {
         provider.onCreate();
 
         ShadowContentResolver.registerProvider(
-                ModelManager.getModelInfo(Data.class).authority(), provider);
+                ActiveModel.getModelInfo(Data.class).authority(), provider);
 
-        Uri uri = ModelManager.getContentUri(Data.class);
+        Uri uri = ActiveModel.getContentUri(Data.class);
         ContentValues values = new ContentValues(1);
         for (String s : FURNITURE) {
             values.put(Data.STRING, s);

@@ -10,7 +10,7 @@ import android.provider.BaseColumns;
 import android.text.TextUtils;
 import net.xaethos.lib.activeprovider.annotations.ModelInfo;
 import net.xaethos.lib.activeprovider.annotations.ProviderInfo;
-import net.xaethos.lib.activeprovider.models.ModelManager;
+import net.xaethos.lib.activeprovider.models.ActiveModel;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -160,7 +160,7 @@ public abstract class ActiveProvider extends ContentProvider {
             Class<?>[] modelInterfaces = getProviderInfo().models();
             ModelInfo[] models = new ModelInfo[modelInterfaces.length];
             for (int i=0; i<modelInterfaces.length; ++i) {
-                models[i] = ModelManager.getModelInfo(modelInterfaces[i]);
+                models[i] = ActiveModel.getModelInfo(modelInterfaces[i]);
             }
             mModels = models;
         }
@@ -194,10 +194,10 @@ public abstract class ActiveProvider extends ContentProvider {
 		ModelInfo model = modelFromUriMatch(match);
 
 		if (isItemUri(match)) {
-            return ModelManager.getContentItemType(model);
+            return ActiveModel.getContentItemType(model);
         }
         else {
-            return ModelManager.getContentDirType(model);
+            return ActiveModel.getContentDirType(model);
         }
 	}
 
@@ -230,7 +230,7 @@ public abstract class ActiveProvider extends ContentProvider {
                 null,
                 null,
                 sortOrder);
-		cursor.setNotificationUri(getContext().getContentResolver(), ModelManager.getContentUri(model));
+		cursor.setNotificationUri(getContext().getContentResolver(), ActiveModel.getContentUri(model));
 		return cursor;
 	}
 
@@ -249,7 +249,7 @@ public abstract class ActiveProvider extends ContentProvider {
 		if (id < 0) return null;
 
 		getContext().getContentResolver().notifyChange(uri, null);
-		return ContentUris.withAppendedId(ModelManager.getContentUri(model), id);
+		return ContentUris.withAppendedId(ActiveModel.getContentUri(model), id);
 	}
 
 	@Override

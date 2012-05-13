@@ -30,8 +30,8 @@ public class DataProvider extends ActiveProvider {
                     "double REAL," +
                     "data BLOB," +
                     "timestamp INTEGER," +
-                    "created_at INTEGER," +
-                    "updated_at INTEGER);");
+                    "_created_at INTEGER," +
+                    "_updated_at INTEGER);");
             return true;
         }
     }

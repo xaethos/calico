@@ -3,7 +3,7 @@ package net.xaethos.lib.activeprovider.models;
 import java.util.Date;
 
 @SuppressWarnings("UnusedDeclaration")
-public interface WritableModelHandler {
+public interface ReadWriteModelHandler extends ReadOnlyModelHandler {
 
     public abstract void set(String field, String value);
     public abstract void set(String field, Byte value);
