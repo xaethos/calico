@@ -20,7 +20,7 @@ public class ActiveResolver extends ContentResolver {
             mModelClass = cls;
         }
 
-        T getModel() {
+        public T getModel() {
             if (this.isClosed() || this.isBeforeFirst() || this.isAfterLast()) {
                 return null;
             }
