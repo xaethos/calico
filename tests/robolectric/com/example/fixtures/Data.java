@@ -13,7 +13,7 @@ import java.util.Date;
         tableName   = "data",
         contentType = "vnd.example.data"
 )
-public interface Data extends ActiveModel {
+public interface Data extends ActiveModel.Base, ActiveModel.Timestamps {
     public static final String STRING     = "string";
     public static final String BOOL       = "bool";
     public static final String BYTE       = "byte";

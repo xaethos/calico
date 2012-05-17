@@ -11,7 +11,7 @@ import android.support.v4.content.Loader;
 import android.support.v4.widget.SimpleCursorAdapter;
 import android.widget.ListView;
 import net.xaethos.lib.activeprovider.integration.models.User;
-import net.xaethos.lib.activeprovider.models.ModelManager;
+import net.xaethos.lib.activeprovider.models.ActiveModel;
 
 public class MyActivity extends FragmentActivity implements LoaderManager.LoaderCallbacks<Cursor> {
 
@@ -40,14 +40,14 @@ public class MyActivity extends FragmentActivity implements LoaderManager.Loader
     public void createUser(String name) {
         ContentValues values = new ContentValues(1);
         values.put(User.NAME, name);
-        getContentResolver().insert(ModelManager.getContentUri(User.class), values);
+        getContentResolver().insert(ActiveModel.getContentUri(User.class), values);
     }
 
     ////////// LoaderManager.LoaderCallbacks //////////
 
     @Override
     public Loader<Cursor> onCreateLoader(int i, Bundle bundle) {
-        return new CursorLoader(this, ModelManager.getContentUri(User.class), null, null, null, null);
+        return new CursorLoader(this, ActiveModel.getContentUri(User.class), null, null, null, null);
     }
 
     @Override

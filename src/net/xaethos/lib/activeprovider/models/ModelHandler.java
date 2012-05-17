@@ -4,19 +4,19 @@ import net.xaethos.lib.activeprovider.annotations.Getter;
 import net.xaethos.lib.activeprovider.annotations.ModelInfo;
 import net.xaethos.lib.activeprovider.annotations.Setter;
 
-import java.lang.reflect.*;
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
 
-public class ModelHandler implements InvocationHandler {
+public abstract class ModelHandler<T extends ActiveModel.Base> implements
+        ActiveModel.Utils, InvocationHandler, ReadOnlyModelHandler
+{
 
-    public static <T> T newModelInstance(Class<T> modelType, ModelHandler handler) {
-        if (!modelType.isAnnotationPresent(ModelInfo.class)) {
-            throw new IllegalArgumentException(
-                    "model interface must have the annotation @" + ModelInfo.class.getSimpleName());
-        }
+    ////////// Static methods //////////
 
-        return modelType.cast(Proxy.newProxyInstance(modelType.getClassLoader(),
-                new Class[]{modelType},
-                handler));
+    protected static boolean validateModelInterface(Class<? extends ActiveModel.Base> modelType) {
+        return modelType.isAnnotationPresent(ModelInfo.class);
     }
 
     protected static String getGetterName(Class<?> cls) {
@@ -25,37 +25,37 @@ public class ModelHandler implements InvocationHandler {
                 cls.getSimpleName());
     }
 
-    protected final boolean isReadable() {
-        return ReadableModelHandler.class.isInstance(this);
+    ////////// Instance fields //////////
+
+    private final Class<T> mModelInterface;
+    private T mModelProxy;
+
+    ////////// Instance methods //////////
+
+    public ModelHandler(Class<T> modelInterface) {
+        if (!validateModelInterface(modelInterface)) {
+            throw new IllegalArgumentException(
+                    "model interface must have the annotation @" + ModelInfo.class.getSimpleName());
+        }
+        mModelInterface = modelInterface;
     }
 
-    protected final boolean isWritable() {
-        return WritableModelHandler.class.isInstance(this);
+    public Class<T> getModelInterface() {
+        return mModelInterface;
     }
 
-    @Override
-    public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+    public T getModelProxy() {
+        if (mModelProxy == null) {
+            mModelProxy = mModelInterface.cast(
+                    Proxy.newProxyInstance(mModelInterface.getClassLoader(),
+                    new Class[]{mModelInterface},
+                    this));
+        }
+        return mModelProxy;
+    }
 
-        if (isReadable() && method.isAnnotationPresent(Getter.class)) {
-            Class<?>[] params = method.getParameterTypes();
-            if (params.length != 0) {
-                throw new IllegalArgumentException("@Getter methods must take no parameters");
-            }
-            return invokeGetter(method.getAnnotation(Getter.class).value(), method.getReturnType());
-        }
-        if (isWritable() && method.isAnnotationPresent(Setter.class)) {
-            Class<?>[] params = method.getParameterTypes();
-            if (params.length != 1) {
-                throw new IllegalArgumentException("@Setter methods must take a single parameter");
-            }
-            invokeSetter(method.getAnnotation(Setter.class).value(), args[0], params[0]);
-            return null;
-        }
-        if (method.getDeclaringClass() == Object.class) {
-            return method.invoke(this, args);
-        }
-
-        throw new UnsupportedOperationException("Unhandled method: " + method.getName());
+    public boolean isReadOnly() {
+        return !ReadWriteModelHandler.class.isInstance(this);
     }
 
     public Object invokeGetter(String field, Class<?> valueType) throws Throwable {
@@ -83,8 +83,40 @@ public class ModelHandler implements InvocationHandler {
             }
         }
         else {
-            ((WritableModelHandler)this).setNull(field);
+            ((ReadWriteModelHandler)this).setNull(field);
         }
+    }
+
+    ////////// InvocationHandler //////////
+
+    @Override
+    public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+        Class<?> methodClass = method.getDeclaringClass();
+
+        if (method.isAnnotationPresent(Getter.class)) {
+            Class<?>[] params = method.getParameterTypes();
+            if (params.length != 0) {
+                throw new IllegalArgumentException("@Getter methods must take no parameters");
+            }
+            return invokeGetter(method.getAnnotation(Getter.class).value(), method.getReturnType());
+        }
+        else if (method.isAnnotationPresent(Setter.class)) {
+            if (isReadOnly()) {
+                throw new ActiveModelReadOnlyException();
+            }
+
+            Class<?>[] params = method.getParameterTypes();
+            if (params.length != 1) {
+                throw new IllegalArgumentException("@Setter methods must take a single parameter");
+            }
+            invokeSetter(method.getAnnotation(Setter.class).value(), args[0], params[0]);
+            return null;
+        }
+        else if (methodClass == Object.class || methodClass == ActiveModel.Utils.class) {
+            return method.invoke(this, args);
+        }
+
+        throw new UnsupportedOperationException("Unhandled method: " + method.getName());
     }
 
 }

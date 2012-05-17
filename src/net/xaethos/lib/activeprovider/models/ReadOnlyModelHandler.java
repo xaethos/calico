@@ -3,7 +3,7 @@ package net.xaethos.lib.activeprovider.models;
 import java.util.Date;
 
 @SuppressWarnings("UnusedDeclaration")
-public interface ReadableModelHandler {
+public interface ReadOnlyModelHandler {
 
     public abstract String  getString(String field);
     public abstract Boolean getBoolean(String field);

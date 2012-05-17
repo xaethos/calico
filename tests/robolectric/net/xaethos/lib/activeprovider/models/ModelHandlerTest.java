@@ -3,7 +3,6 @@ package net.xaethos.lib.activeprovider.models;
 import net.xaethos.lib.activeprovider.annotations.Getter;
 import net.xaethos.lib.activeprovider.annotations.ModelInfo;
 import net.xaethos.lib.activeprovider.annotations.Setter;
-import org.junit.Before;
 import org.junit.Test;
 
 import java.util.Date;
@@ -15,7 +14,11 @@ import static org.mockito.Mockito.verify;
 
 public class ModelHandlerTest {
 
-    public class ROModelHandler extends ModelHandler implements ReadableModelHandler {
+    public class ROHandler<T extends ActiveModel.Base> extends ModelHandler<T> implements ReadOnlyModelHandler {
+        public ROHandler(Class<T> modelInterface) {
+            super(modelInterface);
+        }
+
         @Override public String  getString(String field)    { return null; }
         @Override public Boolean getBoolean(String field)   { return null; }
         @Override public Byte    getByte(String field)      { return null; }
@@ -26,9 +29,14 @@ public class ModelHandlerTest {
         @Override public Double  getDouble(String field)    { return null; }
         @Override public byte[]  getbyteArray(String field) { return null; }
         @Override public Date    getDate(String field)      { return null; }
+        @Override public T       writableCopy()             { return null; }
     }
 
-    public class RWModelHandler extends ROModelHandler implements WritableModelHandler {
+    public class RWHandler<T extends ActiveModel.Base> extends ROHandler<T> implements ReadWriteModelHandler {
+        public RWHandler(Class<T> modelInterface) {
+            super(modelInterface);
+        }
+
         @Override public void set(String field, String value)  {}
         @Override public void set(String field, Boolean value) {}
         @Override public void set(String field, Byte value)    {}
@@ -45,7 +53,7 @@ public class ModelHandlerTest {
     }
 
     @ModelInfo(authority = "com.example.content", tableName = "table", contentType = "vnd.example.table")
-    private static interface TestModel {
+    private static interface TestModel extends ActiveModel.Base {
         public Integer badMethod();
 
         public static final String INT = "int";
@@ -53,38 +61,35 @@ public class ModelHandlerTest {
         @Setter(INT) public void setInt(Integer i);
     }
 
-    private static interface BadInterface {}
+    private static interface BadInterface extends ActiveModel.Base {}
 
-    private RWModelHandler proxy;
-
-    @Before
-    public void mockProxy() {
-        proxy = new RWModelHandler();
-    }
+    RWHandler<TestModel> handler;
 
     @Test(expected = IllegalArgumentException.class)
     public void shouldNotHandleUnannotatedInterfaces() {
-        ModelHandler.newModelInstance(BadInterface.class, proxy);
+        new RWHandler<BadInterface>(BadInterface.class);
     }
 
     @Test(expected = UnsupportedOperationException.class)
     public void shouldNotHandleUnsupportedMethods() {
-        TestModel model = ModelHandler.newModelInstance(TestModel.class, proxy);
-        model.badMethod();
+        handler = new RWHandler<TestModel>(TestModel.class);
+        handler.getModelProxy().badMethod();
     }
 
     @Test
     public void shouldForwardGetterMethodsToProperGetter() {
-        RWModelHandler mock = spy(proxy);
-        TestModel model = ModelHandler.newModelInstance(TestModel.class, mock);
+        handler = new RWHandler<TestModel>(TestModel.class);
+        RWHandler<TestModel> mock = spy(handler);
+        TestModel model = mock.getModelProxy();
         model.getInt();
         verify(mock).getInteger(TestModel.INT);
     }
 
     @Test
     public void shouldForwardSetterMethodsToSet() {
-        RWModelHandler mock = spy(proxy);
-        TestModel model = ModelHandler.newModelInstance(TestModel.class, mock);
+        handler = new RWHandler<TestModel>(TestModel.class);
+        RWHandler<TestModel> mock = spy(handler);
+        TestModel model = mock.getModelProxy();
         model.setInt(42);
         verify(mock).set(TestModel.INT, 42);
     }
@@ -93,21 +98,15 @@ public class ModelHandlerTest {
     public void testGetGetterName() throws Throwable {
         assertThat(ModelHandler.getGetterName(String.class), is("getString"));
         assertThat(ModelHandler.getGetterName(byte[].class), is("getbyteArray"));
-        assertThat(ModelHandler.getGetterName(RWModelHandler.class), is("getRWModelHandler"));
+        assertThat(ModelHandler.getGetterName(RWHandler.class), is("getRWHandler"));
     }
 
-    @Test
-    public void testIsReadable() {
-        assertThat(new ModelHandler().isReadable(), is(false));
-        assertThat(new ROModelHandler().isReadable(), is(true));
-        assertThat(new RWModelHandler().isReadable(), is(true));
-    }
+    ////////// ActiveModel.Base tests //////////
 
     @Test
-    public void testIsWritable() {
-        assertThat(new ModelHandler().isWritable(), is(false));
-        assertThat(new ROModelHandler().isWritable(), is(false));
-        assertThat(new RWModelHandler().isWritable(), is(true));
+    public void isReadOnly() {
+        assertThat(new ROHandler<TestModel>(TestModel.class).isReadOnly(), is(true));
+        assertThat(new RWHandler<TestModel>(TestModel.class).isReadOnly(), is(false));
     }
 
 }

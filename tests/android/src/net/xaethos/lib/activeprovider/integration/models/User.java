@@ -7,7 +7,7 @@ import net.xaethos.lib.activeprovider.models.ActiveModel;
         authority = "net.xaethos.lib.activeprovider.integration",
         contentType = "vnd.xaethos.test.user",
         tableName = "users")
-public interface User extends ActiveModel {
+public interface User extends ActiveModel.Base {
 
     public static final String NAME = "name";
 

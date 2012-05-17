@@ -20,8 +20,8 @@ public class ValuesModelHandlerTest {
 
     @Before
     public void instantiateModel() {
-        ValuesModelHandler handler = new ValuesModelHandler();
-        model = ValuesModelHandler.newModelInstance(Data.class, handler);
+        ValuesModelHandler<Data> handler = new ValuesModelHandler<Data>(Data.class);
+        model = handler.getModelProxy();
         values = handler.getValues();
     }
 
@@ -29,13 +29,15 @@ public class ValuesModelHandlerTest {
     public void shouldBeAbleToGetValuesFromSeededContent() {
         ContentValues values = new ContentValues(1);
         values.put(Data.STRING, "foo");
-        model = ValuesModelHandler.newModelInstance(Data.class, new ValuesModelHandler(values));
+        model = new ValuesModelHandler<Data>(Data.class, values).getModelProxy();
 
         assertThat(model.getString(), is("foo"));
 
         values.put(Data.STRING, "bar");
         assertThat(model.getString(), is("foo"));
     }
+
+    ////////// ReadOnlyModelHandler tests //////////
 
     @Test
     public void testGetString() throws Exception {
@@ -150,6 +152,21 @@ public class ValuesModelHandlerTest {
         Date date = new Date();
         model.setTimestamp(date);
         assertThat(model.getTimestamp(), is(date));
+    }
+
+    ////////// Shared behavior tests //////////
+
+    public static class ActiveModelUtils
+            extends ActiveModelUtilsTest<ValuesModelHandler<Data>> {
+
+        @Override
+        protected ValuesModelHandler<Data> newHandler() {
+            ContentValues values = new ContentValues(3);
+            values.put(Data._ID, ID);
+            values.put(Data.STRING, STRING);
+            values.putNull(Data.INT);
+            return new ValuesModelHandler<Data>(Data.class, values);
+        }
     }
 
 }
