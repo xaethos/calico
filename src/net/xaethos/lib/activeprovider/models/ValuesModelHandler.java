@@ -35,7 +35,7 @@ implements ReadWriteModelHandler {
     ////////// ActiveModel.Base //////////
 
     @Override
-    public ActiveModel.Base writableCopy() {
+    public T writableCopy() {
         return new ValuesModelHandler<T>(getModelInterface()).getModelProxy();
     }
 

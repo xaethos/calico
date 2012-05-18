@@ -13,7 +13,7 @@ public class ActiveModel {
     /////////////// Inner classes ///////////////
 
     @SuppressWarnings("UnusedDeclaration")
-    public static interface Base extends Utils {
+    public static interface Base<T extends Base> extends Utils<T> {
         public static final String _ID = BaseColumns._ID;
 
         @Getter(_ID) public Long getId();

@@ -10,7 +10,7 @@ import net.xaethos.lib.activeprovider.models.ActiveModel;
         authority = MyProvider.AUTHORITY,
         contentType = "vnd.xaethos.test.polymorph"
 )
-public interface Polymorph extends ActiveModel.Base {
+public interface Polymorph extends ActiveModel.Base<Polymorph> {
     public static final String VALUE = "value";
 
     @Getter(VALUE) public String  getStringValue();
