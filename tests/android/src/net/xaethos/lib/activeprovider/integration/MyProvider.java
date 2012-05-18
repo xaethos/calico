@@ -2,6 +2,7 @@ package net.xaethos.lib.activeprovider.integration;
 
 import net.xaethos.lib.activeprovider.annotations.ProviderInfo;
 import net.xaethos.lib.activeprovider.content.ActiveProvider;
+import net.xaethos.lib.activeprovider.integration.migrations.AddTimestampsToPolymorphs;
 import net.xaethos.lib.activeprovider.integration.migrations.CreatePolymorphs;
 import net.xaethos.lib.activeprovider.integration.migrations.CreateUsers;
 import net.xaethos.lib.activeprovider.integration.models.Polymorph;
@@ -15,7 +16,8 @@ import net.xaethos.lib.activeprovider.integration.models.User;
         },
         migrations = {
                 CreateUsers.class,
-                CreatePolymorphs.class
+                CreatePolymorphs.class,
+                AddTimestampsToPolymorphs.class
         }
 )
 public class MyProvider extends ActiveProvider {
