@@ -10,6 +10,8 @@ import net.xaethos.lib.activeprovider.annotations.ModelInfo;
 import net.xaethos.lib.activeprovider.integration.models.Polymorph;
 import net.xaethos.lib.activeprovider.models.ActiveModel;
 
+import static net.xaethos.lib.activeprovider.integration.tests.Assert.assertHasItems;
+
 public class ActiveProviderTest extends BaseProviderTest {
 
     ContentResolver resolver;

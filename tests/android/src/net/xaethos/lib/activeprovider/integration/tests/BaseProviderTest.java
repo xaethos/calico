@@ -10,9 +10,6 @@ import net.xaethos.lib.activeprovider.integration.MyProvider;
 import net.xaethos.lib.activeprovider.integration.models.Polymorph;
 import net.xaethos.lib.activeprovider.models.ActiveModel;
 
-import java.util.Arrays;
-import java.util.Collection;
-
 public class BaseProviderTest extends ProviderTestCase2<MyProvider> {
 
     static final String[] ID_PROJECTION = { Polymorph._ID };
@@ -77,16 +74,6 @@ public class BaseProviderTest extends ProviderTestCase2<MyProvider> {
         values.put(Polymorph._CREATED_AT, System.currentTimeMillis());
         values.put(Polymorph._UPDATED_AT, values.getAsLong(Polymorph._CREATED_AT));
         return getMockContentResolver().insert(polymorphUri, values);
-    }
-
-    protected <T> void assertHasItems(Collection<T> actual, T... expected) {
-        for (T item : expected) {
-            assertTrue(actual.toString() + " expected to contain " + item.toString(), actual.contains(item));
-        }
-    }
-
-    protected <T> void assertHasItems(T[] actual, T... expected) {
-        assertHasItems(Arrays.asList(actual), expected);
     }
 
 }
