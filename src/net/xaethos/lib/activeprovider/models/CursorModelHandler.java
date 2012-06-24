@@ -22,7 +22,8 @@ implements ReadOnlyModelHandler {
 
     @Override
     public T writableCopy() {
-        ValuesModelHandler<T> handler = new ValuesModelHandler<T>(getModelInterface(), mCursor);
+        Cursor cursor = mCursor;
+        ValuesModelHandler<T> handler = new ValuesModelHandler<T>(getModelInterface(), cursor);
         return handler.getModelProxy();
     }
 

@@ -5,10 +5,9 @@ import android.net.Uri;
 import android.test.ProviderTestCase2;
 import net.xaethos.lib.activeprovider.annotations.ModelInfo;
 import net.xaethos.lib.activeprovider.annotations.ProviderInfo;
-import net.xaethos.lib.activeprovider.content.ActiveResolver;
+import net.xaethos.lib.activeprovider.content.ActiveManager;
 import net.xaethos.lib.activeprovider.integration.MyProvider;
 import net.xaethos.lib.activeprovider.integration.models.Polymorph;
-import net.xaethos.lib.activeprovider.models.ActiveModel;
 
 public class BaseProviderTest extends ProviderTestCase2<MyProvider> {
 
@@ -17,8 +16,7 @@ public class BaseProviderTest extends ProviderTestCase2<MyProvider> {
 
     ProviderInfo providerInfo;
 
-    ActiveResolver.Cursor<Polymorph> cursor;
-    Polymorph polymorph;
+    ActiveManager.ModelCursor<Polymorph> cursor;
     ModelInfo polymorphInfo;
     Uri polymorphUri;
 
@@ -43,14 +41,22 @@ public class BaseProviderTest extends ProviderTestCase2<MyProvider> {
         super.tearDown();
     }
 
+    public void testMockResolver() throws Exception {
+        assertEquals(getMockContext().getContentResolver(), getMockContentResolver());
+    }
+
     ////////// Helper methods //////////
 
-    protected ActiveResolver.Cursor<Polymorph> queryPolymorphs() {
-        return new ActiveResolver.Cursor<Polymorph>(Polymorph.class, getMockContentResolver().query(
-                ActiveModel.getContentUri(Polymorph.class), null, null, null, null));
+    protected ActiveManager.ModelCursor<Polymorph> queryPolymorphs() {
+        return new ActiveManager(getMockContext()).query(Polymorph.class, null, null, null, null);
     }
 
     protected Uri insertPolymorph(String value) {
+        ContentValues values = new ContentValues(1); values.put(Polymorph.VALUE, value);
+        return insertPolymorph(values);
+    }
+
+    protected Uri insertPolymorph(Boolean value) {
         ContentValues values = new ContentValues(1); values.put(Polymorph.VALUE, value);
         return insertPolymorph(values);
     }
