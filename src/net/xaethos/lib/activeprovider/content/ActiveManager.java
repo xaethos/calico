@@ -28,6 +28,22 @@ public class ActiveManager {
         mResolver = context.getContentResolver();
     }
 
+    /**
+     * Queries the ContentProvider for the table representing a given model.
+     * Equivalent to calling query(modelClass, null, null, null, null)
+     * @return a ModelCursor with the query results
+     */
+    public <T extends ActiveModel.Base> ModelCursor<T> query(Class<T> modelClass) {
+        return query(modelClass, null, null, null, null);
+    }
+
+    /**
+     * Queries the ContentProvider for the table representing a given model.
+     * See {@link ContentResolver#query(Uri, String[], String, String[], String)
+     * ContentResolver.query()} for documentation on the meaning of the
+     * parameters.
+     * @return a ModelCursor with the query results
+     */
     public <T extends ActiveModel.Base> ModelCursor<T> query(Class<T> modelClass, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
         Uri uri = ActiveModel.getContentUri(modelClass);
         ContentProviderClient client = mResolver.acquireContentProviderClient(uri);

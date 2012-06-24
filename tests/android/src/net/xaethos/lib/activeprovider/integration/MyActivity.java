@@ -10,10 +10,12 @@ import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.support.v4.widget.SimpleCursorAdapter;
 import android.widget.ListView;
+import net.xaethos.lib.activeprovider.content.ActiveManager;
+import net.xaethos.lib.activeprovider.content.ModelLoader;
 import net.xaethos.lib.activeprovider.integration.models.User;
 import net.xaethos.lib.activeprovider.models.ActiveModel;
 
-public class MyActivity extends FragmentActivity implements LoaderManager.LoaderCallbacks<Cursor> {
+public class MyActivity extends FragmentActivity implements LoaderManager.LoaderCallbacks<ActiveManager.ModelCursor<User>> {
 
     private SimpleCursorAdapter mAdapter;
 
@@ -46,17 +48,17 @@ public class MyActivity extends FragmentActivity implements LoaderManager.Loader
     ////////// LoaderManager.LoaderCallbacks //////////
 
     @Override
-    public Loader<Cursor> onCreateLoader(int i, Bundle bundle) {
-        return new CursorLoader(this, ActiveModel.getContentUri(User.class), null, null, null, null);
+    public Loader<ActiveManager.ModelCursor<User>> onCreateLoader(int i, Bundle bundle) {
+        return new ModelLoader<User>(this, User.class);
     }
 
     @Override
-    public void onLoadFinished(Loader<Cursor> cursorLoader, Cursor cursor) {
+    public void onLoadFinished(Loader<ActiveManager.ModelCursor<User>> loader, ActiveManager.ModelCursor<User> cursor) {
         mAdapter.swapCursor(cursor);
     }
 
     @Override
-    public void onLoaderReset(Loader<Cursor> cursorLoader) {
+    public void onLoaderReset(Loader<ActiveManager.ModelCursor<User>> loader) {
         mAdapter.swapCursor(null);
     }
 }
