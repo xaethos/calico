@@ -2,17 +2,17 @@ package net.xaethos.lib.activeprovider.integration.tests;
 
 import android.content.ContentUris;
 import android.net.Uri;
-import net.xaethos.lib.activeprovider.content.ActiveManager;
+import net.xaethos.lib.activeprovider.models.ModelManager;
 import net.xaethos.lib.activeprovider.integration.models.Polymorph;
 
-public class ActiveManagerTest extends BaseProviderTest {
+public class ModelManagerTest extends BaseProviderTest {
 
-    ActiveManager manager;
+    ModelManager manager;
 
     @Override
     public void setUp() throws Exception {
         super.setUp();
-        manager = new ActiveManager(getMockContext());
+        manager = new ModelManager(getMockContext());
     }
 
     ////////// Tests //////////
@@ -38,7 +38,7 @@ public class ActiveManagerTest extends BaseProviderTest {
         assertEquals("dining table", cursor.getString(1));
     }
 
-    public void test_query_forModel() {
+    public void test_fetch_model() {
         Uri uri = insertPolymorph("dining table");
 
         Polymorph poly = manager.fetch(Polymorph.class, ContentUris.parseId(uri));
@@ -46,6 +46,18 @@ public class ActiveManagerTest extends BaseProviderTest {
         assertNotNull(poly);
         assertEquals("dining table", poly.getStringValue());
         assertFalse(poly.isReadOnly());
+    }
+
+    public void test_save_model() {
+        Uri uri = insertPolymorph("dining table");
+
+        Polymorph poly = manager.fetch(Polymorph.class, ContentUris.parseId(uri));
+        poly.setStringValue("desk");
+
+        assertTrue(manager.save(poly));
+
+        poly = manager.fetch(Polymorph.class, ContentUris.parseId(uri));
+        assertEquals("desk", poly.getStringValue());
     }
 
 }

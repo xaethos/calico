@@ -1,9 +1,10 @@
 package net.xaethos.lib.activeprovider.models;
 
+import android.content.ContentProviderOperation;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.DatabaseUtils;
-import net.xaethos.lib.activeprovider.content.ActiveManager;
+import android.net.Uri;
 
 import java.util.Date;
 
@@ -25,8 +26,8 @@ implements ReadWriteModelHandler {
     public ValuesModelHandler(Class<T> modelInterface, Cursor cursor) {
         super(modelInterface);
         ContentValues values = null;
-        if (cursor instanceof ActiveManager.ModelCursor) {
-            values = ((ActiveManager.ModelCursor)cursor).getValues();
+        if (cursor instanceof ModelManager.ModelCursor) {
+            values = ((ModelManager.ModelCursor)cursor).getValues();
         }
         else {
             values = new ContentValues(cursor.getColumnCount());
@@ -44,6 +45,16 @@ implements ReadWriteModelHandler {
     @Override
     public T writableCopy() {
         return new ValuesModelHandler<T>(getModelInterface()).getModelProxy();
+    }
+
+    @Override
+    public ContentProviderOperation saveOperation() {
+        Uri uri = ActiveModel.getContentUri(getModelInterface(), mValues.getAsLong(ActiveModel.Base._ID));
+        return ContentProviderOperation
+                .newUpdate(uri)
+                .withExpectedCount(1)
+                .withValues(mValues)
+                .build();
     }
 
     ////////// ReadWriteModelHandler //////////

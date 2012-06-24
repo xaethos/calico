@@ -1,23 +1,18 @@
-package net.xaethos.lib.activeprovider.content;
+package net.xaethos.lib.activeprovider.models;
 
-import android.content.ContentProviderClient;
-import android.content.ContentResolver;
-import android.content.ContentValues;
-import android.content.Context;
+import android.content.*;
 import android.database.Cursor;
 import android.database.CursorWrapper;
 import android.database.DatabaseUtils;
 import android.net.Uri;
 import android.os.RemoteException;
-import net.xaethos.lib.activeprovider.models.ActiveModel;
-import net.xaethos.lib.activeprovider.models.CursorModelHandler;
-import net.xaethos.lib.activeprovider.models.ModelHandler;
-import net.xaethos.lib.activeprovider.models.ValuesModelHandler;
+import android.util.Log;
 
 import java.lang.reflect.Proxy;
 import java.util.*;
 
-public class ActiveManager {
+public class ModelManager {
+    private static final String TAG = "ModelManager";
 
     /////////////// Static methods ///////////////
 
@@ -33,17 +28,8 @@ public class ActiveManager {
 
     /////////////// Instance methods ///////////////
 
-    public ActiveManager(Context context) {
+    public ModelManager(Context context) {
         mResolver = context.getContentResolver();
-    }
-
-    /**
-     * Queries the ContentProvider for the table representing a given model.
-     * Equivalent to calling query(modelClass, null, null, null, null)
-     * @return a ModelCursor with the query results
-     */
-    public <T extends ActiveModel.Base> ModelCursor<T> query(Class<T> modelClass) {
-        return query(modelClass, null, null, null, null);
     }
 
     /**
@@ -90,6 +76,23 @@ public class ActiveManager {
             cursor.close();
         }
         return model;
+    }
+
+    public <T extends ActiveModel.Base> boolean save(T model) {
+        ContentProviderOperation operation = model.saveOperation();
+        ArrayList<ContentProviderOperation> operations = new ArrayList<ContentProviderOperation>(1);
+        operations.add(operation);
+
+        try {
+            mResolver.applyBatch(operation.getUri().getAuthority(), operations);
+            return true;
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error saving model", e);
+        } catch (OperationApplicationException e) {
+            Log.e(TAG, "Error saving model", e);
+        }
+
+        return false;
     }
 
     /////////////// Inner classes ///////////////

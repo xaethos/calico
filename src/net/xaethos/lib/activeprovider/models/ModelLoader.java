@@ -1,11 +1,10 @@
-package net.xaethos.lib.activeprovider.content;
+package net.xaethos.lib.activeprovider.models;
 
 import android.content.Context;
 import android.database.Cursor;
 import android.support.v4.content.AsyncTaskLoader;
-import net.xaethos.lib.activeprovider.models.ActiveModel;
 
-public class ModelLoader<T extends ActiveModel.Base> extends AsyncTaskLoader<ActiveManager.ModelCursor<T>> {
+public class ModelLoader<T extends ActiveModel.Base> extends AsyncTaskLoader<ModelManager.ModelCursor<T>> {
 
     ////////// Instance variables //////////
 
@@ -17,7 +16,7 @@ public class ModelLoader<T extends ActiveModel.Base> extends AsyncTaskLoader<Act
     String[] mSelectionArgs;
     String mSortOrder;
 
-    protected ActiveManager.ModelCursor<T> mCursor;
+    protected ModelManager.ModelCursor<T> mCursor;
 
     ////////// Instance methods //////////
 
@@ -35,9 +34,9 @@ public class ModelLoader<T extends ActiveModel.Base> extends AsyncTaskLoader<Act
     ///// AsyncTaskLoader
 
     @Override
-    public ActiveManager.ModelCursor<T> loadInBackground() {
-        ActiveManager manager = new ActiveManager(getContext());
-        ActiveManager.ModelCursor<T> cursor = manager.query(
+    public ModelManager.ModelCursor<T> loadInBackground() {
+        ModelManager manager = new ModelManager(getContext());
+        ModelManager.ModelCursor<T> cursor = manager.query(
                 mModelType, mProjection, mSelection, mSelectionArgs, mSortOrder);
         if (cursor != null) {
             // Ensure the cursor window is filled
@@ -48,7 +47,7 @@ public class ModelLoader<T extends ActiveModel.Base> extends AsyncTaskLoader<Act
     }
 
     @Override
-    public void deliverResult(ActiveManager.ModelCursor<T> cursor) {
+    public void deliverResult(ModelManager.ModelCursor<T> cursor) {
         if (isReset()) {
             // An async query came in while the loader is stopped
             if (cursor != null) {

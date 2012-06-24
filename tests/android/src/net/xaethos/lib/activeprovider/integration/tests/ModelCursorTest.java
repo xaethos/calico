@@ -1,7 +1,7 @@
 package net.xaethos.lib.activeprovider.integration.tests;
 
 import android.content.ContentValues;
-import net.xaethos.lib.activeprovider.content.ActiveManager;
+import net.xaethos.lib.activeprovider.models.ModelManager;
 import net.xaethos.lib.activeprovider.integration.models.Polymorph;
 
 import java.util.List;
@@ -23,7 +23,7 @@ public class ModelCursorTest extends BaseProviderTest {
 
         for(String table : TABLES) insertPolymorph(table);
 
-        cursor = new ActiveManager(getMockContext()).query(Polymorph.class, PROJ, null, null, null);
+        cursor = new ModelManager(getMockContext()).query(Polymorph.class, PROJ, null, null, null);
     }
 
     ////////// Tests //////////
