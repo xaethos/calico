@@ -88,7 +88,7 @@ public class ModelListTest extends BaseProviderTest {
             assertThrows(UnsupportedOperationException.class, new Runnable() {
                 @Override public void run() { iterator.remove(); }
             });
-            assertTrue(poly.isReadOnly());
+            assertFalse(poly.isReadOnly());
             assertEquals(table, poly.getStringValue());
         }
 

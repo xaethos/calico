@@ -47,17 +47,10 @@ public class ActiveManager {
         }
     }
 
-//    public <T extends ActiveModel.Base> Cursor query(Class<T> modelClass) {
-//        return query(modelClass, null, null, null, null);
-//    }
-
-//    public <T extends ActiveModel.Base> Cursor query(Class<T> modelClass, long id) {
-//        return mResolver.query(ContentUris.withAppendedId(ActiveModel.getContentUri(modelClass), id), null, null, null, null);
-//    }
-
     /////////////// Inner classes ///////////////
 
-    public final class ModelCursor<T extends ActiveModel.Base> extends CursorWrapper {
+    public final class ModelCursor<T extends ActiveModel.Base> extends CursorWrapper
+            implements Iterable<T> {
         private final Cursor mCursor;
         private final Class<T> mModelType;
         private final ContentProviderClient mContentProvider;
@@ -68,6 +61,18 @@ public class ActiveManager {
             mCursor = cursor;
             mModelType = modelType;
             mContentProvider = client;
+        }
+
+        ////////// Instance methods //////////
+
+        public List<T> getList() {
+            return new ModelList<T>(mModelType, this);
+        }
+
+        public ContentValues getValues() {
+            ContentValues values = new ContentValues(getColumnCount());
+            DatabaseUtils.cursorRowToContentValues(mCursor, values);
+            return values;
         }
 
         @Override
@@ -88,14 +93,36 @@ public class ActiveManager {
             }
         }
 
-        public List<T> getList() {
-            return new ModelList<T>(mModelType, this);
-        }
+        ////////// Iterable<T> //////////
 
-        public ContentValues getValues() {
-            ContentValues values = new ContentValues(getColumnCount());
-            DatabaseUtils.cursorRowToContentValues(mCursor, values);
-            return values;
+        @Override
+        public Iterator<T> iterator() {
+            moveToPosition(-1);
+            CursorModelHandler<T> handler = new CursorModelHandler<T>(mModelType, this);
+            final T model = mModelType.cast(Proxy.newProxyInstance(mModelType.getClassLoader(),
+                    new Class[]{mModelType},
+                    handler));
+
+            return new Iterator<T>() {
+                private final T mModel = model;
+
+                @Override
+                public boolean hasNext() {
+                    return !isLast();
+                }
+
+                @Override
+                public T next() {
+                    moveToNext();
+                    if (isAfterLast()) throw new NoSuchElementException();
+                    return mModel;
+                }
+
+                @Override
+                public void remove() {
+                    throw new UnsupportedOperationException("Immutable collection");
+                }
+            };
         }
     }
 
@@ -107,61 +134,6 @@ public class ActiveManager {
         private ModelList(Class<T> modelClass, ModelCursor cursor) {
             mModelClass = modelClass;
             mCursor = cursor;
-        }
-
-//        @Override
-//        public boolean contains(Object o) {
-//            return false;  //To change body of implemented methods use File | Settings | File Templates.
-//        }
-//
-//        @Override
-//        public boolean containsAll(Collection<?> objects) {
-//            return false;  //To change body of implemented methods use File | Settings | File Templates.
-//        }
-//
-//        @Override
-//        public boolean isEmpty() {
-//            return false;  //To change body of implemented methods use File | Settings | File Templates.
-//        }
-
-        @Override
-        public Iterator<T> iterator() {
-            mCursor.moveToPosition(-1);
-            CursorModelHandler<T> handler = new CursorModelHandler<T>(mModelClass, mCursor);
-            final T model = mModelClass.cast(Proxy.newProxyInstance(mModelClass.getClassLoader(),
-                    new Class[]{mModelClass},
-                    handler));
-
-            return new Iterator<T>() {
-                private final T mModel = model;
-
-                @Override
-                public boolean hasNext() {
-                    return !mCursor.isLast();
-                }
-
-                @Override
-                public T next() {
-                    mCursor.moveToNext();
-                    if (mCursor.isAfterLast()) throw new NoSuchElementException();
-                    return mModel;
-                }
-
-                @Override
-                public void remove() {
-                    throw new UnsupportedOperationException("Immutable collection");
-                }
-            };
-        }
-
-        @Override
-        public boolean remove(Object o) {
-            throw new UnsupportedOperationException("Immutable collection");
-        }
-
-        @Override
-        public boolean removeAll(Collection<?> objects) {
-            throw new UnsupportedOperationException("Immutable collection");
         }
 
         @Override
@@ -178,15 +150,16 @@ public class ActiveManager {
             return mCursor.getCount();
         }
 
-//        @Override
-//        public Object[] toArray() {
-//            return new Object[0];  //To change body of implemented methods use File | Settings | File Templates.
-//        }
-//
-//        @Override
-//        public <T> T[] toArray(T[] ts) {
-//            return null;  //To change body of implemented methods use File | Settings | File Templates.
-//        }
+        @Override
+        public boolean remove(Object o) {
+            throw new UnsupportedOperationException("Immutable collection");
+        }
+
+        @Override
+        public boolean removeAll(Collection<?> objects) {
+            throw new UnsupportedOperationException("Immutable collection");
+        }
+
     }
 
 }
