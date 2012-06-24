@@ -19,7 +19,7 @@ import java.util.regex.Pattern;
 
 public abstract class ActiveProvider extends ContentProvider {
 
-    protected static final String MIGRATIONS_TABLE = "activeprovider_migrations";
+    public static final String MIGRATIONS_TABLE = "activeprovider_migrations";
 
     /////////////// Inner classes ///////////////
 

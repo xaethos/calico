@@ -1,28 +1,22 @@
-package net.xaethos.lib.activeprovider.content;
+package net.xaethos.lib.activeprovider.integration.tests;
 
 import android.database.sqlite.SQLiteDatabase;
-import com.example.fixtures.DataProvider;
-import com.xtremelabs.robolectric.Robolectric;
-import com.xtremelabs.robolectric.RobolectricTestRunner;
+import android.test.mock.MockContext;
+import junit.framework.TestCase;
 import net.xaethos.lib.activeprovider.annotations.ProviderInfo;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import net.xaethos.lib.activeprovider.content.ActiveMigration;
+import net.xaethos.lib.activeprovider.content.ActiveProvider;
+import net.xaethos.lib.activeprovider.content.MigrationException;
+import net.xaethos.lib.activeprovider.integration.MyProvider;
 
+import java.util.Arrays;
 import java.util.List;
 
-import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.*;
+public class ActiveMigrationTest extends TestCase {
 
-@RunWith(RobolectricTestRunner.class)
-public class ActiveMigrationTest {
+    /////////////// Constants ///////////////
 
-	/////////////// Constants ///////////////
-
-	///// Database constants
+    ///// Database constants
 //	private static final String SCHEMA = "PUBLIC";
 
 //	private static final int TABLE_NAME = 3;
@@ -30,92 +24,86 @@ public class ActiveMigrationTest {
 
 //	private static final int COLUMN_NAME = 4;
 
-	/////////////// Fields ///////////////
+    /////////////// Fields ///////////////
 
-	SQLiteDatabase db;
+    SQLiteDatabase db;
 
-	/////////////// Set up ///////////////
+    /////////////// Set up ///////////////
 
-	@Before public void setup() {
-		db = SQLiteDatabase.openDatabase(null, null, 0);
+    @Override
+    public void setUp() {
+        db = SQLiteDatabase.create(null);
         ActiveProvider.DBHelper.createMigrationsTable(db);
     }
 
-	/////////////// Tests ///////////////
+    /////////////// Tests ///////////////
 
-	@Test public void callsOnUpgrade() {
-		class TestMigration extends ActiveMigration {
-			public boolean onUpgradeCalled;
-			@Override public boolean onUpgrade(SQLiteDatabase db) {
-				onUpgradeCalled = true;
-				return true;
-			}
-		}
-		TestMigration migration = new TestMigration();
-		migration.upgrade(db);
+    public void test_upgrade_callsOnUpgrade() {
+        class TestMigration extends ActiveMigration {
+            public boolean onUpgradeCalled;
+            @Override public boolean onUpgrade(SQLiteDatabase db) {
+                onUpgradeCalled = true;
+                return true;
+            }
+        }
+        TestMigration migration = new TestMigration();
+        migration.upgrade(db);
 
-		assertThat(migration.onUpgradeCalled, is(true));
-	}
+        assertTrue(migration.onUpgradeCalled);
+    }
 
-	@Test(expected=NullPointerException.class)
-	public void mustHaveADatabase() {
-		new ActiveMigration() {
-			@Override public boolean onUpgrade(SQLiteDatabase db) { return true; }
-		}.upgrade(null);
-	}
+    public void test_upgrade_mustHaveADatabase() {
+        try {
+            new ActiveMigration() {
+                @Override public boolean onUpgrade(SQLiteDatabase db) { return true; }
+            }.upgrade(null);
+            assert false;
+        }
+        catch (NullPointerException e){}
+    }
 
-	@Test(expected=MigrationException.class)
-	public void balksAtMigrationFailure() {
-		new ActiveMigration() {
-			@Override public boolean onUpgrade(SQLiteDatabase db) { return false; }
-		}.upgrade(db);
-	}
+    public void test_upgrade_balksAtMigrationFailure() {
+        try {
+            new ActiveMigration() {
+                @Override public boolean onUpgrade(SQLiteDatabase db) { return false; }
+            }.upgrade(db);
+            assert false;
+        }
+        catch (MigrationException e){}
+    }
 
-    @Test
-    public void upgrade_marksMigrationAsApplied() {
-        ActiveProvider.DBHelper helper = new ActiveProvider.DBHelper(Robolectric.application,
-                DataProvider.class.getAnnotation(ProviderInfo.class));
+    public void test_upgrade_marksMigrationAsApplied() {
+        ActiveProvider.DBHelper helper = new ActiveProvider.DBHelper(new MockContext(),
+                MyProvider.class.getAnnotation(ProviderInfo.class));
         List<ActiveMigration> migrations = helper.getMissingMigrations(db);
         assertFalse(migrations.isEmpty());
         for (ActiveMigration migration : migrations) migration.upgrade(db);
         assertTrue(helper.getMissingMigrations(db).isEmpty());
     }
 
-    @Test
-    public void onUpgrade_happensInTransaction() {
-        SQLiteDatabase mockDB = mock(SQLiteDatabase.class);
+    public void test_onUpgrade_happensInTransaction() {
+        assertFalse(db.inTransaction());
         new ActiveMigration() {
             @Override public boolean onUpgrade(SQLiteDatabase db) {
-                verify(db, times(1)).beginTransaction();
-                verify(db, never()).setTransactionSuccessful();
-                verify(db, never()).endTransaction();
+                assertTrue(db.inTransaction());
                 return true;
             }
-        }.upgrade(mockDB);
-
-        verify(mockDB, times(1)).beginTransaction();
-        verify(mockDB, times(1)).setTransactionSuccessful();
-        verify(mockDB, times(1)).endTransaction();
+        }.upgrade(db);
+        assertFalse(db.inTransaction());
     }
 
-    @Test
-    public void onUpgrade_rollsBackIfFalse() {
-        SQLiteDatabase mockDB = mock(SQLiteDatabase.class);
+    public void test_onUpgrade_rollsBackIfFalse() {
         try {
-        new ActiveMigration() {
-            @Override public boolean onUpgrade(SQLiteDatabase db) {
-                verify(db, times(1)).beginTransaction();
-                verify(db, never()).setTransactionSuccessful();
-                verify(db, never()).endTransaction();
-                return false;
-            }
-        }.upgrade(mockDB);
+            new ActiveMigration() {
+                @Override public boolean onUpgrade(SQLiteDatabase db) {
+                    db.execSQL("CREATE TABLE foo (bar);");
+                    return false;
+                }
+            }.upgrade(db);
         }
         catch (MigrationException e) {}
-
-        verify(mockDB, times(1)).beginTransaction();
-        verify(mockDB, never()).setTransactionSuccessful();
-        verify(mockDB, times(1)).endTransaction();
+        assertFalse(Arrays.asList(ActiveProvider.DBHelper.queryTableNames(db))
+                .contains("foo"));
     }
 
     /*
@@ -211,16 +199,16 @@ public class ActiveMigrationTest {
 	}
 	*/
 
-	/* http://api.rubyonrails.org/classes/ActiveRecord/Migration.html
-TODO rename_column(table_name, column_name, new_column_name):
- Renames a column but keeps the type and content.
-TODO change_column(table_name, column_name, type, options):
- Changes the column to a different type using the same parameters as add_column.
-TODO remove_column(table_name, column_name):
- Removes the column named column_name from the table called table_name.
-	 */
+    /* http://api.rubyonrails.org/classes/ActiveRecord/Migration.html
+ TODO rename_column(table_name, column_name, new_column_name):
+  Renames a column but keeps the type and content.
+ TODO change_column(table_name, column_name, type, options):
+  Changes the column to a different type using the same parameters as add_column.
+ TODO remove_column(table_name, column_name):
+  Removes the column named column_name from the table called table_name.
+      */
 
-	///// Helper methods
+    ///// Helper methods
 
     /*
 	private void createTestTable() {

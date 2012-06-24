@@ -3,6 +3,7 @@ package net.xaethos.lib.activeprovider.models;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.DatabaseUtils;
+import net.xaethos.lib.activeprovider.content.ActiveManager;
 
 import java.util.Date;
 
@@ -23,8 +24,14 @@ implements ReadWriteModelHandler {
 
     public ValuesModelHandler(Class<T> modelInterface, Cursor cursor) {
         super(modelInterface);
-        ContentValues values = new ContentValues(cursor.getColumnCount());
-        DatabaseUtils.cursorRowToContentValues(cursor, values);
+        ContentValues values = null;
+        if (cursor instanceof ActiveManager.ModelCursor) {
+            values = ((ActiveManager.ModelCursor)cursor).getValues();
+        }
+        else {
+            values = new ContentValues(cursor.getColumnCount());
+            DatabaseUtils.cursorRowToContentValues(cursor, values);
+        }
         mValues = values;
     }
 
@@ -35,7 +42,7 @@ implements ReadWriteModelHandler {
     ////////// ActiveModel.Base //////////
 
     @Override
-    public ActiveModel.Base writableCopy() {
+    public T writableCopy() {
         return new ValuesModelHandler<T>(getModelInterface()).getModelProxy();
     }
 

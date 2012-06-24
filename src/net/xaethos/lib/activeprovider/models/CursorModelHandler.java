@@ -21,8 +21,9 @@ implements ReadOnlyModelHandler {
     ////////// ActiveModel.Base //////////
 
     @Override
-    public ActiveModel.Base writableCopy() {
-        ValuesModelHandler handler = new ValuesModelHandler<T>(getModelInterface(), mCursor);
+    public T writableCopy() {
+        Cursor cursor = mCursor;
+        ValuesModelHandler<T> handler = new ValuesModelHandler<T>(getModelInterface(), cursor);
         return handler.getModelProxy();
     }
 
