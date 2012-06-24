@@ -7,10 +7,23 @@
 
     <application android:label="@string/app_name">
         <uses-library android:name="android.test.runner" />
-        <activity android:name=".MyActivity" android:label="@string/app_name">
+        <activity android:name=".UsersActivity" android:label="@string/app_name">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
-                <category android:name="android.intent.category.LAUNCHER"/>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="vnd.android.cursor.dir/vnd.xaethos.test.user" />
+            </intent-filter>
+        </activity>
+
+        <activity android:name=".EditUserActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.EDIT" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="vnd.android.cursor.item/vnd.xaethos.test.user" />
             </intent-filter>
         </activity>
 

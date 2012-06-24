@@ -1,21 +1,24 @@
 package net.xaethos.lib.activeprovider.integration;
 
 import android.R;
-import android.content.ContentValues;
-import android.database.Cursor;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.LoaderManager;
-import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.support.v4.widget.SimpleCursorAdapter;
+import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ListView;
 import net.xaethos.lib.activeprovider.content.ActiveManager;
 import net.xaethos.lib.activeprovider.content.ModelLoader;
 import net.xaethos.lib.activeprovider.integration.models.User;
 import net.xaethos.lib.activeprovider.models.ActiveModel;
 
-public class MyActivity extends FragmentActivity implements LoaderManager.LoaderCallbacks<ActiveManager.ModelCursor<User>> {
+public class UsersActivity extends FragmentActivity
+        implements LoaderManager.LoaderCallbacks<ActiveManager.ModelCursor<User>>,
+        AdapterView.OnItemClickListener
+{
 
     private SimpleCursorAdapter mAdapter;
 
@@ -35,14 +38,9 @@ public class MyActivity extends FragmentActivity implements LoaderManager.Loader
 
         list.setId(R.id.list);
         list.setAdapter(adapter);
+        list.setOnItemClickListener(this);
 
         getSupportLoaderManager().initLoader(0, null, this);
-    }
-
-    public void createUser(String name) {
-        ContentValues values = new ContentValues(1);
-        values.put(User.NAME, name);
-        getContentResolver().insert(ActiveModel.getContentUri(User.class), values);
     }
 
     ////////// LoaderManager.LoaderCallbacks //////////
@@ -60,5 +58,12 @@ public class MyActivity extends FragmentActivity implements LoaderManager.Loader
     @Override
     public void onLoaderReset(Loader<ActiveManager.ModelCursor<User>> loader) {
         mAdapter.swapCursor(null);
+    }
+
+    ////////// AdapterView.OnItemClickListener //////////
+
+    @Override
+    public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
+        startActivity(new Intent(Intent.ACTION_EDIT, ActiveModel.getContentUri(User.class, id)));
     }
 }

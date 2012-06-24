@@ -7,18 +7,17 @@ import android.net.Uri;
 import android.test.ActivityInstrumentationTestCase2;
 import android.widget.ListView;
 import android.widget.TextView;
-import net.xaethos.lib.activeprovider.integration.MyActivity;
-import net.xaethos.lib.activeprovider.integration.models.Polymorph;
+import net.xaethos.lib.activeprovider.integration.UsersActivity;
 import net.xaethos.lib.activeprovider.integration.models.User;
 import net.xaethos.lib.activeprovider.models.ActiveModel;
 
-public class ModelLoaderTest extends ActivityInstrumentationTestCase2<MyActivity> {
+public class ModelLoaderTest extends ActivityInstrumentationTestCase2<UsersActivity> {
     static final String[] NAMES = { "Pedro", "Juan", "Diego" };
 
     Uri usersUri;
 
     public ModelLoaderTest() {
-        super(MyActivity.class);
+        super(UsersActivity.class);
     }
 
     @Override
@@ -30,7 +29,7 @@ public class ModelLoaderTest extends ActivityInstrumentationTestCase2<MyActivity
     }
 
     public void test_cursorReloading() throws Exception {
-        final MyActivity activity = getActivity();
+        final UsersActivity activity = getActivity();
         ContentResolver resolver = activity.getContentResolver();
 
         ContentValues values = new ContentValues(1);

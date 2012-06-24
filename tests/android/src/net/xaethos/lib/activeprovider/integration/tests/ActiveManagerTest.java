@@ -1,5 +1,7 @@
 package net.xaethos.lib.activeprovider.integration.tests;
 
+import android.content.ContentUris;
+import android.net.Uri;
 import net.xaethos.lib.activeprovider.content.ActiveManager;
 import net.xaethos.lib.activeprovider.integration.models.Polymorph;
 
@@ -34,6 +36,16 @@ public class ActiveManagerTest extends BaseProviderTest {
         assertEquals("coffee table", cursor.getString(1));
         assertTrue(cursor.moveToNext());
         assertEquals("dining table", cursor.getString(1));
+    }
+
+    public void test_query_forModel() {
+        Uri uri = insertPolymorph("dining table");
+
+        Polymorph poly = manager.fetch(Polymorph.class, ContentUris.parseId(uri));
+
+        assertNotNull(poly);
+        assertEquals("dining table", poly.getStringValue());
+        assertFalse(poly.isReadOnly());
     }
 
 }

@@ -11,12 +11,21 @@ import android.net.Uri;
 import android.os.RemoteException;
 import net.xaethos.lib.activeprovider.models.ActiveModel;
 import net.xaethos.lib.activeprovider.models.CursorModelHandler;
+import net.xaethos.lib.activeprovider.models.ModelHandler;
 import net.xaethos.lib.activeprovider.models.ValuesModelHandler;
 
 import java.lang.reflect.Proxy;
 import java.util.*;
 
 public class ActiveManager {
+
+    /////////////// Static methods ///////////////
+
+    protected static <T extends ActiveModel.Base> T getModel(Class<T> modelClass, ModelHandler<T> handler) {
+        return modelClass.cast(Proxy.newProxyInstance(modelClass.getClassLoader(),
+                new Class[]{modelClass},
+                handler));
+    }
 
     /////////////// Instance fields ///////////////
 
@@ -45,7 +54,17 @@ public class ActiveManager {
      * @return a ModelCursor with the query results
      */
     public <T extends ActiveModel.Base> ModelCursor<T> query(Class<T> modelClass, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
-        Uri uri = ActiveModel.getContentUri(modelClass);
+        return query(modelClass, ActiveModel.getContentUri(modelClass), projection, selection, selectionArgs, sortOrder);
+    }
+
+    /**
+     * Queries the ContentProvider for the table representing a given model.
+     * See {@link ContentResolver#query(Uri, String[], String, String[], String)
+     * ContentResolver.query()} for documentation on the meaning of the
+     * parameters.
+     * @return a ModelCursor with the query results
+     */
+    public <T extends ActiveModel.Base> ModelCursor<T> query(Class<T> modelClass, Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
         ContentProviderClient client = mResolver.acquireContentProviderClient(uri);
         try {
             Cursor cursor = client.query(uri, projection, selection, selectionArgs, sortOrder);
@@ -61,6 +80,16 @@ public class ActiveManager {
             client.release();
             throw e;
         }
+    }
+
+    public <T extends ActiveModel.Base> T fetch(Class<T> modelClass, long id) {
+        T model = null;
+        ModelCursor<T> cursor = query(modelClass, ActiveModel.getContentUri(modelClass, id), null, null, null, null);
+        if (cursor.moveToFirst()) {
+            model = getModel(modelClass, new ValuesModelHandler<T>(modelClass, cursor));
+            cursor.close();
+        }
+        return model;
     }
 
     /////////////// Inner classes ///////////////
@@ -114,10 +143,7 @@ public class ActiveManager {
         @Override
         public Iterator<T> iterator() {
             moveToPosition(-1);
-            CursorModelHandler<T> handler = new CursorModelHandler<T>(mModelType, this);
-            final T model = mModelType.cast(Proxy.newProxyInstance(mModelType.getClassLoader(),
-                    new Class[]{mModelType},
-                    handler));
+            final T model = getModel(mModelType, new CursorModelHandler<T>(mModelType, this));
 
             return new Iterator<T>() {
                 private final T mModel = model;
@@ -155,10 +181,7 @@ public class ActiveManager {
         @Override
         public T get(int i) {
             mCursor.moveToPosition(i);
-            ValuesModelHandler<T> handler = new ValuesModelHandler<T>(mModelClass, mCursor);
-            return mModelClass.cast(Proxy.newProxyInstance(mModelClass.getClassLoader(),
-                    new Class[]{mModelClass},
-                    handler));
+            return getModel(mModelClass, new ValuesModelHandler<T>(mModelClass, mCursor));
         }
 
         @Override
