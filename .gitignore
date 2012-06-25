@@ -1,0 +1,37 @@
+## OSX ignores
+.DS_Store
+
+## Android ignores
+# built application files
+*.apk
+*.ap_
+
+# files for the dex VM
+*.dex
+
+# Java class files
+*.class
+
+# generated files
+bin/
+gen/
+out/
+
+# Local configuration file (sdk path, etc)
+local.properties
+local-libs/
+
+## Eclipse ignores
+.project
+.classpath
+.settings
+
+## IntelliJ ignores
+*.iml
+.idea/*
+
+## Misc
+tmp/
+*.swp
+*~
+
