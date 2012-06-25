@@ -2,7 +2,6 @@ package net.xaethos.lib.activeprovider.integration.tests;
 
 import android.database.Cursor;
 import net.xaethos.lib.activeprovider.integration.models.Polymorph;
-import net.xaethos.lib.activeprovider.models.ActiveModel;
 import net.xaethos.lib.activeprovider.models.ModelManager;
 
 public abstract class ReadOnlyModelHandlerTest extends BaseProviderTest {
@@ -18,7 +17,7 @@ public abstract class ReadOnlyModelHandlerTest extends BaseProviderTest {
 
         Polymorph polymorph = newModelProxy(cursor);
 
-        assertEquals(ActiveModel.getContentUri(Polymorph.class, polymorph.getId()), polymorph.getUri());
+        assertEquals(ModelManager.getContentUri(Polymorph.class, polymorph.getId()), polymorph.getUri());
     }
 
     public void test_getUri_isNullIfNoId() {
@@ -59,7 +58,6 @@ public abstract class ReadOnlyModelHandlerTest extends BaseProviderTest {
         verifyTypeCasting(newModelProxy(cursor), "8");
     }
 
-//    TODO: get blobs to work
     public void testBlobPolymorph() throws Exception {
         byte[] blob = { 1, 2, 3, 4 };
         insertPolymorph(blob);
@@ -70,6 +68,18 @@ public abstract class ReadOnlyModelHandlerTest extends BaseProviderTest {
         for (int i=0; i<blob.length; ++i) {
             assertEquals(blob[i], polymorph.getBlobValue()[i]);
         }
+    }
+
+    public void test_writableCopy() {
+        insertPolymorph("8");
+        cursor = queryPolymorphs();
+        assertTrue(cursor.moveToFirst());
+
+        Polymorph polymorph = newModelProxy(cursor);
+        Polymorph polymorphCopy = polymorph.writableCopy();
+
+        assertFalse(polymorphCopy.isReadOnly());
+        assertNotSame(polymorph, polymorphCopy);
     }
 
     ////////// Helper methods //////////

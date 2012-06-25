@@ -10,7 +10,6 @@ import android.view.*;
 import android.widget.AdapterView;
 import android.widget.ListView;
 import net.xaethos.lib.activeprovider.integration.models.User;
-import net.xaethos.lib.activeprovider.models.ActiveModel;
 import net.xaethos.lib.activeprovider.models.ModelLoader;
 import net.xaethos.lib.activeprovider.models.ModelManager;
 
@@ -50,7 +49,7 @@ public class UsersActivity extends FragmentActivity
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuItem item = menu.add("New User");
-        item.setIntent(new Intent(Intent.ACTION_INSERT, ActiveModel.getContentUri(User.class)));
+        item.setIntent(new Intent(Intent.ACTION_INSERT, ModelManager.getContentUri(User.class)));
         return true;
     }
 
@@ -82,7 +81,7 @@ public class UsersActivity extends FragmentActivity
     ///// Helpers
 
     private void editUser(long userId) {
-        startActivity(new Intent(Intent.ACTION_EDIT, ActiveModel.getContentUri(User.class, userId)));
+        startActivity(new Intent(Intent.ACTION_EDIT, ModelManager.getContentUri(User.class, userId)));
     }
 
     ////////// LoaderManager.LoaderCallbacks //////////

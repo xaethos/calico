@@ -1,6 +1,5 @@
 package net.xaethos.lib.activeprovider.models;
 
-import android.net.Uri;
 import net.xaethos.lib.activeprovider.annotations.Getter;
 import net.xaethos.lib.activeprovider.annotations.ModelInfo;
 import net.xaethos.lib.activeprovider.annotations.Setter;
@@ -15,7 +14,7 @@ import static org.mockito.Mockito.verify;
 
 public class ModelHandlerTest {
 
-    public class ROHandler<T extends ActiveModel.Base> extends ModelHandler<T> implements ReadOnlyModelHandler {
+    public class ROHandler<T extends Model> extends ModelHandler<T> implements ReadOnlyModelHandler {
         public ROHandler(Class<T> modelInterface) {
             super(modelInterface);
         }
@@ -33,7 +32,7 @@ public class ModelHandlerTest {
         @Override public T       writableCopy()             { return null; }
     }
 
-    public class RWHandler<T extends ActiveModel.Base> extends ROHandler<T> implements ReadWriteModelHandler {
+    public class RWHandler<T extends Model> extends ROHandler<T> implements ReadWriteModelHandler {
         public RWHandler(Class<T> modelInterface) {
             super(modelInterface);
         }
@@ -54,7 +53,7 @@ public class ModelHandlerTest {
     }
 
     @ModelInfo(authority = "com.example.content", tableName = "table", contentType = "vnd.example.table")
-    private static interface TestModel extends ActiveModel.Base {
+    private static interface TestModel extends Model {
         public Integer badMethod();
 
         public static final String INT = "int";
@@ -62,7 +61,7 @@ public class ModelHandlerTest {
         @Setter(INT) public void setInt(Integer i);
     }
 
-    private static interface BadInterface extends ActiveModel.Base {}
+    private static interface BadInterface extends Model {}
 
     RWHandler<TestModel> handler;
 
@@ -102,7 +101,7 @@ public class ModelHandlerTest {
         assertThat(ModelHandler.getGetterName(RWHandler.class), is("getRWHandler"));
     }
 
-    ////////// ActiveModel.Base tests //////////
+    ////////// Model tests //////////
 
     @Test
     public void isReadOnly() {

@@ -2,20 +2,63 @@ package net.xaethos.lib.activeprovider.integration.tests;
 
 import android.content.ContentUris;
 import android.net.Uri;
+import net.xaethos.lib.activeprovider.annotations.ModelInfo;
 import net.xaethos.lib.activeprovider.integration.models.Polymorph;
+import net.xaethos.lib.activeprovider.models.Model;
 import net.xaethos.lib.activeprovider.models.ModelManager;
+
+import static net.xaethos.lib.activeprovider.integration.tests.Assert.assertThrows;
 
 public class ModelManagerTest extends BaseProviderTest {
 
+    ModelInfo dataInfo;
     ModelManager manager;
 
     @Override
     public void setUp() throws Exception {
         super.setUp();
         manager = new ModelManager(getMockContext());
+        dataInfo = Polymorph.class.getAnnotation(ModelInfo.class);
     }
 
-    ////////// Tests //////////
+    ////////// Static method tests //////////
+
+    public void test_getModelInfo() {
+        assertEquals(dataInfo, ModelManager.getModelInfo(Polymorph.class));
+    }
+
+    public void test_getModelInfo_shouldThrowException() throws Throwable {
+        assertThrows(IllegalArgumentException.class, new Runnable() {
+            @Override
+            public void run() {
+                ModelManager.getModelInfo(NotAnnotated.class);
+            }
+        });
+    }
+
+    public void test_getContentUri() throws Exception {
+        Uri uri = Uri.parse("content://net.xaethos.lib.activeprovider.integration/polymorphs");
+        assertEquals(uri, ModelManager.getContentUri(dataInfo));
+        assertEquals(uri, ModelManager.getContentUri(Polymorph.class));
+
+        uri = ContentUris.withAppendedId(uri, 42L);
+        assertEquals(uri, ModelManager.getContentUri(dataInfo, 42L));
+        assertEquals(uri, ModelManager.getContentUri(Polymorph.class, 42L));
+    }
+
+    public void test_getContentDirType() {
+        String mimeType = "vnd.android.cursor.dir/vnd.xaethos.test.polymorph";
+        assertEquals(mimeType, ModelManager.getContentDirType(dataInfo));
+        assertEquals(mimeType, ModelManager.getContentDirType(Polymorph.class));
+    }
+
+    public void test_getContentItemType() {
+        String mimeType = "vnd.android.cursor.item/vnd.xaethos.test.polymorph";
+        assertEquals(mimeType, ModelManager.getContentItemType(dataInfo));
+        assertEquals(mimeType, ModelManager.getContentItemType(Polymorph.class));
+    }
+
+    ////////// Instance method tests //////////
 
     public void test_query_forModelCursor() {
         insertPolymorph("dining table");
@@ -89,5 +132,15 @@ public class ModelManagerTest extends BaseProviderTest {
         poly = manager.fetch(Polymorph.class, ContentUris.parseId(uri));
         assertNull(poly);
     }
+
+    ////////// Helpers //////////
+
+    private interface NotAnnotated extends Model {}
+
+    @ModelInfo(authority = "", contentType = "", tableName = "")
+    private abstract class NotAnInterface implements Model {}
+
+    @ModelInfo(authority = "", contentType = "", tableName = "")
+    private interface NotExtendingModel {}
 
 }

@@ -9,7 +9,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 import net.xaethos.lib.activeprovider.integration.UsersActivity;
 import net.xaethos.lib.activeprovider.integration.models.User;
-import net.xaethos.lib.activeprovider.models.ActiveModel;
+import net.xaethos.lib.activeprovider.models.ModelManager;
 
 public class ModelLoaderTest extends ActivityInstrumentationTestCase2<UsersActivity> {
     static final String[] NAMES = { "Pedro", "Juan", "Diego" };
@@ -24,7 +24,7 @@ public class ModelLoaderTest extends ActivityInstrumentationTestCase2<UsersActiv
     protected void setUp() throws Exception {
         super.setUp();
 
-        usersUri = ActiveModel.getContentUri(User.class);
+        usersUri = ModelManager.getContentUri(User.class);
         getInstrumentation().getTargetContext().getContentResolver().delete(usersUri, null, null);
     }
 

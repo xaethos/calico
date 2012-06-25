@@ -7,6 +7,8 @@ import android.database.DatabaseUtils;
 import android.net.Uri;
 import android.os.RemoteException;
 import android.util.Log;
+import net.xaethos.lib.activeprovider.annotations.Getter;
+import net.xaethos.lib.activeprovider.annotations.ModelInfo;
 
 import java.lang.reflect.Proxy;
 import java.util.*;
@@ -16,10 +18,63 @@ public class ModelManager {
 
     /////////////// Static methods ///////////////
 
-    protected static <T extends ActiveModel.Base> T getModel(Class<T> modelClass, ModelHandler<T> handler) {
+    public static <T extends Model> ModelInfo getModelInfo(Class<T> modelType) {
+        if (!isModelInterface(modelType)) {
+            throw new IllegalArgumentException(
+                    modelType.getName() + "must be an interface with the annotation @" + ModelInfo.class.getSimpleName());
+        }
+        return modelType.getAnnotation(ModelInfo.class);
+    }
+
+    public static Uri getContentUri(ModelInfo model) {
+        return buildContentUri(model).build();
+    }
+
+    public static <T extends Model> Uri getContentUri(Class<T> modelType) {
+        return getContentUri(modelType.getAnnotation(ModelInfo.class));
+    }
+
+    public static Uri getContentUri(ModelInfo model, long id) {
+        return buildContentUri(model).appendPath(Long.toString(id)).build();
+    }
+
+    public static <T extends Model> Uri getContentUri(Class<T> modelType, long id) {
+        return getContentUri(modelType.getAnnotation(ModelInfo.class), id);
+    }
+
+    public static String getContentDirType(ModelInfo model) {
+        return ContentResolver.CURSOR_DIR_BASE_TYPE + "/" + model.contentType();
+    }
+
+    public static <T extends Model> String getContentDirType(Class<T> modelType) {
+        return getContentDirType(getModelInfo(modelType));
+    }
+
+    public static String getContentItemType(ModelInfo model) {
+        return ContentResolver.CURSOR_ITEM_BASE_TYPE + "/" + model.contentType();
+    }
+
+    public static <T extends Model> String getContentItemType(Class<T> modelType) {
+        return getContentItemType(getModelInfo(modelType));
+    }
+
+    ///// Helpers
+
+    static <T extends Model> boolean isModelInterface(Class<T> modelType) {
+        return modelType.isInterface() && modelType.isAnnotationPresent(ModelInfo.class);
+    }
+
+    static <T extends Model> T getModel(Class<T> modelClass, ModelHandler<T> handler) {
         return modelClass.cast(Proxy.newProxyInstance(modelClass.getClassLoader(),
                 new Class[]{modelClass},
                 handler));
+    }
+
+    private static Uri.Builder buildContentUri(ModelInfo model) {
+        return new Uri.Builder()
+                .scheme(ContentResolver.SCHEME_CONTENT)
+                .authority(model.authority())
+                .appendPath(model.tableName());
     }
 
     /////////////// Instance fields ///////////////
@@ -39,8 +94,8 @@ public class ModelManager {
      * parameters.
      * @return a ModelCursor with the query results
      */
-    public <T extends ActiveModel.Base> ModelCursor<T> query(Class<T> modelClass, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
-        return query(modelClass, ActiveModel.getContentUri(modelClass), projection, selection, selectionArgs, sortOrder);
+    public <T extends Model> ModelCursor<T> query(Class<T> modelClass, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
+        return query(modelClass, getContentUri(modelClass), projection, selection, selectionArgs, sortOrder);
     }
 
     /**
@@ -50,7 +105,7 @@ public class ModelManager {
      * parameters.
      * @return a ModelCursor with the query results
      */
-    public <T extends ActiveModel.Base> ModelCursor<T> query(Class<T> modelClass, Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
+    public <T extends Model> ModelCursor<T> query(Class<T> modelClass, Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
         ContentProviderClient client = mResolver.acquireContentProviderClient(uri);
         try {
             Cursor cursor = client.query(uri, projection, selection, selectionArgs, sortOrder);
@@ -68,13 +123,13 @@ public class ModelManager {
         }
     }
 
-    public <T extends ActiveModel.Base> T create(Class<T> modelType) {
+    public <T extends Model> T create(Class<T> modelType) {
         return getModel(modelType, new ValuesModelHandler<T>(modelType));
     }
 
-    public <T extends ActiveModel.Base> T fetch(Class<T> modelClass, long id) {
+    public <T extends Model> T fetch(Class<T> modelClass, long id) {
         T model = null;
-        ModelCursor<T> cursor = query(modelClass, ActiveModel.getContentUri(modelClass, id), null, null, null, null);
+        ModelCursor<T> cursor = query(modelClass, getContentUri(modelClass, id), null, null, null, null);
         if (cursor.moveToFirst()) {
             model = getModel(modelClass, new ValuesModelHandler<T>(modelClass, cursor));
             cursor.close();
@@ -82,11 +137,11 @@ public class ModelManager {
         return model;
     }
 
-    public <T extends ActiveModel.Base> boolean save(T model) {
+    public <T extends Model> boolean save(T model) {
         return applyOperation(model.saveOperation());
     }
 
-    public <T extends ActiveModel.Base> boolean delete(T model) {
+    public <T extends Model> boolean delete(T model) {
         return applyOperation(model.deleteOperation());
     }
 
@@ -108,7 +163,26 @@ public class ModelManager {
 
     /////////////// Inner classes ///////////////
 
-    public final class ModelCursor<T extends ActiveModel.Base> extends CursorWrapper
+    @SuppressWarnings("UnusedDeclaration")
+    public static interface Timestamps {
+        public static final String _CREATED_AT = "_created_at";
+        public static final String _UPDATED_AT = "_updated_at";
+
+        @Getter(_CREATED_AT) public Date getCreatedAt();
+        @Getter(_UPDATED_AT) public Date getUpdatedAt();
+    }
+
+    public static interface Utils<T extends Model> {
+        public Uri getUri();
+
+        public boolean isReadOnly();
+        public T writableCopy();
+
+        public ContentProviderOperation saveOperation();
+        public ContentProviderOperation deleteOperation();
+    }
+
+    public final class ModelCursor<T extends Model> extends CursorWrapper
             implements Iterable<T> {
         private final Cursor mCursor;
         private final Class<T> mModelType;
@@ -186,7 +260,7 @@ public class ModelManager {
         }
     }
 
-    private class ModelList<T extends ActiveModel.Base> extends AbstractList<T> {
+    private class ModelList<T extends Model> extends AbstractList<T> {
 
         private final Class<T> mModelClass;
         private final ModelCursor mCursor;

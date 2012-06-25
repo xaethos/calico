@@ -5,7 +5,7 @@ import android.net.Uri;
 
 import java.util.Date;
 
-public class CursorModelHandler<T extends ActiveModel.Base> extends ModelHandler<T>
+public class CursorModelHandler<T extends Model> extends ModelHandler<T>
 implements ReadOnlyModelHandler {
 
     private final Cursor mCursor;
@@ -19,17 +19,17 @@ implements ReadOnlyModelHandler {
         return mCursor;
     }
 
-    ////////// ActiveModel.Base //////////
+    ////////// Model implementation //////////
 
     @Override
     public Uri getUri() {
         Cursor cursor = mCursor;
-        int index = cursor.getColumnIndex(ActiveModel.Base._ID);
+        int index = cursor.getColumnIndex(Model._ID);
         if (index < 0 || cursor.isNull(index)) {
             return null;
         }
 
-        return ActiveModel.getContentUri(getModelInterface(), cursor.getLong(index));
+        return ModelManager.getContentUri(getModelInterface(), cursor.getLong(index));
     }
 
     @Override

@@ -4,7 +4,8 @@ import net.xaethos.lib.activeprovider.annotations.Getter;
 import net.xaethos.lib.activeprovider.annotations.ModelInfo;
 import net.xaethos.lib.activeprovider.annotations.Setter;
 import net.xaethos.lib.activeprovider.integration.MyProvider;
-import net.xaethos.lib.activeprovider.models.ActiveModel;
+import net.xaethos.lib.activeprovider.models.Model;
+import net.xaethos.lib.activeprovider.models.ModelManager;
 
 @ModelInfo(
         tableName = "polymorphs",
@@ -12,8 +13,8 @@ import net.xaethos.lib.activeprovider.models.ActiveModel;
         contentType = "vnd.xaethos.test.polymorph"
 )
 public interface Polymorph extends
-        ActiveModel.Base<Polymorph>,
-        ActiveModel.Timestamps
+        Model<Polymorph>,
+        ModelManager.Timestamps
 {
     public static final String VALUE = "value";
 

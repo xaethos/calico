@@ -8,7 +8,7 @@ import android.net.Uri;
 import android.provider.BaseColumns;
 import net.xaethos.lib.activeprovider.annotations.ModelInfo;
 import net.xaethos.lib.activeprovider.integration.models.Polymorph;
-import net.xaethos.lib.activeprovider.models.ActiveModel;
+import net.xaethos.lib.activeprovider.models.ModelManager;
 
 import static net.xaethos.lib.activeprovider.integration.tests.Assert.assertHasItems;
 
@@ -122,8 +122,8 @@ public class ActiveProviderTest extends BaseProviderTest {
         ContentValues values = new ContentValues();
         values.put(Polymorph.VALUE, "Hello World!");
 
-        Uri uri = resolver.insert(ActiveModel.getContentUri(Polymorph.class), values);
-        assertEquals(ActiveModel.getContentItemType(Polymorph.class), resolver.getType(uri));
+        Uri uri = resolver.insert(ModelManager.getContentUri(Polymorph.class), values);
+        assertEquals(ModelManager.getContentItemType(Polymorph.class), resolver.getType(uri));
 
         cursor = queryPolymorphs();
         assertTrue(cursor.moveToFirst());

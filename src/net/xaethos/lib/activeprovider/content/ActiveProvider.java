@@ -10,7 +10,8 @@ import android.provider.BaseColumns;
 import android.text.TextUtils;
 import net.xaethos.lib.activeprovider.annotations.ModelInfo;
 import net.xaethos.lib.activeprovider.annotations.ProviderInfo;
-import net.xaethos.lib.activeprovider.models.ActiveModel;
+import net.xaethos.lib.activeprovider.models.Model;
+import net.xaethos.lib.activeprovider.models.ModelManager;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -157,10 +158,10 @@ public abstract class ActiveProvider extends ContentProvider {
 
     public ModelInfo[] getModels() {
         if (mModels == null) {
-            Class<?>[] modelInterfaces = getProviderInfo().models();
+            Class<? extends Model>[] modelInterfaces = getProviderInfo().models();
             ModelInfo[] models = new ModelInfo[modelInterfaces.length];
             for (int i=0; i<modelInterfaces.length; ++i) {
-                models[i] = ActiveModel.getModelInfo(modelInterfaces[i]);
+                models[i] = ModelManager.getModelInfo(modelInterfaces[i]);
             }
             mModels = models;
         }
@@ -194,10 +195,10 @@ public abstract class ActiveProvider extends ContentProvider {
 		ModelInfo model = modelFromUriMatch(match);
 
 		if (isItemUri(match)) {
-            return ActiveModel.getContentItemType(model);
+            return ModelManager.getContentItemType(model);
         }
         else {
-            return ActiveModel.getContentDirType(model);
+            return ModelManager.getContentDirType(model);
         }
 	}
 
@@ -230,7 +231,7 @@ public abstract class ActiveProvider extends ContentProvider {
                 null,
                 null,
                 sortOrder);
-		cursor.setNotificationUri(getContext().getContentResolver(), ActiveModel.getContentUri(model));
+		cursor.setNotificationUri(getContext().getContentResolver(), ModelManager.getContentUri(model));
 		return cursor;
 	}
 
@@ -249,7 +250,7 @@ public abstract class ActiveProvider extends ContentProvider {
 		if (id < 0) return null;
 
 		getContext().getContentResolver().notifyChange(uri, null);
-		return ContentUris.withAppendedId(ActiveModel.getContentUri(model), id);
+		return ContentUris.withAppendedId(ModelManager.getContentUri(model), id);
 	}
 
 	@Override

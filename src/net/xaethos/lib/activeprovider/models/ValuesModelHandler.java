@@ -8,7 +8,7 @@ import android.net.Uri;
 
 import java.util.Date;
 
-public class ValuesModelHandler<T extends ActiveModel.Base> extends ModelHandler<T>
+public class ValuesModelHandler<T extends Model> extends ModelHandler<T>
 implements ReadWriteModelHandler {
 
     private final ContentValues mValues;
@@ -43,7 +43,7 @@ implements ReadWriteModelHandler {
     ///// Helper methods
 
     private ContentProviderOperation insertOperation() {
-        Uri uri = ActiveModel.getContentUri(getModelInterface());
+        Uri uri = ModelManager.getContentUri(getModelInterface());
         return ContentProviderOperation
                 .newInsert(uri)
                 .withValues(mValues)
@@ -59,7 +59,7 @@ implements ReadWriteModelHandler {
                 .build();
     }
 
-    ////////// ActiveModel.Base //////////
+    ////////// Model implementation //////////
 
     @Override
     public T writableCopy() {
@@ -68,7 +68,7 @@ implements ReadWriteModelHandler {
 
     @Override
     public ContentProviderOperation saveOperation() {
-        Long id = mValues.getAsLong(ActiveModel.Base._ID);
+        Long id = mValues.getAsLong(Model._ID);
         if (id != null && id > 0) {
             return updateOperation();
         }

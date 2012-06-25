@@ -4,7 +4,8 @@ package com.example.fixtures;
 import net.xaethos.lib.activeprovider.annotations.Getter;
 import net.xaethos.lib.activeprovider.annotations.ModelInfo;
 import net.xaethos.lib.activeprovider.annotations.Setter;
-import net.xaethos.lib.activeprovider.models.ActiveModel;
+import net.xaethos.lib.activeprovider.models.Model;
+import net.xaethos.lib.activeprovider.models.ModelManager;
 
 import java.util.Date;
 
@@ -13,7 +14,7 @@ import java.util.Date;
         tableName   = "data",
         contentType = "vnd.example.data"
 )
-public interface Data extends ActiveModel.Base, ActiveModel.Timestamps {
+public interface Data extends Model, ModelManager.Timestamps {
     public static final String STRING     = "string";
     public static final String BOOL       = "bool";
     public static final String BYTE       = "byte";

@@ -4,7 +4,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.support.v4.content.AsyncTaskLoader;
 
-public class ModelLoader<T extends ActiveModel.Base> extends AsyncTaskLoader<ModelManager.ModelCursor<T>> {
+public class ModelLoader<T extends Model> extends AsyncTaskLoader<ModelManager.ModelCursor<T>> {
 
     ////////// Instance variables //////////
 

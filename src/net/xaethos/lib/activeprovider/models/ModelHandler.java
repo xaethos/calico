@@ -11,13 +11,13 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 
-public abstract class ModelHandler<T extends ActiveModel.Base> implements
-        ActiveModel.Utils, InvocationHandler, ReadOnlyModelHandler
+public abstract class ModelHandler<T extends Model> implements
+        ModelManager.Utils, InvocationHandler, ReadOnlyModelHandler
 {
 
     ////////// Static methods //////////
 
-    protected static boolean validateModelInterface(Class<? extends ActiveModel.Base> modelType) {
+    protected static boolean validateModelInterface(Class<? extends Model> modelType) {
         return modelType.isAnnotationPresent(ModelInfo.class);
     }
 
@@ -85,17 +85,17 @@ public abstract class ModelHandler<T extends ActiveModel.Base> implements
         }
     }
 
-    ////////// ActiveModel.Base //////////
+    ////////// Model implementation //////////
 
     @Override
     public Uri getUri() {
-        Long id = getLong(ActiveModel.Base._ID);
+        Long id = getLong(Model._ID);
 
         if (id == null || id < 1) {
             return null;
         }
 
-        return ActiveModel.getContentUri(mModelInterface, id);
+        return ModelManager.getContentUri(mModelInterface, id);
     }
 
     @Override
@@ -128,7 +128,7 @@ public abstract class ModelHandler<T extends ActiveModel.Base> implements
         }
         else if (method.isAnnotationPresent(Setter.class)) {
             if (isReadOnly()) {
-                throw new ActiveModelReadOnlyException();
+                throw new ReadOnlyModelException();
             }
 
             Class<?>[] params = method.getParameterTypes();
@@ -138,7 +138,7 @@ public abstract class ModelHandler<T extends ActiveModel.Base> implements
             invokeSetter(method.getAnnotation(Setter.class).value(), args[0], params[0]);
             return null;
         }
-        else if (methodClass == Object.class || methodClass == ActiveModel.Utils.class) {
+        else if (methodClass == Object.class || methodClass == ModelManager.Utils.class) {
             return method.invoke(this, args);
         }
 

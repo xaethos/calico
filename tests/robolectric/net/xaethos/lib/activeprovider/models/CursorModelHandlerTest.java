@@ -90,21 +90,4 @@ public class CursorModelHandlerTest {
         assertThat(model.getTimestamp(), is(date));
     }
 
-    ////////// Shared behaviors //////////
-
-    public static class ActiveModelUtils
-            extends ActiveModelUtilsTest<CursorModelHandler<Data>> {
-        @Override
-        protected CursorModelHandler<Data> newHandler() {
-            MatrixCursor cursor = new MatrixCursor(new String[]{
-                    Data._ID,
-                    Data.STRING,
-                    Data.INT
-            }, 1);
-            cursor.addRow(new Object[]{ID, STRING, null});
-            cursor.moveToFirst();
-            return new CursorModelHandler<Data>(Data.class, cursor);
-        }
-    }
-
 }

@@ -154,19 +154,4 @@ public class ValuesModelHandlerTest {
         assertThat(model.getTimestamp(), is(date));
     }
 
-    ////////// Shared behavior tests //////////
-
-    public static class ActiveModelUtils
-            extends ActiveModelUtilsTest<ValuesModelHandler<Data>> {
-
-        @Override
-        protected ValuesModelHandler<Data> newHandler() {
-            ContentValues values = new ContentValues(3);
-            values.put(Data._ID, ID);
-            values.put(Data.STRING, STRING);
-            values.putNull(Data.INT);
-            return new ValuesModelHandler<Data>(Data.class, values);
-        }
-    }
-
 }
