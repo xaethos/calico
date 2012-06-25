@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- package name must be unique so suffix with "integration" so package loader doesn't ignore us -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-          package="net.xaethos.lib.activeprovider.integration"
+          package="net.xaethos.lib.calico.integration"
           android:versionCode="1"
           android:versionName="1.0">
 
@@ -32,10 +32,10 @@
             </intent-filter>
         </activity>
 
-        <provider android:name=".MyProvider" android:authorities="net.xaethos.lib.activeprovider.integration" />
+        <provider android:name=".MyProvider" android:authorities="net.xaethos.lib.calico.integration" />
     </application>
 
     <instrumentation android:name="android.test.InstrumentationTestRunner"
-                     android:targetPackage="net.xaethos.lib.activeprovider.integration"
-                     android:label="Tests for net.xaethos.lib.activeprovider"/>
+                     android:targetPackage="net.xaethos.lib.calico.integration"
+                     android:label="Tests for net.xaethos.lib.calico"/>
 </manifest>

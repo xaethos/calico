@@ -1,11 +1,11 @@
 package com.example.fixtures;
 
 
-import net.xaethos.lib.activeprovider.annotations.Getter;
-import net.xaethos.lib.activeprovider.annotations.ModelInfo;
-import net.xaethos.lib.activeprovider.annotations.Setter;
-import net.xaethos.lib.activeprovider.models.Model;
-import net.xaethos.lib.activeprovider.models.ModelManager;
+import net.xaethos.lib.calico.annotations.Getter;
+import net.xaethos.lib.calico.annotations.ModelInfo;
+import net.xaethos.lib.calico.annotations.Setter;
+import net.xaethos.lib.calico.models.Model;
+import net.xaethos.lib.calico.models.ModelManager;
 
 import java.util.Date;
 

@@ -1,9 +1,9 @@
 package com.example.fixtures;
 
 import android.database.sqlite.SQLiteDatabase;
-import net.xaethos.lib.activeprovider.annotations.ProviderInfo;
-import net.xaethos.lib.activeprovider.content.ProviderMigration;
-import net.xaethos.lib.activeprovider.content.CalicoProvider;
+import net.xaethos.lib.calico.annotations.ProviderInfo;
+import net.xaethos.lib.calico.content.ProviderMigration;
+import net.xaethos.lib.calico.content.CalicoProvider;
 
 @ProviderInfo(
         databaseName = "test",
