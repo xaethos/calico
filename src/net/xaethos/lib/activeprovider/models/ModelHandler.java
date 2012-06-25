@@ -108,6 +108,11 @@ public abstract class ModelHandler<T extends ActiveModel.Base> implements
         throw new UnsupportedOperationException();
     }
 
+    @Override
+    public ContentProviderOperation deleteOperation() {
+        throw new UnsupportedOperationException();
+    }
+
     ////////// InvocationHandler //////////
 
     @Override

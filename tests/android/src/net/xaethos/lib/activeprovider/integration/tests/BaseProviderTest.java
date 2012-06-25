@@ -5,9 +5,9 @@ import android.net.Uri;
 import android.test.ProviderTestCase2;
 import net.xaethos.lib.activeprovider.annotations.ModelInfo;
 import net.xaethos.lib.activeprovider.annotations.ProviderInfo;
-import net.xaethos.lib.activeprovider.models.ModelManager;
 import net.xaethos.lib.activeprovider.integration.MyProvider;
 import net.xaethos.lib.activeprovider.integration.models.Polymorph;
+import net.xaethos.lib.activeprovider.models.ModelManager;
 
 public class BaseProviderTest extends ProviderTestCase2<MyProvider> {
 

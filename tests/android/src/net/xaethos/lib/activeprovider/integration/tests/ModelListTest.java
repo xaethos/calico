@@ -1,7 +1,7 @@
 package net.xaethos.lib.activeprovider.integration.tests;
 
-import net.xaethos.lib.activeprovider.models.ModelManager;
 import net.xaethos.lib.activeprovider.integration.models.Polymorph;
+import net.xaethos.lib.activeprovider.models.ModelManager;
 
 import java.util.Iterator;
 import java.util.List;

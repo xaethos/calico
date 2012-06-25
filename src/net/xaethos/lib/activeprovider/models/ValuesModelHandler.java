@@ -51,7 +51,7 @@ implements ReadWriteModelHandler {
     }
 
     private ContentProviderOperation updateOperation() {
-        Uri uri = ActiveModel.getContentUri(getModelInterface(), mValues.getAsLong(ActiveModel.Base._ID));
+        Uri uri = getUri();
         return ContentProviderOperation
                 .newUpdate(uri)
                 .withExpectedCount(1)
@@ -75,6 +75,15 @@ implements ReadWriteModelHandler {
         else {
             return insertOperation();
         }
+    }
+
+    @Override
+    public ContentProviderOperation deleteOperation() {
+        Uri uri = getUri();
+        return ContentProviderOperation
+                .newDelete(uri)
+                .withExpectedCount(1)
+                .build();
     }
 
     ////////// ReadWriteModelHandler //////////

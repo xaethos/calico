@@ -36,6 +36,7 @@ public class ActiveModel {
         public T writableCopy();
 
         public ContentProviderOperation saveOperation();
+        public ContentProviderOperation deleteOperation();
     }
 
     /////////////// Static methods ///////////////

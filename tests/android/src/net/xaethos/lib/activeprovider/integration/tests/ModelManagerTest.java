@@ -2,8 +2,8 @@ package net.xaethos.lib.activeprovider.integration.tests;
 
 import android.content.ContentUris;
 import android.net.Uri;
-import net.xaethos.lib.activeprovider.models.ModelManager;
 import net.xaethos.lib.activeprovider.integration.models.Polymorph;
+import net.xaethos.lib.activeprovider.models.ModelManager;
 
 public class ModelManagerTest extends BaseProviderTest {
 
@@ -77,6 +77,17 @@ public class ModelManagerTest extends BaseProviderTest {
 
         poly = manager.fetch(Polymorph.class, ContentUris.parseId(uri));
         assertEquals("desk", poly.getStringValue());
+    }
+
+    public void test_delete() {
+        Uri uri = insertPolymorph("dining table");
+
+        Polymorph poly = manager.fetch(Polymorph.class, ContentUris.parseId(uri));
+
+        assertTrue(manager.delete(poly));
+
+        poly = manager.fetch(Polymorph.class, ContentUris.parseId(uri));
+        assertNull(poly);
     }
 
 }

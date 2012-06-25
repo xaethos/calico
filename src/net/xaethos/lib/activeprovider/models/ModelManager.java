@@ -83,7 +83,14 @@ public class ModelManager {
     }
 
     public <T extends ActiveModel.Base> boolean save(T model) {
-        ContentProviderOperation operation = model.saveOperation();
+        return applyOperation(model.saveOperation());
+    }
+
+    public <T extends ActiveModel.Base> boolean delete(T model) {
+        return applyOperation(model.deleteOperation());
+    }
+
+    private boolean applyOperation(ContentProviderOperation operation) {
         ArrayList<ContentProviderOperation> operations = new ArrayList<ContentProviderOperation>(1);
         operations.add(operation);
 
@@ -91,9 +98,9 @@ public class ModelManager {
             mResolver.applyBatch(operation.getUri().getAuthority(), operations);
             return true;
         } catch (RemoteException e) {
-            Log.e(TAG, "Error saving model", e);
+            Log.e(TAG, "Error invoking binder", e);
         } catch (OperationApplicationException e) {
-            Log.e(TAG, "Error saving model", e);
+            Log.e(TAG, "Error applying operation", e);
         }
 
         return false;
@@ -119,6 +126,10 @@ public class ModelManager {
 
         public List<T> getList() {
             return new ModelList<T>(mModelType, this);
+        }
+
+        public T getModel() {
+            return ModelManager.getModel(mModelType, new ValuesModelHandler<T>(mModelType, this));
         }
 
         public ContentValues getValues() {
@@ -150,7 +161,7 @@ public class ModelManager {
         @Override
         public Iterator<T> iterator() {
             moveToPosition(-1);
-            final T model = getModel(mModelType, new CursorModelHandler<T>(mModelType, this));
+            final T model = ModelManager.getModel(mModelType, new CursorModelHandler<T>(mModelType, this));
 
             return new Iterator<T>() {
                 private final T mModel = model;
