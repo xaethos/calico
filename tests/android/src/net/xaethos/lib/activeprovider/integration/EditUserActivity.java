@@ -20,20 +20,39 @@ public class EditUserActivity extends FragmentActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.edit_user);
 
-        mManager = new ModelManager(this);
-
         Intent intent = getIntent();
-        mUser = mManager.fetch(User.class, ContentUris.parseId(intent.getData()));
+        ModelManager manager = new ModelManager(this);
+        User user = null;
+
+        if (Intent.ACTION_INSERT.equals(intent.getAction())) {
+            user = manager.create(User.class);
+        }
+        else if (Intent.ACTION_EDIT.equals(intent.getAction())) {
+            user = manager.fetch(User.class, ContentUris.parseId(intent.getData()));
+        }
+
+        mManager = manager;
+        mUser = user;
 
         mNameField = (EditText) findViewById(R.id.et_name);
         mNameField.setText(mUser.getName());
+
+        setResult(RESULT_CANCELED);
     }
 
     ///// Events
 
     public void onSave(View view) {
-        mUser.setName(mNameField.getText().toString());
-        mManager.save(mUser);
+        User user = mUser;
+
+        user.setName(mNameField.getText().toString());
+
+        if (mManager.save(user)) {
+            Intent intent = new Intent(getIntent());
+            intent.setData(user.getUri());
+            setResult(RESULT_OK, new Intent());
+        }
+
         finish();
     }
 }

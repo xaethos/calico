@@ -68,6 +68,10 @@ public class ModelManager {
         }
     }
 
+    public <T extends ActiveModel.Base> T create(Class<T> modelType) {
+        return getModel(modelType, new ValuesModelHandler<T>(modelType));
+    }
+
     public <T extends ActiveModel.Base> T fetch(Class<T> modelClass, long id) {
         T model = null;
         ModelCursor<T> cursor = query(modelClass, ActiveModel.getContentUri(modelClass, id), null, null, null, null);

@@ -40,6 +40,25 @@ implements ReadWriteModelHandler {
         return mValues;
     }
 
+    ///// Helper methods
+
+    private ContentProviderOperation insertOperation() {
+        Uri uri = ActiveModel.getContentUri(getModelInterface());
+        return ContentProviderOperation
+                .newInsert(uri)
+                .withValues(mValues)
+                .build();
+    }
+
+    private ContentProviderOperation updateOperation() {
+        Uri uri = ActiveModel.getContentUri(getModelInterface(), mValues.getAsLong(ActiveModel.Base._ID));
+        return ContentProviderOperation
+                .newUpdate(uri)
+                .withExpectedCount(1)
+                .withValues(mValues)
+                .build();
+    }
+
     ////////// ActiveModel.Base //////////
 
     @Override
@@ -49,12 +68,13 @@ implements ReadWriteModelHandler {
 
     @Override
     public ContentProviderOperation saveOperation() {
-        Uri uri = ActiveModel.getContentUri(getModelInterface(), mValues.getAsLong(ActiveModel.Base._ID));
-        return ContentProviderOperation
-                .newUpdate(uri)
-                .withExpectedCount(1)
-                .withValues(mValues)
-                .build();
+        Long id = mValues.getAsLong(ActiveModel.Base._ID);
+        if (id != null && id > 0) {
+            return updateOperation();
+        }
+        else {
+            return insertOperation();
+        }
     }
 
     ////////// ReadWriteModelHandler //////////

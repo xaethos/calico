@@ -30,6 +30,8 @@ public class ActiveModel {
     }
 
     public static interface Utils<T extends Base> {
+        public Uri getUri();
+
         public boolean isReadOnly();
         public T writableCopy();
 

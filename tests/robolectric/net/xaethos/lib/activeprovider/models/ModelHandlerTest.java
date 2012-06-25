@@ -1,5 +1,6 @@
 package net.xaethos.lib.activeprovider.models;
 
+import android.net.Uri;
 import net.xaethos.lib.activeprovider.annotations.Getter;
 import net.xaethos.lib.activeprovider.annotations.ModelInfo;
 import net.xaethos.lib.activeprovider.annotations.Setter;

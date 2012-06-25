@@ -7,6 +7,8 @@ import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.support.v4.widget.SimpleCursorAdapter;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
@@ -42,6 +44,16 @@ public class UsersActivity extends FragmentActivity
 
         getSupportLoaderManager().initLoader(0, null, this);
     }
+
+    ///// Options menu
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuItem item = menu.add("New User");
+        item.setIntent(new Intent(Intent.ACTION_INSERT, ActiveModel.getContentUri(User.class)));
+        return true;
+    }
+
 
     ////////// LoaderManager.LoaderCallbacks //////////
 

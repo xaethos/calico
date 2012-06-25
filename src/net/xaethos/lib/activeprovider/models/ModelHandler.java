@@ -1,6 +1,7 @@
 package net.xaethos.lib.activeprovider.models;
 
 import android.content.ContentProviderOperation;
+import android.net.Uri;
 import net.xaethos.lib.activeprovider.annotations.Getter;
 import net.xaethos.lib.activeprovider.annotations.ModelInfo;
 import net.xaethos.lib.activeprovider.annotations.Setter;
@@ -85,6 +86,17 @@ public abstract class ModelHandler<T extends ActiveModel.Base> implements
     }
 
     ////////// ActiveModel.Base //////////
+
+    @Override
+    public Uri getUri() {
+        Long id = getLong(ActiveModel.Base._ID);
+
+        if (id == null || id < 1) {
+            return null;
+        }
+
+        return ActiveModel.getContentUri(mModelInterface, id);
+    }
 
     @Override
     public boolean isReadOnly() {

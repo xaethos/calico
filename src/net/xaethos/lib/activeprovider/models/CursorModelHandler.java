@@ -1,6 +1,7 @@
 package net.xaethos.lib.activeprovider.models;
 
 import android.database.Cursor;
+import android.net.Uri;
 
 import java.util.Date;
 
@@ -19,6 +20,17 @@ implements ReadOnlyModelHandler {
     }
 
     ////////// ActiveModel.Base //////////
+
+    @Override
+    public Uri getUri() {
+        Cursor cursor = mCursor;
+        int index = cursor.getColumnIndex(ActiveModel.Base._ID);
+        if (index < 0 || cursor.isNull(index)) {
+            return null;
+        }
+
+        return ActiveModel.getContentUri(getModelInterface(), cursor.getLong(index));
+    }
 
     @Override
     public T writableCopy() {

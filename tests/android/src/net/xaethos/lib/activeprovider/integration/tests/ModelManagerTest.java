@@ -38,6 +38,13 @@ public class ModelManagerTest extends BaseProviderTest {
         assertEquals("dining table", cursor.getString(1));
     }
 
+    public void test_create() {
+        Polymorph poly = manager.create(Polymorph.class);
+        assertNotNull(poly);
+        assertNull(poly.getIntegerValue());
+        assertFalse(poly.isReadOnly());
+    }
+
     public void test_fetch_model() {
         Uri uri = insertPolymorph("dining table");
 
@@ -48,7 +55,19 @@ public class ModelManagerTest extends BaseProviderTest {
         assertFalse(poly.isReadOnly());
     }
 
-    public void test_save_model() {
+    public void test_save_updatesInsertsNewModels() {
+        Polymorph poly = manager.create(Polymorph.class);
+        poly.setStringValue("desk");
+
+        assertTrue(manager.save(poly));
+
+        cursor = manager.query(Polymorph.class, new String[]{Polymorph.VALUE}, null, null, null);
+        assertTrue(cursor.moveToFirst());
+        assertTrue(cursor.isLast());
+        assertEquals("desk", cursor.getString(0));
+    }
+
+    public void test_save_updatesExistingModels() {
         Uri uri = insertPolymorph("dining table");
 
         Polymorph poly = manager.fetch(Polymorph.class, ContentUris.parseId(uri));

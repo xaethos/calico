@@ -7,7 +7,7 @@ import net.xaethos.lib.activeprovider.models.ValuesModelHandler;
 public class ValuesModelHandlerTest extends ReadOnlyModelHandlerTest {
 
     @Override
-    protected Polymorph newReadOnlyModelProxy(Cursor cursor) {
+    protected Polymorph newModelProxy(Cursor cursor) {
         return new ValuesModelHandler<Polymorph>(Polymorph.class, cursor).getModelProxy();
     }
 
