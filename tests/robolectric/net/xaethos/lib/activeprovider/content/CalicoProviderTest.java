@@ -22,7 +22,7 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 
 @RunWith(RobolectricTestRunner.class)
-public class ActiveProviderTest {
+public class CalicoProviderTest {
 
 	DataProvider provider;
 

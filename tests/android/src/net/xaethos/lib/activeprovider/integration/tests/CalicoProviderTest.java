@@ -12,7 +12,7 @@ import net.xaethos.lib.activeprovider.models.ModelManager;
 
 import static net.xaethos.lib.activeprovider.integration.tests.Assert.assertHasItems;
 
-public class ActiveProviderTest extends BaseProviderTest {
+public class CalicoProviderTest extends BaseProviderTest {
 
     ContentResolver resolver;
 

@@ -5,15 +5,15 @@ import android.database.sqlite.SQLiteDatabase;
 import android.test.mock.MockContext;
 import junit.framework.TestCase;
 import net.xaethos.lib.activeprovider.annotations.ProviderInfo;
-import net.xaethos.lib.activeprovider.content.ActiveMigration;
-import net.xaethos.lib.activeprovider.content.ActiveProvider;
+import net.xaethos.lib.activeprovider.content.CalicoProvider;
+import net.xaethos.lib.activeprovider.content.ProviderMigration;
 
 import java.util.Arrays;
 import java.util.List;
 
 import static net.xaethos.lib.activeprovider.integration.tests.Assert.assertHasItems;
 
-public class ActiveProviderDBHelperTest extends TestCase {
+public class CalicoProviderDBHelperTest extends TestCase {
 
     @ProviderInfo(
             databaseName = "migration_test.db",
@@ -23,15 +23,15 @@ public class ActiveProviderDBHelperTest extends TestCase {
                     TestProvider.Migration2.class
             }
     )
-    public static class TestProvider extends ActiveProvider {
-        public static class Migration1 extends ActiveMigration {
+    public static class TestProvider extends CalicoProvider {
+        public static class Migration1 extends ProviderMigration {
             public static boolean wasRun = false;
             @Override public boolean onUpgrade(SQLiteDatabase db) {
                 wasRun = true;
                 return true;
             }
         }
-        public static class Migration2 extends ActiveMigration {
+        public static class Migration2 extends ProviderMigration {
             public static boolean wasRun = false;
             @Override public boolean onUpgrade(SQLiteDatabase db) {
                 wasRun = true;
@@ -40,13 +40,13 @@ public class ActiveProviderDBHelperTest extends TestCase {
         }
     }
 
-    ActiveProvider.DBHelper helper;
+    CalicoProvider.DBHelper helper;
     SQLiteDatabase db;
 
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-        helper = new ActiveProvider.DBHelper(new MockContext(), TestProvider.class.getAnnotation(ProviderInfo.class));
+        helper = new CalicoProvider.DBHelper(new MockContext(), TestProvider.class.getAnnotation(ProviderInfo.class));
         db = SQLiteDatabase.create(null);
     }
 
@@ -64,7 +64,7 @@ public class ActiveProviderDBHelperTest extends TestCase {
     }
 
     public void test_onUpgrade_runsMissingMigrations() {
-        ActiveProvider.DBHelper.createMigrationsTable(db);
+        CalicoProvider.DBHelper.createMigrationsTable(db);
 
         TestProvider.Migration1.wasRun = false;
         TestProvider.Migration2.wasRun = false;
@@ -74,27 +74,27 @@ public class ActiveProviderDBHelperTest extends TestCase {
     }
 
     public void test_onCreate_createsMigrationsTable() {
-        assertFalse(Arrays.asList(ActiveProvider.DBHelper.queryTableNames(db))
-                .contains(ActiveProvider.MIGRATIONS_TABLE));
+        assertFalse(Arrays.asList(CalicoProvider.DBHelper.queryTableNames(db))
+                .contains(CalicoProvider.MIGRATIONS_TABLE));
         helper.onCreate(db);
-        assertTrue(Arrays.asList(ActiveProvider.DBHelper.queryTableNames(db))
-                .contains(ActiveProvider.MIGRATIONS_TABLE));
+        assertTrue(Arrays.asList(CalicoProvider.DBHelper.queryTableNames(db))
+                .contains(CalicoProvider.MIGRATIONS_TABLE));
     }
 
     public void test_queryTableNames() {
         db.execSQL("CREATE TABLE foo (bar);");
 
-        String[] tableNames = ActiveProvider.DBHelper.queryTableNames(db);
+        String[] tableNames = CalicoProvider.DBHelper.queryTableNames(db);
         assertEquals(2, tableNames.length);
         assertHasItems(tableNames, "foo", "android_metadata");
     }
 
     public void test_getMissingMigrations() {
-        ActiveProvider.DBHelper.createMigrationsTable(db);
+        CalicoProvider.DBHelper.createMigrationsTable(db);
         ContentValues values = new ContentValues(1); values.put("name", "Migration2");
-        db.insert(ActiveProvider.MIGRATIONS_TABLE, null, values);
+        db.insert(CalicoProvider.MIGRATIONS_TABLE, null, values);
 
-        List<ActiveMigration> migrations = helper.getMissingMigrations(db);
+        List<ProviderMigration> migrations = helper.getMissingMigrations(db);
         assertEquals(1, migrations.size());
         assertTrue(migrations.get(0) instanceof TestProvider.Migration1);
     }

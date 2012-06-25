@@ -1,9 +1,9 @@
 package net.xaethos.lib.activeprovider.integration.migrations;
 
 import android.database.sqlite.SQLiteDatabase;
-import net.xaethos.lib.activeprovider.content.ActiveMigration;
+import net.xaethos.lib.activeprovider.content.ProviderMigration;
 
-public class CreateUsers extends ActiveMigration {
+public class CreateUsers extends ProviderMigration {
 
     @Override
     public boolean onUpgrade(SQLiteDatabase db) {

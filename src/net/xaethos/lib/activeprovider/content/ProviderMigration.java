@@ -3,7 +3,7 @@ package net.xaethos.lib.activeprovider.content;
 import android.database.sqlite.SQLiteDatabase;
 import android.provider.BaseColumns;
 
-public abstract class ActiveMigration {
+public abstract class ProviderMigration {
 
 	/////////////// Inner classes ///////////////
 
@@ -72,7 +72,7 @@ public abstract class ActiveMigration {
         db.beginTransaction();
         try {
             if (!onUpgrade(db)) throw new MigrationException();
-            db.execSQL("INSERT INTO " + ActiveProvider.MIGRATIONS_TABLE + " VALUES (?)",
+            db.execSQL("INSERT INTO " + CalicoProvider.MIGRATIONS_TABLE + " VALUES (?)",
                     new String[]{ this.getClass().getSimpleName() });
             db.setTransactionSuccessful();
         }

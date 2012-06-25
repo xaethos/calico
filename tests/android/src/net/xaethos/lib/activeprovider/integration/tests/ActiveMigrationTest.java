@@ -4,9 +4,9 @@ import android.database.sqlite.SQLiteDatabase;
 import android.test.mock.MockContext;
 import junit.framework.TestCase;
 import net.xaethos.lib.activeprovider.annotations.ProviderInfo;
-import net.xaethos.lib.activeprovider.content.ActiveMigration;
-import net.xaethos.lib.activeprovider.content.ActiveProvider;
+import net.xaethos.lib.activeprovider.content.CalicoProvider;
 import net.xaethos.lib.activeprovider.content.MigrationException;
+import net.xaethos.lib.activeprovider.content.ProviderMigration;
 import net.xaethos.lib.activeprovider.integration.MyProvider;
 
 import java.util.Arrays;
@@ -33,13 +33,13 @@ public class ActiveMigrationTest extends TestCase {
     @Override
     public void setUp() {
         db = SQLiteDatabase.create(null);
-        ActiveProvider.DBHelper.createMigrationsTable(db);
+        CalicoProvider.DBHelper.createMigrationsTable(db);
     }
 
     /////////////// Tests ///////////////
 
     public void test_upgrade_callsOnUpgrade() {
-        class TestMigration extends ActiveMigration {
+        class TestMigration extends ProviderMigration {
             public boolean onUpgradeCalled;
             @Override public boolean onUpgrade(SQLiteDatabase db) {
                 onUpgradeCalled = true;
@@ -54,7 +54,7 @@ public class ActiveMigrationTest extends TestCase {
 
     public void test_upgrade_mustHaveADatabase() {
         try {
-            new ActiveMigration() {
+            new ProviderMigration() {
                 @Override public boolean onUpgrade(SQLiteDatabase db) { return true; }
             }.upgrade(null);
             assert false;
@@ -64,7 +64,7 @@ public class ActiveMigrationTest extends TestCase {
 
     public void test_upgrade_balksAtMigrationFailure() {
         try {
-            new ActiveMigration() {
+            new ProviderMigration() {
                 @Override public boolean onUpgrade(SQLiteDatabase db) { return false; }
             }.upgrade(db);
             assert false;
@@ -73,17 +73,17 @@ public class ActiveMigrationTest extends TestCase {
     }
 
     public void test_upgrade_marksMigrationAsApplied() {
-        ActiveProvider.DBHelper helper = new ActiveProvider.DBHelper(new MockContext(),
+        CalicoProvider.DBHelper helper = new CalicoProvider.DBHelper(new MockContext(),
                 MyProvider.class.getAnnotation(ProviderInfo.class));
-        List<ActiveMigration> migrations = helper.getMissingMigrations(db);
+        List<ProviderMigration> migrations = helper.getMissingMigrations(db);
         assertFalse(migrations.isEmpty());
-        for (ActiveMigration migration : migrations) migration.upgrade(db);
+        for (ProviderMigration migration : migrations) migration.upgrade(db);
         assertTrue(helper.getMissingMigrations(db).isEmpty());
     }
 
     public void test_onUpgrade_happensInTransaction() {
         assertFalse(db.inTransaction());
-        new ActiveMigration() {
+        new ProviderMigration() {
             @Override public boolean onUpgrade(SQLiteDatabase db) {
                 assertTrue(db.inTransaction());
                 return true;
@@ -94,7 +94,7 @@ public class ActiveMigrationTest extends TestCase {
 
     public void test_onUpgrade_rollsBackIfFalse() {
         try {
-            new ActiveMigration() {
+            new ProviderMigration() {
                 @Override public boolean onUpgrade(SQLiteDatabase db) {
                     db.execSQL("CREATE TABLE foo (bar);");
                     return false;
@@ -102,7 +102,7 @@ public class ActiveMigrationTest extends TestCase {
             }.upgrade(db);
         }
         catch (MigrationException e) {}
-        assertFalse(Arrays.asList(ActiveProvider.DBHelper.queryTableNames(db))
+        assertFalse(Arrays.asList(CalicoProvider.DBHelper.queryTableNames(db))
                 .contains("foo"));
     }
 
@@ -117,7 +117,7 @@ public class ActiveMigrationTest extends TestCase {
 
 	@Test public void canDropTable() throws Exception {
 		createTestTable();
-		new ActiveMigration() {
+		new ProviderMigration() {
 			@Override public boolean onUpgrade(SQLiteDatabase db) {
 				dropTable("foo");
 				return true;
@@ -130,7 +130,7 @@ public class ActiveMigrationTest extends TestCase {
 
 	@Test public void canRenameTable() throws Exception {
 		createTestTable();
-		new ActiveMigration() {
+		new ProviderMigration() {
 			@Override public boolean onUpgrade(SQLiteDatabase db) {
 				renameTable("foo", "bar");
 				return true;
@@ -145,7 +145,7 @@ public class ActiveMigrationTest extends TestCase {
 
 	@Test public void canAddColumn() throws Exception {
 		createTestTable();
-		new ActiveMigration() {
+		new ProviderMigration() {
 			@Override public boolean onUpgrade(SQLiteDatabase db) {
 				addColumn("foo", Column.text("bar"));
 				return true;
@@ -162,7 +162,7 @@ public class ActiveMigrationTest extends TestCase {
 		createTestTable("table", Column.text("name"));
 		insertValues("table", "_id", "1", "name", "Alice");
 
-		new ActiveMigration() {
+		new ProviderMigration() {
 			@Override public boolean onUpgrade(SQLiteDatabase db) {
 				addColumn("table", Column.text("surname"));
 				return true;
@@ -183,7 +183,7 @@ public class ActiveMigrationTest extends TestCase {
 				Column.text("cat"),
 				Column.text("dog"));
 
-		new ActiveMigration() {
+		new ProviderMigration() {
 			@Override public boolean onUpgrade(SQLiteDatabase db) {
 				dropColumn("foo", "bar", "dog");
 				return true;
@@ -216,7 +216,7 @@ public class ActiveMigrationTest extends TestCase {
 	}
 
 	private void createTestTable(final String tableName, final Column...columns) {
-		new ActiveMigration() {
+		new ProviderMigration() {
 			@Override public boolean onUpgrade(SQLiteDatabase db) {
 				createTable(tableName, columns);
 				return true;

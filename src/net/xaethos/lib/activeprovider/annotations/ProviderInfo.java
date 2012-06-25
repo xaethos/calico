@@ -1,6 +1,6 @@
 package net.xaethos.lib.activeprovider.annotations;
 
-import net.xaethos.lib.activeprovider.content.ActiveMigration;
+import net.xaethos.lib.activeprovider.content.ProviderMigration;
 import net.xaethos.lib.activeprovider.models.Model;
 
 import java.lang.annotation.ElementType;
@@ -13,5 +13,5 @@ import java.lang.annotation.Target;
 public @interface ProviderInfo {
     String databaseName();
     Class<? extends Model>[] models();
-    Class<? extends ActiveMigration>[] migrations();
+    Class<? extends ProviderMigration>[] migrations();
 }

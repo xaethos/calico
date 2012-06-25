@@ -18,7 +18,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.regex.Pattern;
 
-public abstract class ActiveProvider extends ContentProvider {
+public abstract class CalicoProvider extends ContentProvider {
 
     public static final String MIGRATIONS_TABLE = "activeprovider_migrations";
 
@@ -66,14 +66,14 @@ public abstract class ActiveProvider extends ContentProvider {
 
         @Override
         public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-            for (ActiveMigration migration : getMissingMigrations(db)) {
+            for (ProviderMigration migration : getMissingMigrations(db)) {
                 migration.upgrade(db);
             }
         }
 
         @SuppressWarnings("unused")
         public void onDowngrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-            throw new UnsupportedOperationException("ActiveProvider cannot downgrade database");
+            throw new UnsupportedOperationException("CalicoProvider cannot downgrade database");
         }
 
         @Override
@@ -82,13 +82,13 @@ public abstract class ActiveProvider extends ContentProvider {
             mTableNames = queryTableNames(db);
         }
 
-        public List<ActiveMigration> getMissingMigrations(SQLiteDatabase db) {
+        public List<ProviderMigration> getMissingMigrations(SQLiteDatabase db) {
             SQLiteStatement statement = db.compileStatement(
                     "SELECT COUNT() FROM " + MIGRATIONS_TABLE + " WHERE name=?");
-            ArrayList<ActiveMigration> missingMigrations = new ArrayList<ActiveMigration>();
+            ArrayList<ProviderMigration> missingMigrations = new ArrayList<ProviderMigration>();
 
             try {
-                for (Class<? extends ActiveMigration> migration : mProviderInfo.migrations()) {
+                for (Class<? extends ProviderMigration> migration : mProviderInfo.migrations()) {
                     statement.bindString(1, migration.getSimpleName());
                     if (statement.simpleQueryForLong() == 0) {
                         missingMigrations.add(migration.newInstance());
@@ -145,7 +145,7 @@ public abstract class ActiveProvider extends ContentProvider {
 
     public ProviderInfo getProviderInfo() {
         if (mInfo == null) {
-            Class<? extends ActiveProvider> cls = this.getClass();
+            Class<? extends CalicoProvider> cls = this.getClass();
             if (!cls.isAnnotationPresent(ProviderInfo.class)) {
                 throw new IllegalArgumentException(
                         cls.getName() + " is not annotated as @" + ProviderInfo.class.getSimpleName());
