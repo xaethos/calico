@@ -1,7 +1,7 @@
 package net.xaethos.lib.activeprovider.integration.tests;
 
-import net.xaethos.lib.activeprovider.content.ActiveManager;
 import net.xaethos.lib.activeprovider.integration.models.Polymorph;
+import net.xaethos.lib.activeprovider.models.ModelManager;
 
 import java.util.Iterator;
 import java.util.List;
@@ -24,7 +24,7 @@ public class ModelListTest extends BaseProviderTest {
 
         for(String table : TABLES) insertPolymorph(table);
 
-        cursor = new ActiveManager(getMockContext()).query(Polymorph.class, null, null, null, null);
+        cursor = new ModelManager(getMockContext()).query(Polymorph.class, null, null, null, null);
         polymorphs = cursor.getList();
     }
 

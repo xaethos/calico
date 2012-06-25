@@ -5,9 +5,9 @@ import android.net.Uri;
 import android.test.ProviderTestCase2;
 import net.xaethos.lib.activeprovider.annotations.ModelInfo;
 import net.xaethos.lib.activeprovider.annotations.ProviderInfo;
-import net.xaethos.lib.activeprovider.content.ActiveManager;
 import net.xaethos.lib.activeprovider.integration.MyProvider;
 import net.xaethos.lib.activeprovider.integration.models.Polymorph;
+import net.xaethos.lib.activeprovider.models.ModelManager;
 
 public class BaseProviderTest extends ProviderTestCase2<MyProvider> {
 
@@ -16,7 +16,7 @@ public class BaseProviderTest extends ProviderTestCase2<MyProvider> {
 
     ProviderInfo providerInfo;
 
-    ActiveManager.ModelCursor<Polymorph> cursor;
+    ModelManager.ModelCursor<Polymorph> cursor;
     ModelInfo polymorphInfo;
     Uri polymorphUri;
 
@@ -47,8 +47,8 @@ public class BaseProviderTest extends ProviderTestCase2<MyProvider> {
 
     ////////// Helper methods //////////
 
-    protected ActiveManager.ModelCursor<Polymorph> queryPolymorphs() {
-        return new ActiveManager(getMockContext()).query(Polymorph.class, null, null, null, null);
+    protected ModelManager.ModelCursor<Polymorph> queryPolymorphs() {
+        return new ModelManager(getMockContext()).query(Polymorph.class, null, null, null, null);
     }
 
     protected Uri insertPolymorph(String value) {

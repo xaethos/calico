@@ -1,5 +1,7 @@
 package net.xaethos.lib.activeprovider.models;
 
+import android.content.ContentProviderOperation;
+import android.net.Uri;
 import net.xaethos.lib.activeprovider.annotations.Getter;
 import net.xaethos.lib.activeprovider.annotations.ModelInfo;
 import net.xaethos.lib.activeprovider.annotations.Setter;
@@ -54,10 +56,6 @@ public abstract class ModelHandler<T extends ActiveModel.Base> implements
         return mModelProxy;
     }
 
-    public boolean isReadOnly() {
-        return !ReadWriteModelHandler.class.isInstance(this);
-    }
-
     public Object invokeGetter(String field, Class<?> valueType) throws Throwable {
         try{
             return this.getClass().getMethod(getGetterName(valueType), String.class).invoke(this, field);
@@ -85,6 +83,34 @@ public abstract class ModelHandler<T extends ActiveModel.Base> implements
         else {
             ((ReadWriteModelHandler)this).setNull(field);
         }
+    }
+
+    ////////// ActiveModel.Base //////////
+
+    @Override
+    public Uri getUri() {
+        Long id = getLong(ActiveModel.Base._ID);
+
+        if (id == null || id < 1) {
+            return null;
+        }
+
+        return ActiveModel.getContentUri(mModelInterface, id);
+    }
+
+    @Override
+    public boolean isReadOnly() {
+        return !ReadWriteModelHandler.class.isInstance(this);
+    }
+
+    @Override
+    public ContentProviderOperation saveOperation() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public ContentProviderOperation deleteOperation() {
+        throw new UnsupportedOperationException();
     }
 
     ////////// InvocationHandler //////////

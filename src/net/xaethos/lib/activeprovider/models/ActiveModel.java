@@ -1,5 +1,6 @@
 package net.xaethos.lib.activeprovider.models;
 
+import android.content.ContentProviderOperation;
 import android.content.ContentResolver;
 import android.net.Uri;
 import android.provider.BaseColumns;
@@ -29,8 +30,13 @@ public class ActiveModel {
     }
 
     public static interface Utils<T extends Base> {
+        public Uri getUri();
+
         public boolean isReadOnly();
         public T writableCopy();
+
+        public ContentProviderOperation saveOperation();
+        public ContentProviderOperation deleteOperation();
     }
 
     /////////////// Static methods ///////////////

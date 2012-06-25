@@ -1,23 +1,18 @@
-package net.xaethos.lib.activeprovider.content;
+package net.xaethos.lib.activeprovider.models;
 
-import android.content.ContentProviderClient;
-import android.content.ContentResolver;
-import android.content.ContentValues;
-import android.content.Context;
+import android.content.*;
 import android.database.Cursor;
 import android.database.CursorWrapper;
 import android.database.DatabaseUtils;
 import android.net.Uri;
 import android.os.RemoteException;
-import net.xaethos.lib.activeprovider.models.ActiveModel;
-import net.xaethos.lib.activeprovider.models.CursorModelHandler;
-import net.xaethos.lib.activeprovider.models.ModelHandler;
-import net.xaethos.lib.activeprovider.models.ValuesModelHandler;
+import android.util.Log;
 
 import java.lang.reflect.Proxy;
 import java.util.*;
 
-public class ActiveManager {
+public class ModelManager {
+    private static final String TAG = "ModelManager";
 
     /////////////// Static methods ///////////////
 
@@ -33,17 +28,8 @@ public class ActiveManager {
 
     /////////////// Instance methods ///////////////
 
-    public ActiveManager(Context context) {
+    public ModelManager(Context context) {
         mResolver = context.getContentResolver();
-    }
-
-    /**
-     * Queries the ContentProvider for the table representing a given model.
-     * Equivalent to calling query(modelClass, null, null, null, null)
-     * @return a ModelCursor with the query results
-     */
-    public <T extends ActiveModel.Base> ModelCursor<T> query(Class<T> modelClass) {
-        return query(modelClass, null, null, null, null);
     }
 
     /**
@@ -82,6 +68,10 @@ public class ActiveManager {
         }
     }
 
+    public <T extends ActiveModel.Base> T create(Class<T> modelType) {
+        return getModel(modelType, new ValuesModelHandler<T>(modelType));
+    }
+
     public <T extends ActiveModel.Base> T fetch(Class<T> modelClass, long id) {
         T model = null;
         ModelCursor<T> cursor = query(modelClass, ActiveModel.getContentUri(modelClass, id), null, null, null, null);
@@ -90,6 +80,30 @@ public class ActiveManager {
             cursor.close();
         }
         return model;
+    }
+
+    public <T extends ActiveModel.Base> boolean save(T model) {
+        return applyOperation(model.saveOperation());
+    }
+
+    public <T extends ActiveModel.Base> boolean delete(T model) {
+        return applyOperation(model.deleteOperation());
+    }
+
+    private boolean applyOperation(ContentProviderOperation operation) {
+        ArrayList<ContentProviderOperation> operations = new ArrayList<ContentProviderOperation>(1);
+        operations.add(operation);
+
+        try {
+            mResolver.applyBatch(operation.getUri().getAuthority(), operations);
+            return true;
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error invoking binder", e);
+        } catch (OperationApplicationException e) {
+            Log.e(TAG, "Error applying operation", e);
+        }
+
+        return false;
     }
 
     /////////////// Inner classes ///////////////
@@ -112,6 +126,10 @@ public class ActiveManager {
 
         public List<T> getList() {
             return new ModelList<T>(mModelType, this);
+        }
+
+        public T getModel() {
+            return ModelManager.getModel(mModelType, new ValuesModelHandler<T>(mModelType, this));
         }
 
         public ContentValues getValues() {
@@ -143,7 +161,7 @@ public class ActiveManager {
         @Override
         public Iterator<T> iterator() {
             moveToPosition(-1);
-            final T model = getModel(mModelType, new CursorModelHandler<T>(mModelType, this));
+            final T model = ModelManager.getModel(mModelType, new CursorModelHandler<T>(mModelType, this));
 
             return new Iterator<T>() {
                 private final T mModel = model;

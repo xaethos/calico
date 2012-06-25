@@ -1,8 +1,8 @@
 package net.xaethos.lib.activeprovider.integration.tests;
 
 import android.content.ContentValues;
-import net.xaethos.lib.activeprovider.content.ActiveManager;
 import net.xaethos.lib.activeprovider.integration.models.Polymorph;
+import net.xaethos.lib.activeprovider.models.ModelManager;
 
 import java.util.List;
 
@@ -23,7 +23,7 @@ public class ModelCursorTest extends BaseProviderTest {
 
         for(String table : TABLES) insertPolymorph(table);
 
-        cursor = new ActiveManager(getMockContext()).query(Polymorph.class, PROJ, null, null, null);
+        cursor = new ModelManager(getMockContext()).query(Polymorph.class, PROJ, null, null, null);
     }
 
     ////////// Tests //////////
@@ -35,6 +35,18 @@ public class ModelCursorTest extends BaseProviderTest {
         for (int i=0; i<cursor.getCount(); ++i) {
             cursor.moveToPosition(i);
             assertEquals(cursor.getString(1), list.get(i).getStringValue());
+        }
+    }
+
+    public void test_getModel() {
+        for (int i=0; i<cursor.getCount(); ++i) {
+            cursor.moveToPosition(i);
+            Polymorph poly = cursor.getModel();
+
+            assertEquals(cursor.getLong(0), (long)poly.getId());
+            assertEquals(cursor.getString(1), poly.getStringValue());
+            assertNull(poly.getCreatedAt());
+            assertFalse(poly.isReadOnly());
         }
     }
 
