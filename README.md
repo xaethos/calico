@@ -1,9 +1,9 @@
 Introduction
 ============
 
-ActiveProvider is a tool to create and use Android Content Providers in a
-simple manner.  It is an object-relational mapping heavily inspired by
-ActiveRecord from Ruby on Rails.
+Calico is a tool to create and use Android Content Providers in a simple
+manner.  It is an object-relational mapping originally inspired by ActiveRecord
+from Ruby on Rails, but now very diverged because of the platform differences.
 
 Content Providers are a useful tool whether or not you wish to share content
 with other applications, but the the amount of boilerplate code necessary to
@@ -22,7 +22,7 @@ Development
 ===========
 
 If you want to contribute to the development, compile the library from source,
-or simply add ActiveProvider as a submodule to your project, read this section.
+or simply add Calico as a submodule to your project, read this section.
 
 Submodules
 ----------
@@ -36,12 +36,18 @@ update` to pull the sources of those modules.
 Building dependencies
 ---------------------
 
-### ActiveProvider library
+### Calico library
 
-ActiveProvider itself only depends on the Android 2.3.3 SDK.  It probably
-compiles with earlier versions of the SDK, I just build it against level 10.
+The Calico library depends on the Android 2.3.3 SDK and the Android
+Compatibility package v4. It probably compiles with earlier versions of the
+SDK, I just build it against level 10.
 
-### ActiveProvider JUnit / Robolectric tests
+### Calico Android Unit tests
+
+Same requirements as the library. Of course, it also depends on the library
+itself. All unit and integration tests are in the
+
+### Calico JUnit / Robolectric tests
 
 To run tests, you need Robolectric and its dependencies.  Everything you need
 should be available in the submodule directory.  The order of the dependencies
@@ -52,7 +58,11 @@ is important (i.e. JUnit4 should be before Android), the following one works:
 3.  Robolectric
 4.  Android SDK
 5.  Android Compatibility package v4
-6.  ActiveProvider sources
+6.  Calico sources
+
+Note: Due to the low-level nature of testing Calico, Robolectric has proved
+less helpful than I had hoped.  I've refactored most of the tests to Android
+Unit tests, and will continue this trend.
 
 ### Robolectric
 

@@ -1,9 +1,9 @@
 package com.example.fixtures;
 
 import android.database.sqlite.SQLiteDatabase;
-import net.xaethos.lib.activeprovider.annotations.ProviderInfo;
-import net.xaethos.lib.activeprovider.content.ActiveMigration;
-import net.xaethos.lib.activeprovider.content.ActiveProvider;
+import net.xaethos.lib.calico.annotations.ProviderInfo;
+import net.xaethos.lib.calico.content.ProviderMigration;
+import net.xaethos.lib.calico.content.CalicoProvider;
 
 @ProviderInfo(
         databaseName = "test",
@@ -14,9 +14,9 @@ import net.xaethos.lib.activeprovider.content.ActiveProvider;
                 DataProvider.Migration3.class
         }
 )
-public class DataProvider extends ActiveProvider {
+public class DataProvider extends CalicoProvider {
 
-    public static class Migration1 extends ActiveMigration {
+    public static class Migration1 extends ProviderMigration {
         @Override public boolean onUpgrade(SQLiteDatabase db) {
             db.execSQL("CREATE TABLE data (" +
                     "_id INTEGER PRIMARY KEY," +
@@ -36,14 +36,14 @@ public class DataProvider extends ActiveProvider {
         }
     }
 
-    public static class Migration2 extends ActiveMigration {
+    public static class Migration2 extends ProviderMigration {
         @Override public boolean onUpgrade(SQLiteDatabase db) {
             db.execSQL("CREATE TABLE temp (_id INTEGER PRIMARY KEY);");
             return true;
         }
     }
 
-    public static class Migration3 extends ActiveMigration {
+    public static class Migration3 extends ProviderMigration {
         @Override public boolean onUpgrade(SQLiteDatabase db) {
             db.execSQL("DELETE FROM temp; DROP TABLE temp;");
             return true;
