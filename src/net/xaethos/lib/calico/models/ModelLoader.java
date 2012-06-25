@@ -4,7 +4,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.support.v4.content.AsyncTaskLoader;
 
-public class ModelLoader<T extends CalicoModel> extends AsyncTaskLoader<ModelManager.ModelCursor<T>> {
+public class ModelLoader<T extends CalicoModel> extends AsyncTaskLoader<ModelCursor<T>> {
 
     ////////// Instance variables //////////
 
@@ -16,7 +16,7 @@ public class ModelLoader<T extends CalicoModel> extends AsyncTaskLoader<ModelMan
     String[] mSelectionArgs;
     String mSortOrder;
 
-    protected ModelManager.ModelCursor<T> mCursor;
+    protected ModelCursor<T> mCursor;
 
     ////////// Instance methods //////////
 
@@ -34,9 +34,9 @@ public class ModelLoader<T extends CalicoModel> extends AsyncTaskLoader<ModelMan
     ///// AsyncTaskLoader
 
     @Override
-    public ModelManager.ModelCursor<T> loadInBackground() {
+    public ModelCursor<T> loadInBackground() {
         ModelManager manager = new ModelManager(getContext());
-        ModelManager.ModelCursor<T> cursor = manager.query(
+        ModelCursor<T> cursor = manager.query(
                 mModelType, mProjection, mSelection, mSelectionArgs, mSortOrder);
         if (cursor != null) {
             // Ensure the cursor window is filled
@@ -47,7 +47,7 @@ public class ModelLoader<T extends CalicoModel> extends AsyncTaskLoader<ModelMan
     }
 
     @Override
-    public void deliverResult(ModelManager.ModelCursor<T> cursor) {
+    public void deliverResult(ModelCursor<T> cursor) {
         if (isReset()) {
             // An async query came in while the loader is stopped
             if (cursor != null) {

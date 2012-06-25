@@ -26,8 +26,8 @@ implements ReadWriteModelHandler {
     public ValuesModelHandler(Class<T> modelInterface, Cursor cursor) {
         super(modelInterface);
         ContentValues values = null;
-        if (cursor instanceof ModelManager.ModelCursor) {
-            values = ((ModelManager.ModelCursor)cursor).getValues();
+        if (cursor instanceof ModelCursor) {
+            values = ((ModelCursor)cursor).getValues();
         }
         else {
             values = new ContentValues(cursor.getColumnCount());

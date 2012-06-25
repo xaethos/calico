@@ -7,6 +7,7 @@ import net.xaethos.lib.calico.annotations.ModelInfo;
 import net.xaethos.lib.calico.annotations.ProviderInfo;
 import net.xaethos.lib.calico.integration.MyProvider;
 import net.xaethos.lib.calico.integration.models.Polymorph;
+import net.xaethos.lib.calico.models.ModelCursor;
 import net.xaethos.lib.calico.models.ModelManager;
 
 public class BaseProviderTest extends ProviderTestCase2<MyProvider> {
@@ -16,7 +17,7 @@ public class BaseProviderTest extends ProviderTestCase2<MyProvider> {
 
     ProviderInfo providerInfo;
 
-    ModelManager.ModelCursor<Polymorph> cursor;
+    ModelCursor<Polymorph> cursor;
     ModelInfo polymorphInfo;
     Uri polymorphUri;
 
@@ -47,7 +48,7 @@ public class BaseProviderTest extends ProviderTestCase2<MyProvider> {
 
     ////////// Helper methods //////////
 
-    protected ModelManager.ModelCursor<Polymorph> queryPolymorphs() {
+    protected ModelCursor<Polymorph> queryPolymorphs() {
         return new ModelManager(getMockContext()).query(Polymorph.class, null, null, null, null);
     }
 

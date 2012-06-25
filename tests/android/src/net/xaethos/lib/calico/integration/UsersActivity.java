@@ -10,15 +10,16 @@ import android.view.*;
 import android.widget.AdapterView;
 import android.widget.ListView;
 import net.xaethos.lib.calico.integration.models.User;
+import net.xaethos.lib.calico.models.ModelCursor;
 import net.xaethos.lib.calico.models.ModelLoader;
 import net.xaethos.lib.calico.models.ModelManager;
 
 public class UsersActivity extends FragmentActivity
-        implements LoaderManager.LoaderCallbacks<ModelManager.ModelCursor<User>>,
+        implements LoaderManager.LoaderCallbacks<ModelCursor<User>>,
         AdapterView.OnItemClickListener
 {
 
-    private ModelManager.ModelCursor<User> mCursor;
+    private ModelCursor<User> mCursor;
     private SimpleCursorAdapter mAdapter;
 
     public void onCreate(Bundle savedInstanceState) {
@@ -87,18 +88,18 @@ public class UsersActivity extends FragmentActivity
     ////////// LoaderManager.LoaderCallbacks //////////
 
     @Override
-    public Loader<ModelManager.ModelCursor<User>> onCreateLoader(int i, Bundle bundle) {
+    public Loader<ModelCursor<User>> onCreateLoader(int i, Bundle bundle) {
         return new ModelLoader<User>(this, User.class);
     }
 
     @Override
-    public void onLoadFinished(Loader<ModelManager.ModelCursor<User>> loader, ModelManager.ModelCursor<User> cursor) {
+    public void onLoadFinished(Loader<ModelCursor<User>> loader, ModelCursor<User> cursor) {
         mCursor = cursor;
         mAdapter.swapCursor(cursor);
     }
 
     @Override
-    public void onLoaderReset(Loader<ModelManager.ModelCursor<User>> loader) {
+    public void onLoaderReset(Loader<ModelCursor<User>> loader) {
         mCursor = null;
         mAdapter.swapCursor(null);
     }
