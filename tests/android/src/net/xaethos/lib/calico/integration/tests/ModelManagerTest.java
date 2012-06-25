@@ -4,7 +4,7 @@ import android.content.ContentUris;
 import android.net.Uri;
 import net.xaethos.lib.calico.annotations.ModelInfo;
 import net.xaethos.lib.calico.integration.models.Polymorph;
-import net.xaethos.lib.calico.models.Model;
+import net.xaethos.lib.calico.models.CalicoModel;
 import net.xaethos.lib.calico.models.ModelManager;
 
 import static net.xaethos.lib.calico.integration.tests.Assert.assertThrows;
@@ -135,10 +135,10 @@ public class ModelManagerTest extends BaseProviderTest {
 
     ////////// Helpers //////////
 
-    private interface NotAnnotated extends Model {}
+    private interface NotAnnotated extends CalicoModel {}
 
     @ModelInfo(authority = "", contentType = "", tableName = "")
-    private abstract class NotAnInterface implements Model {}
+    private abstract class NotAnInterface implements CalicoModel {}
 
     @ModelInfo(authority = "", contentType = "", tableName = "")
     private interface NotExtendingModel {}

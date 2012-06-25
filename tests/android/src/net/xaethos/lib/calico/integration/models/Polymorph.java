@@ -4,7 +4,7 @@ import net.xaethos.lib.calico.annotations.Getter;
 import net.xaethos.lib.calico.annotations.ModelInfo;
 import net.xaethos.lib.calico.annotations.Setter;
 import net.xaethos.lib.calico.integration.MyProvider;
-import net.xaethos.lib.calico.models.Model;
+import net.xaethos.lib.calico.models.CalicoModel;
 import net.xaethos.lib.calico.models.ModelManager;
 
 @ModelInfo(
@@ -13,7 +13,7 @@ import net.xaethos.lib.calico.models.ModelManager;
         contentType = "vnd.xaethos.test.polymorph"
 )
 public interface Polymorph extends
-        Model<Polymorph>,
+        CalicoModel<Polymorph>,
         ModelManager.Timestamps
 {
     public static final String VALUE = "value";

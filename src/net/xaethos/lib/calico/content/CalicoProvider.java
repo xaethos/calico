@@ -10,7 +10,7 @@ import android.provider.BaseColumns;
 import android.text.TextUtils;
 import net.xaethos.lib.calico.annotations.ModelInfo;
 import net.xaethos.lib.calico.annotations.ProviderInfo;
-import net.xaethos.lib.calico.models.Model;
+import net.xaethos.lib.calico.models.CalicoModel;
 import net.xaethos.lib.calico.models.ModelManager;
 
 import java.util.ArrayList;
@@ -158,7 +158,7 @@ public abstract class CalicoProvider extends ContentProvider {
 
     public ModelInfo[] getModels() {
         if (mModels == null) {
-            Class<? extends Model>[] modelInterfaces = getProviderInfo().models();
+            Class<? extends CalicoModel>[] modelInterfaces = getProviderInfo().models();
             ModelInfo[] models = new ModelInfo[modelInterfaces.length];
             for (int i=0; i<modelInterfaces.length; ++i) {
                 models[i] = ModelManager.getModelInfo(modelInterfaces[i]);

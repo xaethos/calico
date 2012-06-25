@@ -8,7 +8,7 @@ import android.net.Uri;
 
 import java.util.Date;
 
-public class ValuesModelHandler<T extends Model> extends ModelHandler<T>
+public class ValuesModelHandler<T extends CalicoModel> extends ModelHandler<T>
 implements ReadWriteModelHandler {
 
     private final ContentValues mValues;
@@ -59,7 +59,7 @@ implements ReadWriteModelHandler {
                 .build();
     }
 
-    ////////// Model implementation //////////
+    ////////// CalicoModel implementation //////////
 
     @Override
     public T writableCopy() {
@@ -68,7 +68,7 @@ implements ReadWriteModelHandler {
 
     @Override
     public ContentProviderOperation saveOperation() {
-        Long id = mValues.getAsLong(Model._ID);
+        Long id = mValues.getAsLong(CalicoModel._ID);
         if (id != null && id > 0) {
             return updateOperation();
         }

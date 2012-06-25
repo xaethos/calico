@@ -18,7 +18,7 @@ public class ModelManager {
 
     /////////////// Static methods ///////////////
 
-    public static <T extends Model> ModelInfo getModelInfo(Class<T> modelType) {
+    public static <T extends CalicoModel> ModelInfo getModelInfo(Class<T> modelType) {
         if (!isModelInterface(modelType)) {
             throw new IllegalArgumentException(
                     modelType.getName() + "must be an interface with the annotation @" + ModelInfo.class.getSimpleName());
@@ -30,7 +30,7 @@ public class ModelManager {
         return buildContentUri(model).build();
     }
 
-    public static <T extends Model> Uri getContentUri(Class<T> modelType) {
+    public static <T extends CalicoModel> Uri getContentUri(Class<T> modelType) {
         return getContentUri(modelType.getAnnotation(ModelInfo.class));
     }
 
@@ -38,7 +38,7 @@ public class ModelManager {
         return buildContentUri(model).appendPath(Long.toString(id)).build();
     }
 
-    public static <T extends Model> Uri getContentUri(Class<T> modelType, long id) {
+    public static <T extends CalicoModel> Uri getContentUri(Class<T> modelType, long id) {
         return getContentUri(modelType.getAnnotation(ModelInfo.class), id);
     }
 
@@ -46,7 +46,7 @@ public class ModelManager {
         return ContentResolver.CURSOR_DIR_BASE_TYPE + "/" + model.contentType();
     }
 
-    public static <T extends Model> String getContentDirType(Class<T> modelType) {
+    public static <T extends CalicoModel> String getContentDirType(Class<T> modelType) {
         return getContentDirType(getModelInfo(modelType));
     }
 
@@ -54,17 +54,17 @@ public class ModelManager {
         return ContentResolver.CURSOR_ITEM_BASE_TYPE + "/" + model.contentType();
     }
 
-    public static <T extends Model> String getContentItemType(Class<T> modelType) {
+    public static <T extends CalicoModel> String getContentItemType(Class<T> modelType) {
         return getContentItemType(getModelInfo(modelType));
     }
 
     ///// Helpers
 
-    static <T extends Model> boolean isModelInterface(Class<T> modelType) {
+    static <T extends CalicoModel> boolean isModelInterface(Class<T> modelType) {
         return modelType.isInterface() && modelType.isAnnotationPresent(ModelInfo.class);
     }
 
-    static <T extends Model> T getModel(Class<T> modelClass, ModelHandler<T> handler) {
+    static <T extends CalicoModel> T getModel(Class<T> modelClass, ModelHandler<T> handler) {
         return modelClass.cast(Proxy.newProxyInstance(modelClass.getClassLoader(),
                 new Class[]{modelClass},
                 handler));
@@ -94,7 +94,7 @@ public class ModelManager {
      * parameters.
      * @return a ModelCursor with the query results
      */
-    public <T extends Model> ModelCursor<T> query(Class<T> modelClass, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
+    public <T extends CalicoModel> ModelCursor<T> query(Class<T> modelClass, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
         return query(modelClass, getContentUri(modelClass), projection, selection, selectionArgs, sortOrder);
     }
 
@@ -105,7 +105,7 @@ public class ModelManager {
      * parameters.
      * @return a ModelCursor with the query results
      */
-    public <T extends Model> ModelCursor<T> query(Class<T> modelClass, Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
+    public <T extends CalicoModel> ModelCursor<T> query(Class<T> modelClass, Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
         ContentProviderClient client = mResolver.acquireContentProviderClient(uri);
         try {
             Cursor cursor = client.query(uri, projection, selection, selectionArgs, sortOrder);
@@ -123,11 +123,11 @@ public class ModelManager {
         }
     }
 
-    public <T extends Model> T create(Class<T> modelType) {
+    public <T extends CalicoModel> T create(Class<T> modelType) {
         return getModel(modelType, new ValuesModelHandler<T>(modelType));
     }
 
-    public <T extends Model> T fetch(Class<T> modelClass, long id) {
+    public <T extends CalicoModel> T fetch(Class<T> modelClass, long id) {
         T model = null;
         ModelCursor<T> cursor = query(modelClass, getContentUri(modelClass, id), null, null, null, null);
         if (cursor.moveToFirst()) {
@@ -137,11 +137,11 @@ public class ModelManager {
         return model;
     }
 
-    public <T extends Model> boolean save(T model) {
+    public <T extends CalicoModel> boolean save(T model) {
         return applyOperation(model.saveOperation());
     }
 
-    public <T extends Model> boolean delete(T model) {
+    public <T extends CalicoModel> boolean delete(T model) {
         return applyOperation(model.deleteOperation());
     }
 
@@ -172,7 +172,7 @@ public class ModelManager {
         @Getter(_UPDATED_AT) public Date getUpdatedAt();
     }
 
-    public static interface Utils<T extends Model> {
+    public static interface Utils<T extends CalicoModel> {
         public Uri getUri();
 
         public boolean isReadOnly();
@@ -182,7 +182,7 @@ public class ModelManager {
         public ContentProviderOperation deleteOperation();
     }
 
-    public final class ModelCursor<T extends Model> extends CursorWrapper
+    public final class ModelCursor<T extends CalicoModel> extends CursorWrapper
             implements Iterable<T> {
         private final Cursor mCursor;
         private final Class<T> mModelType;
@@ -260,7 +260,7 @@ public class ModelManager {
         }
     }
 
-    private class ModelList<T extends Model> extends AbstractList<T> {
+    private class ModelList<T extends CalicoModel> extends AbstractList<T> {
 
         private final Class<T> mModelClass;
         private final ModelCursor mCursor;

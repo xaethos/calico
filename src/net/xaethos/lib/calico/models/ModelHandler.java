@@ -11,13 +11,13 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 
-public abstract class ModelHandler<T extends Model> implements
+public abstract class ModelHandler<T extends CalicoModel> implements
         ModelManager.Utils, InvocationHandler, ReadOnlyModelHandler
 {
 
     ////////// Static methods //////////
 
-    protected static boolean validateModelInterface(Class<? extends Model> modelType) {
+    protected static boolean validateModelInterface(Class<? extends CalicoModel> modelType) {
         return modelType.isAnnotationPresent(ModelInfo.class);
     }
 
@@ -85,11 +85,11 @@ public abstract class ModelHandler<T extends Model> implements
         }
     }
 
-    ////////// Model implementation //////////
+    ////////// CalicoModel implementation //////////
 
     @Override
     public Uri getUri() {
-        Long id = getLong(Model._ID);
+        Long id = getLong(CalicoModel._ID);
 
         if (id == null || id < 1) {
             return null;

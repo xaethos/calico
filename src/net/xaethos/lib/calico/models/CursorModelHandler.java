@@ -5,7 +5,7 @@ import android.net.Uri;
 
 import java.util.Date;
 
-public class CursorModelHandler<T extends Model> extends ModelHandler<T>
+public class CursorModelHandler<T extends CalicoModel> extends ModelHandler<T>
 implements ReadOnlyModelHandler {
 
     private final Cursor mCursor;
@@ -19,12 +19,12 @@ implements ReadOnlyModelHandler {
         return mCursor;
     }
 
-    ////////// Model implementation //////////
+    ////////// CalicoModel implementation //////////
 
     @Override
     public Uri getUri() {
         Cursor cursor = mCursor;
-        int index = cursor.getColumnIndex(Model._ID);
+        int index = cursor.getColumnIndex(CalicoModel._ID);
         if (index < 0 || cursor.isNull(index)) {
             return null;
         }

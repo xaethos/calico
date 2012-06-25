@@ -14,7 +14,7 @@ import static org.mockito.Mockito.verify;
 
 public class ModelHandlerTest {
 
-    public class ROHandler<T extends Model> extends ModelHandler<T> implements ReadOnlyModelHandler {
+    public class ROHandler<T extends CalicoModel> extends ModelHandler<T> implements ReadOnlyModelHandler {
         public ROHandler(Class<T> modelInterface) {
             super(modelInterface);
         }
@@ -32,7 +32,7 @@ public class ModelHandlerTest {
         @Override public T       writableCopy()             { return null; }
     }
 
-    public class RWHandler<T extends Model> extends ROHandler<T> implements ReadWriteModelHandler {
+    public class RWHandler<T extends CalicoModel> extends ROHandler<T> implements ReadWriteModelHandler {
         public RWHandler(Class<T> modelInterface) {
             super(modelInterface);
         }
@@ -53,7 +53,7 @@ public class ModelHandlerTest {
     }
 
     @ModelInfo(authority = "com.example.content", tableName = "table", contentType = "vnd.example.table")
-    private static interface TestModel extends Model {
+    private static interface TestModel extends CalicoModel {
         public Integer badMethod();
 
         public static final String INT = "int";
@@ -61,7 +61,7 @@ public class ModelHandlerTest {
         @Setter(INT) public void setInt(Integer i);
     }
 
-    private static interface BadInterface extends Model {}
+    private static interface BadInterface extends CalicoModel {}
 
     RWHandler<TestModel> handler;
 
@@ -101,7 +101,7 @@ public class ModelHandlerTest {
         assertThat(ModelHandler.getGetterName(RWHandler.class), is("getRWHandler"));
     }
 
-    ////////// Model tests //////////
+    ////////// CalicoModel tests //////////
 
     @Test
     public void isReadOnly() {
