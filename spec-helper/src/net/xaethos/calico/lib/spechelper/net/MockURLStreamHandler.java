@@ -1,4 +1,4 @@
-package net.xaethos.calico.spechelper.net;
+package net.xaethos.calico.lib.spechelper.net;
 
 import java.io.IOException;
 import java.io.InputStream;

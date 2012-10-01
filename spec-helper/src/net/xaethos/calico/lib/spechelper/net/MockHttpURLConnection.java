@@ -1,4 +1,4 @@
-package net.xaethos.calico.spechelper.net;
+package net.xaethos.calico.lib.spechelper.net;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -9,7 +9,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import net.xaethos.calico.spechelper.net.MockURLStreamHandler.RequestHandler;
+import net.xaethos.calico.lib.spechelper.net.MockURLStreamHandler.RequestHandler;
 
 public class MockHttpURLConnection extends HttpURLConnection
 {
