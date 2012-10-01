@@ -6,8 +6,8 @@ import android.content.ContentValues;
 import android.database.Cursor;
 import android.net.Uri;
 import android.provider.BaseColumns;
+import net.xaethos.app.calicosample.models.Polymorph;
 import net.xaethos.lib.calico.annotations.ModelInfo;
-import net.xaethos.lib.calico.integration.models.Polymorph;
 import net.xaethos.lib.calico.models.ModelManager;
 
 import static net.xaethos.lib.calico.integration.tests.Assert.assertHasItems;

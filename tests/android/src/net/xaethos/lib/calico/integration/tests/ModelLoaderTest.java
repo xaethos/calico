@@ -1,17 +1,18 @@
 package net.xaethos.lib.calico.integration.tests;
 
-import android.R;
+import net.xaethos.app.calicosample.UsersActivity;
+import net.xaethos.app.calicosample.models.User;
+import net.xaethos.lib.calico.models.ModelManager;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.net.Uri;
 import android.test.ActivityInstrumentationTestCase2;
 import android.widget.ListView;
 import android.widget.TextView;
-import net.xaethos.lib.calico.integration.UsersActivity;
-import net.xaethos.lib.calico.integration.models.User;
-import net.xaethos.lib.calico.models.ModelManager;
 
-public class ModelLoaderTest extends ActivityInstrumentationTestCase2<UsersActivity> {
+public class ModelLoaderTest
+    extends ActivityInstrumentationTestCase2<UsersActivity>
+{
     static final String[] NAMES = { "Pedro", "Juan", "Diego" };
 
     Uri usersUri;
@@ -25,7 +26,9 @@ public class ModelLoaderTest extends ActivityInstrumentationTestCase2<UsersActiv
         super.setUp();
 
         usersUri = ModelManager.getContentUri(User.class);
-        getInstrumentation().getTargetContext().getContentResolver().delete(usersUri, null, null);
+        getInstrumentation().getTargetContext()
+                .getContentResolver()
+                .delete(usersUri, null, null);
     }
 
     public void test_cursorReloading() throws Exception {
@@ -41,10 +44,13 @@ public class ModelLoaderTest extends ActivityInstrumentationTestCase2<UsersActiv
         getInstrumentation().waitForIdle(new Runnable() {
             @Override
             public void run() {
-                ListView lv = (ListView) activity.findViewById(R.id.list);
+                ListView lv =
+                        (ListView) activity.findViewById(android.R.id.list);
                 assertEquals(NAMES.length, lv.getChildCount());
                 for (String name : NAMES) {
-                    TextView tv = (TextView) lv.getChildAt(0).findViewById(R.id.text1);
+                    TextView tv =
+                            (TextView) lv.getChildAt(0).findViewById(
+                                    android.R.id.text1);
                     assertEquals(name, tv.getText());
                 }
             }
@@ -56,9 +62,12 @@ public class ModelLoaderTest extends ActivityInstrumentationTestCase2<UsersActiv
         getInstrumentation().waitForIdle(new Runnable() {
             @Override
             public void run() {
-                ListView lv = (ListView) activity.findViewById(R.id.list);
+                ListView lv =
+                        (ListView) activity.findViewById(android.R.id.list);
                 assertEquals(NAMES.length + 1, lv.getChildCount());
-                TextView tv = (TextView) lv.getChildAt(NAMES.length).findViewById(R.id.text1);
+                TextView tv =
+                        (TextView) lv.getChildAt(NAMES.length).findViewById(
+                                android.R.id.text1);
                 assertEquals("Matias", tv.getText());
             }
         });

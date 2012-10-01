@@ -1,4 +1,4 @@
-package net.xaethos.lib.calico.integration.migrations;
+package net.xaethos.app.calicosample.migrations;
 
 import android.database.sqlite.SQLiteDatabase;
 import net.xaethos.lib.calico.content.ProviderMigration;

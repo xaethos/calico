@@ -1,14 +1,14 @@
 package net.xaethos.lib.calico.integration.tests;
 
+import net.xaethos.app.calicosample.MyProvider;
+import net.xaethos.app.calicosample.models.Polymorph;
+import net.xaethos.lib.calico.annotations.ModelInfo;
+import net.xaethos.lib.calico.annotations.ProviderInfo;
+import net.xaethos.lib.calico.models.ModelCursor;
+import net.xaethos.lib.calico.models.ModelManager;
 import android.content.ContentValues;
 import android.net.Uri;
 import android.test.ProviderTestCase2;
-import net.xaethos.lib.calico.annotations.ModelInfo;
-import net.xaethos.lib.calico.annotations.ProviderInfo;
-import net.xaethos.lib.calico.integration.MyProvider;
-import net.xaethos.lib.calico.integration.models.Polymorph;
-import net.xaethos.lib.calico.models.ModelCursor;
-import net.xaethos.lib.calico.models.ModelManager;
 
 public class BaseProviderTest extends ProviderTestCase2<MyProvider> {
 

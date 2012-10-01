@@ -1,9 +1,9 @@
-package net.xaethos.lib.calico.integration.models;
+package net.xaethos.app.calicosample.models;
 
+import net.xaethos.app.calicosample.MyProvider;
 import net.xaethos.lib.calico.annotations.Getter;
 import net.xaethos.lib.calico.annotations.ModelInfo;
 import net.xaethos.lib.calico.annotations.Setter;
-import net.xaethos.lib.calico.integration.MyProvider;
 import net.xaethos.lib.calico.models.CalicoModel;
 import net.xaethos.lib.calico.models.ModelManager;
 

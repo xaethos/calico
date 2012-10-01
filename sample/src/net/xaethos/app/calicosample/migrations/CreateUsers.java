@@ -1,12 +1,13 @@
-package net.xaethos.lib.calico.integration.migrations;
+package net.xaethos.app.calicosample.migrations;
 
 import android.database.sqlite.SQLiteDatabase;
 import net.xaethos.lib.calico.content.ProviderMigration;
 
-public class CreatePolymorphs extends ProviderMigration {
+public class CreateUsers extends ProviderMigration {
+
     @Override
     public boolean onUpgrade(SQLiteDatabase db) {
-        db.execSQL("CREATE TABLE polymorphs(_id INTEGER PRIMARY KEY, value);");
+        db.execSQL("CREATE TABLE users (_id INTEGER PRIMARY KEY, name TEXT);");
         return true;
     }
 }

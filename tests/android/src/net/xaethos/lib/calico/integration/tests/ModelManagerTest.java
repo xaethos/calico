@@ -2,14 +2,15 @@ package net.xaethos.lib.calico.integration.tests;
 
 import android.content.ContentUris;
 import android.net.Uri;
+import net.xaethos.app.calicosample.models.Polymorph;
 import net.xaethos.lib.calico.annotations.ModelInfo;
-import net.xaethos.lib.calico.integration.models.Polymorph;
 import net.xaethos.lib.calico.models.CalicoModel;
 import net.xaethos.lib.calico.models.ModelManager;
 
 import static net.xaethos.lib.calico.integration.tests.Assert.assertThrows;
 
-public class ModelManagerTest extends BaseProviderTest {
+public class ModelManagerTest extends BaseProviderTest
+{
 
     ModelInfo dataInfo;
     ModelManager manager;
@@ -37,7 +38,8 @@ public class ModelManagerTest extends BaseProviderTest {
     }
 
     public void test_getContentUri() throws Exception {
-        Uri uri = Uri.parse("content://net.xaethos.lib.calico.integration/polymorphs");
+        Uri uri =
+                Uri.parse("content://net.xaethos.app.calicosample/polymorphs");
         assertEquals(uri, ModelManager.getContentUri(dataInfo));
         assertEquals(uri, ModelManager.getContentUri(Polymorph.class));
 
@@ -65,12 +67,18 @@ public class ModelManagerTest extends BaseProviderTest {
         insertPolymorph("desk");
         insertPolymorph("coffee table");
 
-        String[] projection = {Polymorph._ID, Polymorph.VALUE};
-        String   where      = Polymorph.VALUE + " LIKE ?";
-        String[] whereArgs  = {"%table"};
-        String   orderBy    = Polymorph.VALUE + " ASC";
+        String[] projection = { Polymorph._ID, Polymorph.VALUE };
+        String where = Polymorph.VALUE + " LIKE ?";
+        String[] whereArgs = { "%table" };
+        String orderBy = Polymorph.VALUE + " ASC";
 
-        cursor = manager.query(Polymorph.class, projection, where, whereArgs, orderBy);
+        cursor =
+                manager.query(
+                        Polymorph.class,
+                        projection,
+                        where,
+                        whereArgs,
+                        orderBy);
         assertNotNull(cursor);
         assertEquals(2, cursor.getCount());
         assertEquals(Polymorph._ID, cursor.getColumnName(0));
@@ -91,7 +99,8 @@ public class ModelManagerTest extends BaseProviderTest {
     public void test_fetch_model() {
         Uri uri = insertPolymorph("dining table");
 
-        Polymorph poly = manager.fetch(Polymorph.class, ContentUris.parseId(uri));
+        Polymorph poly =
+                manager.fetch(Polymorph.class, ContentUris.parseId(uri));
 
         assertNotNull(poly);
         assertEquals("dining table", poly.getStringValue());
@@ -104,7 +113,13 @@ public class ModelManagerTest extends BaseProviderTest {
 
         assertTrue(manager.save(poly));
 
-        cursor = manager.query(Polymorph.class, new String[]{Polymorph.VALUE}, null, null, null);
+        cursor =
+                manager.query(
+                        Polymorph.class,
+                        new String[] { Polymorph.VALUE },
+                        null,
+                        null,
+                        null);
         assertTrue(cursor.moveToFirst());
         assertTrue(cursor.isLast());
         assertEquals("desk", cursor.getString(0));
@@ -113,7 +128,8 @@ public class ModelManagerTest extends BaseProviderTest {
     public void test_save_updatesExistingModels() {
         Uri uri = insertPolymorph("dining table");
 
-        Polymorph poly = manager.fetch(Polymorph.class, ContentUris.parseId(uri));
+        Polymorph poly =
+                manager.fetch(Polymorph.class, ContentUris.parseId(uri));
         poly.setStringValue("desk");
 
         assertTrue(manager.save(poly));
@@ -125,7 +141,8 @@ public class ModelManagerTest extends BaseProviderTest {
     public void test_delete() {
         Uri uri = insertPolymorph("dining table");
 
-        Polymorph poly = manager.fetch(Polymorph.class, ContentUris.parseId(uri));
+        Polymorph poly =
+                manager.fetch(Polymorph.class, ContentUris.parseId(uri));
 
         assertTrue(manager.delete(poly));
 
@@ -135,12 +152,20 @@ public class ModelManagerTest extends BaseProviderTest {
 
     ////////// Helpers //////////
 
-    private interface NotAnnotated extends CalicoModel {}
+    private interface NotAnnotated extends CalicoModel<NotAnnotated>
+    {
+    }
 
     @ModelInfo(authority = "", contentType = "", tableName = "")
-    private abstract class NotAnInterface implements CalicoModel {}
+    private abstract class NotAnInterface
+        implements
+            CalicoModel<NotAnInterface>
+    {
+    }
 
     @ModelInfo(authority = "", contentType = "", tableName = "")
-    private interface NotExtendingModel {}
+    private interface NotExtendingModel
+    {
+    }
 
 }

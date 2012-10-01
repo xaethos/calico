@@ -1,6 +1,6 @@
 package net.xaethos.lib.calico.integration.tests;
 
-import net.xaethos.lib.calico.integration.models.Polymorph;
+import net.xaethos.app.calicosample.models.Polymorph;
 import net.xaethos.lib.calico.models.ModelManager;
 
 import java.util.Iterator;

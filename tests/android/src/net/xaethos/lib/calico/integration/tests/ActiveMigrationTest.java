@@ -1,16 +1,16 @@
 package net.xaethos.lib.calico.integration.tests;
 
-import android.database.sqlite.SQLiteDatabase;
-import android.test.mock.MockContext;
+import java.util.Arrays;
+import java.util.List;
+
 import junit.framework.TestCase;
+import net.xaethos.app.calicosample.MyProvider;
 import net.xaethos.lib.calico.annotations.ProviderInfo;
 import net.xaethos.lib.calico.content.CalicoProvider;
 import net.xaethos.lib.calico.content.MigrationException;
 import net.xaethos.lib.calico.content.ProviderMigration;
-import net.xaethos.lib.calico.integration.MyProvider;
-
-import java.util.Arrays;
-import java.util.List;
+import android.database.sqlite.SQLiteDatabase;
+import android.test.mock.MockContext;
 
 public class ActiveMigrationTest extends TestCase {
 

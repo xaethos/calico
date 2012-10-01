@@ -1,13 +1,13 @@
-package net.xaethos.lib.calico.integration;
+package net.xaethos.app.calicosample;
 
+import net.xaethos.app.calicosample.models.User;
+import net.xaethos.lib.calico.models.ModelManager;
 import android.content.ContentUris;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.view.View;
 import android.widget.EditText;
-import net.xaethos.lib.calico.integration.models.User;
-import net.xaethos.lib.calico.models.ModelManager;
 
 public class EditUserActivity extends FragmentActivity {
 
@@ -16,6 +16,7 @@ public class EditUserActivity extends FragmentActivity {
 
     private EditText mNameField;
 
+    @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.edit_user);
