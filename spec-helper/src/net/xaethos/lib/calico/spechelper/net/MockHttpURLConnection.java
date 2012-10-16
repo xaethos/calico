@@ -1,4 +1,4 @@
-package net.xaethos.calico.lib.spechelper.net;
+package net.xaethos.lib.calico.spechelper.net;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -9,7 +9,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import net.xaethos.calico.lib.spechelper.net.MockURLStreamHandler.RequestHandler;
+import net.xaethos.lib.calico.spechelper.net.URLConnectionMocker.RequestHandler;
 
 public class MockHttpURLConnection extends HttpURLConnection
 {
@@ -62,6 +62,11 @@ public class MockHttpURLConnection extends HttpURLConnection
     }
 
     // *** HttpURLConnection
+
+    @Override
+    public int getResponseCode() throws IOException {
+        return mRequestHandler.getResponseCode();
+    }
 
     @Override
     public InputStream getInputStream() throws IOException {
