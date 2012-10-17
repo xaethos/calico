@@ -4,7 +4,9 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.net.URLConnection;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 
 import net.xaethos.lib.calico.integration.R;
 import net.xaethos.lib.calico.spechelper.net.URLConnectionMocker.RequestHandler;
@@ -46,6 +48,40 @@ public class MockHttpURLConnectionTest extends InstrumentationTestCase
         requestHandler.setResponseCode(304);
         HttpURLConnection conn = (HttpURLConnection) url.openConnection();
         assertEquals(304, conn.getResponseCode());
+    }
+
+    public void testRequestProperties() throws Exception {
+        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+        Map<String, List<String>> props;
+
+        conn.addRequestProperty("foo", "foo");
+        conn.addRequestProperty("foo", "bar");
+        assertEquals("bar", conn.getRequestProperty("foo"));
+
+        props = conn.getRequestProperties();
+        assertEquals(2, props.get("foo").size());
+        assertEquals("foo", props.get("foo").get(0));
+        assertEquals("bar", props.get("foo").get(1));
+
+        conn.setRequestProperty("foo", "cat");
+        assertEquals("cat", conn.getRequestProperty("foo"));
+
+        props = conn.getRequestProperties();
+        assertEquals(1, props.get("foo").size());
+        assertEquals("cat", props.get("foo").get(0));
+
+        // assert unmodifiable
+        try {
+            props.put("foo", Arrays.asList("dog"));
+            fail("Request properties map should be unmodifiable");
+        }
+        catch(UnsupportedOperationException e) {}
+
+        try {
+            props.get("foo").add("dog");
+            fail("Request properties values should be unmodifiable");
+        }
+        catch(UnsupportedOperationException e) {}
     }
 
 }

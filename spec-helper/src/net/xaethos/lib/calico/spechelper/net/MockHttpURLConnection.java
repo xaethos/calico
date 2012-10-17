@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -38,14 +39,22 @@ public class MockHttpURLConnection extends HttpURLConnection
     @Override
     public String getRequestProperty(String field) {
         if (mHeaders.containsKey(field)) {
-            return mHeaders.get(field).get(0);
+            List<String> values = mHeaders.get(field);
+            return values.get(values.size() - 1);
         }
         return null;
     }
 
     @Override
     public Map<String, List<String>> getRequestProperties() {
-        return mHeaders;
+        HashMap<String, List<String>> headers = mHeaders;
+        HashMap<String, List<String>> headersCopy =
+                new HashMap<String, List<String>>(headers.size());
+        for (String key : headers.keySet()) {
+            headersCopy.put(key, Collections.unmodifiableList(headers.get(key)));
+        }
+
+        return Collections.unmodifiableMap(headersCopy);
     }
 
     @Override
